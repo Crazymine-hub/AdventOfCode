@@ -36,6 +36,7 @@ namespace AdventOfCode.Tools.IntComputer
             for (int i = 0; i < Memory.Length; i += stepSize)
             {
                 stepSize = ExecuteAt(i, true, out int result);
+                if (stepSize == -1) return;
             }
         }
 
@@ -44,49 +45,81 @@ namespace AdventOfCode.Tools.IntComputer
             int line = 0;
             int evalLine = 0;
 
-            Console.Clear();
-            DumpLine[] memDump = DumpMemory();
-            Console.WriteLine("DEBUG MODE");
-            Console.WriteLine("==========");
-            int eval = 0;
-            for (int i = 0; i < memDump.Length; i++)
-            {
-                Console.WriteLine("{0} {1}", (memDump[i].StartPos).ToString().PadRight(5), memDump[i].Line);
-                if (i == line)
-                {
-                    Console.CursorTop--;
-                    Console.CursorLeft = 5;
-                    Console.WriteLine(">");
-                }
-            }
-
-            evalLine = Console.CursorTop;
             while (true)
             {
-                Console.SetCursorPosition(0, evalLine);
-                Console.Write("".PadLeft(Console.WindowWidth));
-                ExecuteAt(memDump[line].StartPos, false, out eval);
-                Console.SetCursorPosition(0, evalLine);
-                Console.WriteLine("Evaluation = "+eval);
-                int prevLine = line;
-                switch (Console.ReadKey().Key)
+                bool fresh = true;
+                Console.Clear();
+                DumpLine[] memDump = DumpMemory();
+                Console.WriteLine("DEBUG MODE");
+                Console.WriteLine("==========");
+                int eval = 0;
+                for (int i = 0; i < memDump.Length; i++)
                 {
-                    case ConsoleKey.UpArrow:
-                        if (--line < 0) line = memDump.Length - 1;
-                        break;
-                    case ConsoleKey.DownArrow:
-                        if (++line >= memDump.Length) line = 0;
-                        break;
-                    case ConsoleKey.Escape:
-                        return;
+                    Console.WriteLine("{0} {1}", (memDump[i].StartPos).ToString().PadRight(5), memDump[i].Line);
+                    if (i == line)
+                    {
+                        Console.CursorTop--;
+                        Console.CursorLeft = 5;
+                        Console.WriteLine(">");
+                    }
                 }
-                Console.SetCursorPosition(5, prevLine+2);
-                Console.Write(" │");
-                Console.SetCursorPosition(5, line+2);
-                Console.Write(">│");
+
+                evalLine = Console.CursorTop;
+                while (fresh)
+                {
+                    Console.SetCursorPosition(0, evalLine);
+                    Console.Write("".PadLeft(Console.WindowWidth));
+                    ExecuteAt(memDump[line].StartPos, false, out eval);
+                    Console.SetCursorPosition(0, evalLine);
+                    Console.WriteLine("Evaluation = " + eval);
+                    int prevLine = line;
+                    switch (Console.ReadKey().Key)
+                    {
+                        case ConsoleKey.UpArrow:
+                            if (--line < 0) line = memDump.Length - 1;
+                            break;
+                        case ConsoleKey.DownArrow:
+                            if (++line >= memDump.Length) line = 0;
+                            break;
+                        case ConsoleKey.Escape:
+                            return;
+                        case ConsoleKey.Enter:
+                            ExecuteAt(memDump[line].StartPos, true, out eval);
+                            fresh = false;
+                            break;
+                        case ConsoleKey.Spacebar:
+                            Console.SetCursorPosition(0, evalLine + 1);
+                            Console.WriteLine("Enter adresses to be evaluated separated by ','");
+                            string[] addresses = Console.ReadLine().Split(',');
+                            for (int i = 0; i < addresses.Length; i++)
+                            {
+                                if (!int.TryParse(addresses[i], out int address))
+                                {
+                                    Console.WriteLine("Invalid Address" + addresses[i]);
+                                    break;
+                                }
+                                Console.WriteLine("{0} = {1}", addresses[i], (address < Memory.Length && address >= 0)? ReadAddress(address).ToString():"OUTSIDE OF MEMORY");
+                            }
+                            Console.WriteLine("Done! Press any key to return...");
+                            Console.ReadKey(false);
+                            int lowest = Console.CursorTop;
+                            for (int i = evalLine + 1; i <= lowest; i++)
+                            {
+                                Console.CursorTop = i;
+                                Console.WriteLine("".PadLeft(Console.WindowWidth));
+                            }
+                            break;
+                    }
+                    Console.SetCursorPosition(5, prevLine + 2);
+                    Console.Write(" │");
+                    Console.SetCursorPosition(5, line + 2);
+                    Console.Write(">│");
+                }
             }
 
         }
+
+
 
         private int ExecuteAt(int address, bool Write, out int result)
         {
@@ -105,7 +138,7 @@ namespace AdventOfCode.Tools.IntComputer
                 case 99:
                     return -1;
                 default:
-                    throw new InvalidOperationException(string.Format("OPCode {0}", Memory[address]));
+                    throw new InvalidOperationException(string.Format("OPCode {0}@{1}", Memory[address], address));
             }
             return instructionsUsed;
         }

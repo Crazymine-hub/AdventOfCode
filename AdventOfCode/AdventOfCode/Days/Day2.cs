@@ -11,8 +11,6 @@ namespace AdventOfCode.Days
     {
         public string Solve(string input, bool part2)
         {
-
-
             IntComputer computer = new IntComputer();
 
             computer.ReadMemory(input);
