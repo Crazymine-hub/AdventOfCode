@@ -125,7 +125,9 @@ namespace AdventOfCode.Tools.IntComputer
         {
             int instructionsUsed = 0;
             result = 0;
-            switch (Memory[address])
+            int instruction = Memory[address] % 100;
+            int paramModes = Memory[address] / 100;
+            switch (instruction)
             {
                 case 1:
                     instructionsUsed = 4;
@@ -135,6 +137,7 @@ namespace AdventOfCode.Tools.IntComputer
                     instructionsUsed = 4;
                     result = WriteAddressP(address + 3, ReadAddressP(address + 1) * ReadAddressP(address + 2), Write);
                     break;
+
                 case 99:
                     return -1;
                 default:
