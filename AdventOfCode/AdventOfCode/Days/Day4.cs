@@ -139,16 +139,9 @@ namespace AdventOfCode.Days
             if (NumberLists.MakeNumber(number) > upper)
             {
                 ulong maxVal = number[0] - 1;
-                number = SetAll(number, 9);
+                number = NumberLists.SetAll(number, 9);
                 number[0] = maxVal;
             }
-            return number;
-        }
-
-        private ulong[] SetAll(ulong[] number, ulong digitValue)
-        {
-            for (int i = 0; i < number.Length; i++)
-                number[i] = digitValue;
             return number;
         }
     }

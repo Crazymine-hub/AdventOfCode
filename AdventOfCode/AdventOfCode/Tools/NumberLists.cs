@@ -16,7 +16,7 @@ namespace AdventOfCode.Tools
             {
                 result.Insert(0, ((number % fac) - (number % (fac / 10))) / (fac / 10));
                 fac *= 10;
-            } while (fac <= number);
+            } while (fac <= number*10);
 
             return result.ToArray();
         }
@@ -30,6 +30,13 @@ namespace AdventOfCode.Tools
                 result *= 10;
             }
             return result / 10;
+        }
+
+        public static ulong[] SetAll(ulong[] number, ulong digitValue)
+        {
+            for (int i = 0; i < number.Length; i++)
+                number[i] = digitValue;
+            return number;
         }
     }
 }

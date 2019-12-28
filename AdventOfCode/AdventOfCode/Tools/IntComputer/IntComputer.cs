@@ -14,6 +14,7 @@ namespace AdventOfCode.Tools.IntComputer
 
         public int ReadMemory(string input)
         {
+            //input = "0,1,1,1,0";
             List<int> codes = new List<int>();
             string[] codeList = input.Split(',');
             for (int i = 0; i < codeList.Length; i++)
@@ -37,6 +38,11 @@ namespace AdventOfCode.Tools.IntComputer
             {
                 stepSize = ExecuteAt(i, true, out int result);
                 if (stepSize == -1) return;
+                if(stepSize == -2)
+                {
+                    stepSize = 0;
+                    i = result;
+                }
             }
         }
 
@@ -67,13 +73,19 @@ namespace AdventOfCode.Tools.IntComputer
                 evalLine = Console.CursorTop;
                 while (fresh)
                 {
-                    Console.SetCursorPosition(0, evalLine);
-                    Console.Write("".PadLeft(Console.WindowWidth));
-                    ExecuteAt(memDump[line].StartPos, false, out eval);
-                    Console.SetCursorPosition(0, evalLine);
-                    Console.WriteLine("Evaluation = " + eval);
+                    Console.SetCursorPosition(4, line+2);
+                    Console.Title = "AoCompute DEBUG >";
+                    try
+                    {
+                        ExecuteAt(memDump[line].StartPos, false, out eval);
+                        Console.Title += string.Format("{0} {1} -> {2}", memDump[line].StartPos, memDump[line].Line, eval);
+                    }
+                    catch
+                    {
+                        Console.Title += " Instruction Error!";
+                    }
                     int prevLine = line;
-                    switch (Console.ReadKey().Key)
+                    switch (Console.ReadKey(false).Key)
                     {
                         case ConsoleKey.UpArrow:
                             if (--line < 0) line = memDump.Length - 1;
@@ -84,7 +96,8 @@ namespace AdventOfCode.Tools.IntComputer
                         case ConsoleKey.Escape:
                             return;
                         case ConsoleKey.Enter:
-                            ExecuteAt(memDump[line].StartPos, true, out eval);
+                            if(memDump[line].HasCode)
+                                ExecuteAt(memDump[line].StartPos, true, out eval);
                             fresh = false;
                             break;
                         case ConsoleKey.Spacebar:
@@ -121,30 +134,113 @@ namespace AdventOfCode.Tools.IntComputer
 
 
 
-        private int ExecuteAt(int address, bool Write, out int result)
+        private int ExecuteAt(int address, bool Write, out int result, bool noEvaluate = false)
         {
-            int instructionsUsed = 0;
+            int instructionsUsed;
             result = 0;
             int instruction = Memory[address] % 100;
-            int paramModes = Memory[address] / 100;
+            ulong[] paramModes = NumberLists.MakeArray((ulong)Math.Abs(Memory[address] / 100)).Reverse().ToArray();
             switch (instruction)
             {
                 case 1:
                     instructionsUsed = 4;
-                    result = WriteAddressP(address + 3, ReadAddressP(address + 1) + ReadAddressP(address + 2), Write);
+                    if (noEvaluate) break;
+                    paramModes = MakeValidModeList(paramModes, instructionsUsed);
+                    result = WriteAddressP(address + 3, GetParamValue(address + 1, paramModes[0]) + GetParamValue(address + 2, paramModes[1]), Write);
                     break;
                 case 2:
                     instructionsUsed = 4;
-                    result = WriteAddressP(address + 3, ReadAddressP(address + 1) * ReadAddressP(address + 2), Write);
+                    if (noEvaluate) break;
+                    paramModes = MakeValidModeList(paramModes, instructionsUsed);
+                    result = WriteAddressP(address + 3, GetParamValue(address + 1, paramModes[0]) * GetParamValue(address + 2, paramModes[1]), Write);
                     break;
-
+                case 3:
+                    instructionsUsed = 2;
+                    if (noEvaluate) break;
+                    paramModes = MakeValidModeList(paramModes, instructionsUsed);
+                    string message = "";
+                    while (Write) {
+                        Console.Clear();
+                        if(message != "")
+                            Console.WriteLine(message);
+                        message = "";
+                        Console.WriteLine("Enter a number:");
+                        if (!int.TryParse(Console.ReadLine(), out int input))
+                        {
+                            message = "You didn't enter a number";
+                            continue;
+                        }
+                        WriteAddressP(address + 1, input, Write);
+                        break;
+                    }
+                    break;
+                case 4:
+                    instructionsUsed = 2;
+                    if (noEvaluate) break;
+                    paramModes = MakeValidModeList(paramModes, instructionsUsed);
+                    result = GetParamValue(address + 1, paramModes[0]);
+                    if(Write)
+                        Console.WriteLine("Output:"+result);
+                    break;
+                case 5:
+                    instructionsUsed = -2;
+                    if (!Write) instructionsUsed = 3;
+                    paramModes = MakeValidModeList(paramModes, 3);
+                    if (GetParamValue(address + 1, paramModes[0]) != 0)
+                        result = GetParamValue(address + 2, paramModes[1]);
+                    else
+                        instructionsUsed = 3;
+                    break;
+                case 6:
+                    instructionsUsed = -2;
+                    if (!Write) instructionsUsed = 3;
+                    paramModes = MakeValidModeList(paramModes, 3);
+                    if (GetParamValue(address + 1, paramModes[0]) == 0)
+                        result = GetParamValue(address + 2, paramModes[1]);
+                    else
+                        instructionsUsed = 3;
+                    break;
+                case 7:
+                    instructionsUsed = 4;
+                    paramModes = MakeValidModeList(paramModes, instructionsUsed);
+                    result = (GetParamValue(address + 1, paramModes[0]) < GetParamValue(address + 2, paramModes[1])) ? 1 : 0;
+                    WriteAddressP(address + 3, result, Write);
+                    break;
+                case 8:
+                    instructionsUsed = 4;
+                    paramModes = MakeValidModeList(paramModes, instructionsUsed);
+                    result = (GetParamValue(address + 1, paramModes[0]) == GetParamValue(address + 2, paramModes[1])) ? 1 : 0;
+                    WriteAddressP(address + 3, result, Write);
+                    break;
+                case 0:
+                    instructionsUsed = 1;
+                    break;
                 case 99:
                     return -1;
                 default:
+                    if (noEvaluate) return -1;
                     throw new InvalidOperationException(string.Format("OPCode {0}@{1}", Memory[address], address));
             }
             return instructionsUsed;
         }
+
+        private ulong[] MakeValidModeList(ulong[] modeList, int neededLength)
+        {
+            List<ulong> result = modeList.ToList();
+            while(result.Count < neededLength)
+                result.Add(0);
+            return result.ToArray();
+        }
+
+        private int GetParamValue(int address, ulong mode)
+        {
+            switch(mode)
+            {
+                case 1: return ReadAddress(address);
+                default: return ReadAddressP(address);
+            }
+        }
+
 
         private int ReadAddress(int Address)
         {
@@ -188,32 +284,35 @@ namespace AdventOfCode.Tools.IntComputer
         private DumpLine[] DumpMemory()
         {
             int instructionCount = 0;
-            int maxInstructions = 4;
+            int maxInstructions = GetOpInstructionCount(0);
+            if (maxInstructions == -1)
+                maxInstructions = 1;
             int instructionsTotal = 0;
             string line = "";
             List<DumpLine> result = new List<DumpLine>();
             int maxLength = Memory.Max().ToString().Length;
             for (int i = 0; i < Memory.Length; i++)
             {
-                if (instructionCount == maxInstructions && maxInstructions >= 0)
+                if (instructionCount == maxInstructions)
                 {
-                    result.Add(new DumpLine(line.Trim('\t'), instructionCount, instructionsTotal));
+                    result.Add(new DumpLine(line.Trim('\t'), instructionCount, instructionsTotal, maxInstructions != -1));
                     line = "";
                     instructionsTotal += instructionCount;
                     instructionCount = 0;
-                    maxInstructions = GetOpInstructionCount(Memory[i]);
+                    maxInstructions = GetOpInstructionCount(i);
+                    if (maxInstructions == -1)
+                        maxInstructions = 1;
                 }
                 line += "│" + string.Format("{0}", Memory[i]).PadRight(maxLength);
                 instructionCount++;
             }
-            result.Add(new DumpLine(line.Trim('\t'), instructionCount, instructionsTotal));
+            result.Add(new DumpLine(line.Trim('\t'), instructionCount, instructionsTotal, maxInstructions != -1));
             return result.ToArray();
         }
 
-        private int GetOpInstructionCount(int instruction)
+        private int GetOpInstructionCount(int address)
         {
-            if (instruction == 99) return -1;
-            else return 4;
+            return ExecuteAt(address, false, out int ignoredValue, true);
         }
     }
 }

@@ -7,7 +7,7 @@ using AdventOfCode.Tools.IntComputer;
 
 namespace AdventOfCode.Days
 {
-    class Day2 : ComputerManager, IDay
+    class Day5 : ComputerManager, IDay
     {
 
     }
