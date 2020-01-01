@@ -11,6 +11,17 @@ namespace AdventOfCode.Tools.IntComputer
     {
         public int[] Memory { get; private set; }
         private readonly byte operationMask = 0;
+        private readonly int[] inputs;
+        private int inputPos = 0;
+
+        public IntComputer()
+        {
+            inputs = new int[0] { };
+        }
+        public IntComputer(int[] inputList)
+        {
+            inputs = inputList;
+        }
 
         public int ReadMemory(string input)
         {
@@ -38,7 +49,7 @@ namespace AdventOfCode.Tools.IntComputer
             {
                 stepSize = ExecuteAt(i, true, out int result);
                 if (stepSize == -1) return;
-                if(stepSize == -2)
+                if (stepSize == -2)
                 {
                     stepSize = 0;
                     i = result;
@@ -73,7 +84,7 @@ namespace AdventOfCode.Tools.IntComputer
                 evalLine = Console.CursorTop;
                 while (fresh)
                 {
-                    Console.SetCursorPosition(4, line+2);
+                    Console.SetCursorPosition(4, line + 2);
                     Console.Title = "AoCompute DEBUG >";
                     try
                     {
@@ -96,7 +107,7 @@ namespace AdventOfCode.Tools.IntComputer
                         case ConsoleKey.Escape:
                             return;
                         case ConsoleKey.Enter:
-                            if(memDump[line].HasCode)
+                            if (memDump[line].HasCode)
                                 ExecuteAt(memDump[line].StartPos, true, out eval);
                             fresh = false;
                             break;
@@ -111,7 +122,7 @@ namespace AdventOfCode.Tools.IntComputer
                                     Console.WriteLine("Invalid Address" + addresses[i]);
                                     break;
                                 }
-                                Console.WriteLine("{0} = {1}", addresses[i], (address < Memory.Length && address >= 0)? ReadAddress(address).ToString():"OUTSIDE OF MEMORY");
+                                Console.WriteLine("{0} = {1}", addresses[i], (address < Memory.Length && address >= 0) ? ReadAddress(address).ToString() : "OUTSIDE OF MEMORY");
                             }
                             Console.WriteLine("Done! Press any key to return...");
                             Console.ReadKey(false);
@@ -159,9 +170,15 @@ namespace AdventOfCode.Tools.IntComputer
                     if (noEvaluate) break;
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
                     string message = "";
-                    while (Write) {
+                    if(inputPos < inputs.Length)
+                    {
+                        WriteAddressP(address + 1, inputs[inputPos], Write);
+                        inputPos++;
+                    }
+                    while (Write)
+                    {
                         Console.Clear();
-                        if(message != "")
+                        if (message != "")
                             Console.WriteLine(message);
                         message = "";
                         Console.WriteLine("Enter a number:");
@@ -179,8 +196,8 @@ namespace AdventOfCode.Tools.IntComputer
                     if (noEvaluate) break;
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
                     result = GetParamValue(address + 1, paramModes[0]);
-                    if(Write)
-                        Console.WriteLine("Output:"+result);
+                    if (Write)
+                        Console.WriteLine("Output:" + result);
                     break;
                 case 5:
                     instructionsUsed = -2;
@@ -227,14 +244,14 @@ namespace AdventOfCode.Tools.IntComputer
         private ulong[] MakeValidModeList(ulong[] modeList, int neededLength)
         {
             List<ulong> result = modeList.ToList();
-            while(result.Count < neededLength)
+            while (result.Count < neededLength)
                 result.Add(0);
             return result.ToArray();
         }
 
         private int GetParamValue(int address, ulong mode)
         {
-            switch(mode)
+            switch (mode)
             {
                 case 1: return ReadAddress(address);
                 default: return ReadAddressP(address);

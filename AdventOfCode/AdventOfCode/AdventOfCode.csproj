@@ -45,11 +45,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Day.cs" />
+    <Compile Include="Days\Classes\OrbitInfo.cs" />
+    <Compile Include="Days\Classes\OrbitObject.cs" />
     <Compile Include="Days\Day5.cs" />
     <Compile Include="Days\Day4.cs" />
     <Compile Include="Days\Day1.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day3.cs" />
+    <Compile Include="Days\Day6.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\IntComputer\ComputerManager.cs" />
