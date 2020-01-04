@@ -13,7 +13,7 @@ namespace AdventOfCode.Days.Classes
         public OrbitObject ParentObject;
         public int OrbitCount;
 
-        public string ToString()
+        public override string ToString()
         {
             return Name;
         }

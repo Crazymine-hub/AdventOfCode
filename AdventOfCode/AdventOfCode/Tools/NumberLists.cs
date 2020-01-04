@@ -16,7 +16,7 @@ namespace AdventOfCode.Tools
             {
                 result.Insert(0, ((number % fac) - (number % (fac / 10))) / (fac / 10));
                 fac *= 10;
-            } while (fac <= number*10);
+            } while (fac <= number * 10);
 
             return result.ToArray();
         }
@@ -37,6 +37,56 @@ namespace AdventOfCode.Tools
             for (int i = 0; i < number.Length; i++)
                 number[i] = digitValue;
             return number;
+        }
+
+        public static ulong CrossSum(ulong[] number)
+        {
+            ulong result = 0;
+            foreach (ulong digit in number)
+                result += digit;
+            return result;
+        }
+
+        public static ulong CrossSum(ulong number)
+        {
+            return CrossSum(MakeArray(number));
+        }
+
+        public static ulong[] SetLength(ulong[] number, uint wantedLength, bool atEnd)
+        {
+            if (number.Length == wantedLength) return number;
+            List<ulong> editNr = number.ToList();
+            while (editNr.Count != wantedLength)
+            {
+                if (editNr.Count > wantedLength)
+                {
+                    if (atEnd)
+                        editNr.RemoveAt(editNr.Count - 1);
+                    else
+                        editNr.RemoveAt(0);
+                }
+                else
+                {
+                    if (atEnd)
+                        editNr.Add(0);
+                    else
+                        editNr.Insert(0, 0);
+                }
+            }
+            return editNr.ToArray();
+        }
+        
+        public static bool UniqueDigits(ulong[] number)
+        {
+            List<ulong> usedDigits = new List<ulong>();
+            foreach(ulong digit in number)
+            {
+                if (usedDigits.Contains(digit))
+                    return false;
+                else
+                    usedDigits.Add(digit);
+            }
+            return true;
         }
     }
 }

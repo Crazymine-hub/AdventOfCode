@@ -3,24 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.IntComputer
 {
     public class IntComputer
     {
-        public int[] Memory { get; private set; }
-        private readonly byte operationMask = 0;
-        private readonly int[] inputs;
-        private int inputPos = 0;
+        public delegate void OutToInputDelegate(int value);
 
-        public IntComputer()
+        public int[] Memory { get; private set; }
+        private int inputPos = 0;
+        private List<int> output;
+        private bool autoMode;
+
+        public int[] Inputs { get; set; }
+        public int[] Output { get { return output.ToArray(); } }
+        public event OutToInputDelegate OnOutput;
+        public Task ExecutingTask { get; private set; }
+        public string Name { get; set; }
+
+        public IntComputer(bool useAutoMode = false, int[] inputList = null)
         {
-            inputs = new int[0] { };
-        }
-        public IntComputer(int[] inputList)
-        {
-            inputs = inputList;
+            if (inputList == null)
+                Inputs = new int[0];
+            else
+                Inputs = inputList;
+            autoMode = useAutoMode;
+            Name = "Computer";
         }
 
         public int ReadMemory(string input)
@@ -40,10 +50,15 @@ namespace AdventOfCode.Tools.IntComputer
         public void Reset()
         {
             Memory = new int[0];
+            Inputs = new int[0];
+            output = new List<int>();
+            inputPos = 0;
         }
 
         public void Run()
         {
+
+            output = new List<int>();
             int stepSize = 0;
             for (int i = 0; i < Memory.Length; i += stepSize)
             {
@@ -55,10 +70,27 @@ namespace AdventOfCode.Tools.IntComputer
                     i = result;
                 }
             }
+            return;
+        }
+
+        public Task RunAsync()
+        {
+            if (!autoMode)
+                throw new InvalidOperationException("The Computer needs to be Run in AutoMode");
+            ExecutingTask = Task.Run(new Action(Run));
+            return ExecutingTask;
+        }
+
+        public void AddInput(int input)
+        {
+            List<int> inputList = Inputs.ToList();
+            inputList.Add(input);
+            Inputs = inputList.ToArray();
         }
 
         public void Debug()
         {
+            output = new List<int>();
             int line = 0;
             int evalLine = 0;
 
@@ -144,7 +176,6 @@ namespace AdventOfCode.Tools.IntComputer
         }
 
 
-
         private int ExecuteAt(int address, bool Write, out int result, bool noEvaluate = false)
         {
             int instructionsUsed;
@@ -167,29 +198,9 @@ namespace AdventOfCode.Tools.IntComputer
                     break;
                 case 3:
                     instructionsUsed = 2;
-                    if (noEvaluate) break;
+                    if (noEvaluate || !Write) break;
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
-                    string message = "";
-                    if(inputPos < inputs.Length)
-                    {
-                        WriteAddressP(address + 1, inputs[inputPos], Write);
-                        inputPos++;
-                    }
-                    while (Write)
-                    {
-                        Console.Clear();
-                        if (message != "")
-                            Console.WriteLine(message);
-                        message = "";
-                        Console.WriteLine("Enter a number:");
-                        if (!int.TryParse(Console.ReadLine(), out int input))
-                        {
-                            message = "You didn't enter a number";
-                            continue;
-                        }
-                        WriteAddressP(address + 1, input, Write);
-                        break;
-                    }
+                    WriteAddressP(address + 1, ReadInput(), Write);
                     break;
                 case 4:
                     instructionsUsed = 2;
@@ -197,7 +208,13 @@ namespace AdventOfCode.Tools.IntComputer
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
                     result = GetParamValue(address + 1, paramModes[0]);
                     if (Write)
-                        Console.WriteLine("Output:" + result);
+                    {
+                        if (autoMode)
+                            OnOutput?.Invoke(result);
+                        else
+                            Console.WriteLine("Output:" + result);
+                        output.Add(result);
+                    }
                     break;
                 case 5:
                     instructionsUsed = -2;
@@ -249,6 +266,29 @@ namespace AdventOfCode.Tools.IntComputer
             return result.ToArray();
         }
 
+        private int ReadInput()
+        {
+            string message = "";
+            if (inputPos < Inputs.Length || autoMode)
+            {
+                while (Inputs.Length <= inputPos) { }
+                return Inputs[inputPos++];
+            }
+            while (true)
+            {
+                Console.Clear();
+                if (message != "")
+                    Console.WriteLine(message);
+                message = "";
+                Console.WriteLine("Enter a number:");
+                if (!int.TryParse(Console.ReadLine(), out int input))
+                {
+                    message = "You didn't enter a number";
+                    continue;
+                }
+                return input;
+            }
+        }
         private int GetParamValue(int address, ulong mode)
         {
             switch (mode)
