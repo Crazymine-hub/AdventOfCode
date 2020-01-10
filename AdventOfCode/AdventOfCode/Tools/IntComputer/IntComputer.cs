@@ -10,15 +10,16 @@ namespace AdventOfCode.Tools.IntComputer
 {
     public class IntComputer
     {
-        public delegate void OutToInputDelegate(int value);
+        public delegate void OutToInputDelegate(long value);
 
-        public int[] Memory { get; private set; }
+        public long[] Memory { get; private set; }
         private int inputPos = 0;
-        private List<int> output;
+        private List<long> output;
         private bool autoMode;
+        private int addressOffset = 0;
 
         public int[] Inputs { get; set; }
-        public int[] Output { get { return output.ToArray(); } }
+        public long[] Output { get { return output.ToArray(); } }
         public event OutToInputDelegate OnOutput;
         public Task ExecutingTask { get; private set; }
         public string Name { get; set; }
@@ -36,7 +37,7 @@ namespace AdventOfCode.Tools.IntComputer
         public int ReadMemory(string input)
         {
             //input = "0,1,1,1,0";
-            List<int> codes = new List<int>();
+            List<long> codes = new List<long>();
             string[] codeList = input.Split(',');
             for (int i = 0; i < codeList.Length; i++)
             {
@@ -49,20 +50,20 @@ namespace AdventOfCode.Tools.IntComputer
 
         public void Reset()
         {
-            Memory = new int[0];
+            Memory = new long[0];
             Inputs = new int[0];
-            output = new List<int>();
+            output = new List<long>();
             inputPos = 0;
         }
 
         public void Run()
         {
 
-            output = new List<int>();
+            output = new List<long>();
             int stepSize = 0;
-            for (int i = 0; i < Memory.Length; i += stepSize)
+            for (long i = 0; i < Memory.Length; i += stepSize)
             {
-                stepSize = ExecuteAt(i, true, out int result);
+                stepSize = ExecuteAt(i, true, out long result);
                 if (stepSize == -1) return;
                 if (stepSize == -2)
                 {
@@ -90,7 +91,7 @@ namespace AdventOfCode.Tools.IntComputer
 
         public void Debug()
         {
-            output = new List<int>();
+            output = new List<long>();
             int line = 0;
             int evalLine = 0;
 
@@ -101,7 +102,7 @@ namespace AdventOfCode.Tools.IntComputer
                 DumpLine[] memDump = DumpMemory();
                 Console.WriteLine("DEBUG MODE");
                 Console.WriteLine("==========");
-                int eval = 0;
+                long eval = 0;
                 for (int i = 0; i < memDump.Length; i++)
                 {
                     Console.WriteLine("{0} {1}", (memDump[i].StartPos).ToString().PadRight(5), memDump[i].Line);
@@ -176,11 +177,11 @@ namespace AdventOfCode.Tools.IntComputer
         }
 
 
-        private int ExecuteAt(int address, bool Write, out int result, bool noEvaluate = false)
+        private int ExecuteAt(long address, bool Write, out long result, bool noEvaluate = false)
         {
             int instructionsUsed;
             result = 0;
-            int instruction = Memory[address] % 100;
+            long instruction = Memory[address] % 100;
             ulong[] paramModes = NumberLists.MakeArray((ulong)Math.Abs(Memory[address] / 100)).Reverse().ToArray();
             switch (instruction)
             {
@@ -268,28 +269,14 @@ namespace AdventOfCode.Tools.IntComputer
 
         private int ReadInput()
         {
-            string message = "";
             if (inputPos < Inputs.Length || autoMode)
             {
                 while (Inputs.Length <= inputPos) { }
                 return Inputs[inputPos++];
             }
-            while (true)
-            {
-                Console.Clear();
-                if (message != "")
-                    Console.WriteLine(message);
-                message = "";
-                Console.WriteLine("Enter a number:");
-                if (!int.TryParse(Console.ReadLine(), out int input))
-                {
-                    message = "You didn't enter a number";
-                    continue;
-                }
-                return input;
-            }
+            return ConsoleAssist.GetUserInput("Enter a number...");
         }
-        private int GetParamValue(int address, ulong mode)
+        private long GetParamValue(long address, ulong mode)
         {
             switch (mode)
             {
@@ -299,7 +286,7 @@ namespace AdventOfCode.Tools.IntComputer
         }
 
 
-        private int ReadAddress(int Address)
+        private long ReadAddress(long Address)
         {
             if (Address < Memory.Length)
                 return Memory[Address];
@@ -307,7 +294,7 @@ namespace AdventOfCode.Tools.IntComputer
                 throw new ArgumentOutOfRangeException("Address", Address, "Address unavailable (Outside of Memory)");
         }
 
-        private int WriteAddress(int Address, int value, bool doWrite)
+        private long WriteAddress(long Address, long value, bool doWrite)
         {
             if (doWrite)
             {
@@ -319,12 +306,12 @@ namespace AdventOfCode.Tools.IntComputer
             return value;
         }
 
-        private int ReadAddressP(int Address)
+        private long ReadAddressP(long Address)
         {
             return ReadAddress(ReadAddress(Address));
         }
 
-        private int WriteAddressP(int Address, int value, bool doWrite)
+        private long WriteAddressP(long Address, long value, bool doWrite)
         {
             return WriteAddress(ReadAddress(Address), value, doWrite);
         }
@@ -369,7 +356,7 @@ namespace AdventOfCode.Tools.IntComputer
 
         private int GetOpInstructionCount(int address)
         {
-            return ExecuteAt(address, false, out int ignoredValue, true);
+            return ExecuteAt(address, false, out long ignoredValue, true);
         }
     }
 }

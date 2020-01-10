@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AdventOfCode.Tools;
 
 namespace AdventOfCode
 {
@@ -19,16 +20,10 @@ namespace AdventOfCode
                 Console.Clear();
                 if (message != "") Console.WriteLine(message);
                 message = "";
-                Console.WriteLine("Advent Of Code");
-                Console.WriteLine("Enter the number of the Day or exit");
-                string input = Console.ReadLine();
-                if (input.ToLower() == "exit") return;
+                int dayNr = ConsoleAssist.GetUserInput(
+                    "Advent Of Code\r\n" +
+                    "Enter the number of the Day or exit");
 
-                if (!int.TryParse(input, out int dayNr))
-                {
-                    message = "You didn't enter a number";
-                    continue;
-                }
                 Type DayType = Type.GetType("AdventOfCode.Days.Day" + dayNr);
                 if(DayType == null)
                 {
