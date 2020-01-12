@@ -16,7 +16,7 @@ namespace AdventOfCode.Tools.IntComputer
         private int inputPos = 0;
         private List<long> output;
         private bool autoMode;
-        private int addressOffset = 0;
+        private long addressOffset = 0;
 
         public int[] Inputs { get; set; }
         public long[] Output { get { return output.ToArray(); } }
@@ -247,6 +247,11 @@ namespace AdventOfCode.Tools.IntComputer
                     result = (GetParamValue(address + 1, paramModes[0]) == GetParamValue(address + 2, paramModes[1])) ? 1 : 0;
                     WriteAddressP(address + 3, result, Write);
                     break;
+                case 9:
+                    instructionsUsed = 2;
+                    paramModes = MakeValidModeList(paramModes, instructionsUsed);
+                    result = addressOffset += GetParamValue(address+1, paramModes[0]);
+                    break;
                 case 0:
                     instructionsUsed = 1;
                     break;
@@ -281,6 +286,7 @@ namespace AdventOfCode.Tools.IntComputer
             switch (mode)
             {
                 case 1: return ReadAddress(address);
+                case 2: return ReadAddress(addressOffset+ReadAddress(address));
                 default: return ReadAddressP(address);
             }
         }
