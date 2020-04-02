@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.IntComputer
 {
+    /*------------------------------------
+     * Complte! Undocumented But Complete
+     *------------------------------------*/
     public class IntComputer
     {
         public delegate void OutToInputDelegate(long value);
