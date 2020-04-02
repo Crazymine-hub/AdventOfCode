@@ -17,7 +17,7 @@ namespace AdventOfCode.Days
         public string Solve(string input, bool part2)
         {
             GenerateSettings(part2);
-            int maxOut = 0;
+            long maxOut = 0;
             while (settingPos < computerSettings.Count)
             {
                 for (int i = 0; i <= 4; i++)

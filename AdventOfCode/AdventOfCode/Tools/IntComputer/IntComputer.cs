@@ -18,16 +18,16 @@ namespace AdventOfCode.Tools.IntComputer
         private bool autoMode;
         private long addressOffset = 0;
 
-        public int[] Inputs { get; set; }
+        public long[] Inputs { get; set; }
         public long[] Output { get { return output.ToArray(); } }
         public event OutToInputDelegate OnOutput;
         public Task ExecutingTask { get; private set; }
         public string Name { get; set; }
 
-        public IntComputer(bool useAutoMode = false, int[] inputList = null)
+        public IntComputer(bool useAutoMode = false, long[] inputList = null)
         {
             if (inputList == null)
-                Inputs = new int[0];
+                Inputs = new long[0];
             else
                 Inputs = inputList;
             autoMode = useAutoMode;
@@ -51,7 +51,7 @@ namespace AdventOfCode.Tools.IntComputer
         public void Reset()
         {
             Memory = new long[0];
-            Inputs = new int[0];
+            Inputs = new long[0];
             output = new List<long>();
             inputPos = 0;
         }
@@ -82,9 +82,9 @@ namespace AdventOfCode.Tools.IntComputer
             return ExecutingTask;
         }
 
-        public void AddInput(int input)
+        public void AddInput(long input)
         {
-            List<int> inputList = Inputs.ToList();
+            List<long> inputList = Inputs.ToList();
             inputList.Add(input);
             Inputs = inputList.ToArray();
         }
@@ -189,19 +189,19 @@ namespace AdventOfCode.Tools.IntComputer
                     instructionsUsed = 4;
                     if (noEvaluate) break;
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
-                    result = WriteAddressP(address + 3, GetParamValue(address + 1, paramModes[0]) + GetParamValue(address + 2, paramModes[1]), Write);
+                    result = WriteAddressP(address + 3, GetParamValue(address + 1, paramModes[0]) + GetParamValue(address + 2, paramModes[1]), paramModes[2], Write);
                     break;
                 case 2:
                     instructionsUsed = 4;
                     if (noEvaluate) break;
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
-                    result = WriteAddressP(address + 3, GetParamValue(address + 1, paramModes[0]) * GetParamValue(address + 2, paramModes[1]), Write);
+                    result = WriteAddressP(address + 3, GetParamValue(address + 1, paramModes[0]) * GetParamValue(address + 2, paramModes[1]), paramModes[2], Write);
                     break;
                 case 3:
                     instructionsUsed = 2;
                     if (noEvaluate || !Write) break;
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
-                    WriteAddressP(address + 1, ReadInput(), Write);
+                    WriteAddressP(address + 1, ReadInput(), paramModes[0], Write);
                     break;
                 case 4:
                     instructionsUsed = 2;
@@ -239,18 +239,18 @@ namespace AdventOfCode.Tools.IntComputer
                     instructionsUsed = 4;
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
                     result = (GetParamValue(address + 1, paramModes[0]) < GetParamValue(address + 2, paramModes[1])) ? 1 : 0;
-                    WriteAddressP(address + 3, result, Write);
+                    WriteAddressP(address + 3, result, paramModes[2], Write);
                     break;
                 case 8:
                     instructionsUsed = 4;
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
                     result = (GetParamValue(address + 1, paramModes[0]) == GetParamValue(address + 2, paramModes[1])) ? 1 : 0;
-                    WriteAddressP(address + 3, result, Write);
+                    WriteAddressP(address + 3, result, paramModes[2], Write);
                     break;
                 case 9:
                     instructionsUsed = 2;
                     paramModes = MakeValidModeList(paramModes, instructionsUsed);
-                    result = addressOffset += GetParamValue(address+1, paramModes[0]);
+                    result = addressOffset += GetParamValue(address + 1, paramModes[0]);
                     break;
                 case 0:
                     instructionsUsed = 1;
@@ -272,7 +272,7 @@ namespace AdventOfCode.Tools.IntComputer
             return result.ToArray();
         }
 
-        private int ReadInput()
+        private long ReadInput()
         {
             if (inputPos < Inputs.Length || autoMode)
             {
@@ -281,33 +281,41 @@ namespace AdventOfCode.Tools.IntComputer
             }
             return ConsoleAssist.GetUserInput("Enter a number...");
         }
+
         private long GetParamValue(long address, ulong mode)
         {
             switch (mode)
             {
                 case 1: return ReadAddress(address);
-                case 2: return ReadAddress(addressOffset+ReadAddress(address));
-                default: return ReadAddressP(address);
+                case 2: return ReadAddress(addressOffset + ReadAddress(address));
+                case 0: return ReadAddressP(address);
+                default: throw new InvalidOperationException($"Unknown Parametermode: {mode}");
             }
         }
 
-
         private long ReadAddress(long Address)
         {
-            if (Address < Memory.Length)
-                return Memory[Address];
-            else
-                throw new ArgumentOutOfRangeException("Address", Address, "Address unavailable (Outside of Memory)");
+            if (Address >= Memory.Length)
+            {
+                long[] newMem = new long[Address + 1];
+                Memory.CopyTo(newMem, 0);
+                Memory = newMem;
+            }
+            return Memory[Address];
         }
 
         private long WriteAddress(long Address, long value, bool doWrite)
         {
             if (doWrite)
             {
-                if (Address < Memory.Length)
-                    Memory[Address] = value;
-                else
-                    throw new ArgumentOutOfRangeException("Address", Address, "Address unavailable (Outside of Memory)");
+                if (Address >= Memory.Length)
+                {
+                    long[] newMem = new long[Address + 1];
+                    Memory.CopyTo(newMem, 0);
+                    Memory = newMem;
+                }
+                Memory[Address] = value;
+
             }
             return value;
         }
@@ -317,9 +325,18 @@ namespace AdventOfCode.Tools.IntComputer
             return ReadAddress(ReadAddress(Address));
         }
 
-        private long WriteAddressP(long Address, long value, bool doWrite)
+        private long WriteAddressP(long address, long value, ulong paramMode, bool doWrite)
         {
-            return WriteAddress(ReadAddress(Address), value, doWrite);
+            switch (paramMode)
+            {
+                case 1: throw new InvalidOperationException("Immediate Parameter mode not allowed for write operations.");
+                case 2: address = addressOffset + ReadAddress(address);
+                        break;
+                case 0: address = ReadAddress(address);
+                        break;
+                default: throw new InvalidOperationException($"Unknown Parametermode: {paramMode}");
+            }
+            return WriteAddress(address, value, doWrite);
         }
 
         public string PrintMemory()
