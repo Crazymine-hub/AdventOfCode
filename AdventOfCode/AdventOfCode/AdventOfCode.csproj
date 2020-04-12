@@ -42,11 +42,14 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Day.cs" />
+    <Compile Include="Days\Classes\AsteroidInfo.cs" />
     <Compile Include="Days\Classes\OrbitInfo.cs" />
     <Compile Include="Days\Classes\OrbitObject.cs" />
+    <Compile Include="Days\Day10.cs" />
     <Compile Include="Days\Day5.cs" />
     <Compile Include="Days\Day4.cs" />
     <Compile Include="Days\Day1.cs" />
@@ -63,6 +66,7 @@
     <Compile Include="Tools\IntComputer\DumpLine.cs" />
     <Compile Include="Tools\IntComputer\IntComputer.cs" />
     <Compile Include="Tools\NumberLists.cs" />
+    <Compile Include="Tools\VectorAssist.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
