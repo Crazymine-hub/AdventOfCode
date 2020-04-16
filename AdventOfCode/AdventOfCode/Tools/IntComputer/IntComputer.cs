@@ -44,7 +44,7 @@ namespace AdventOfCode.Tools.IntComputer
             string[] codeList = input.Split(',');
             for (int i = 0; i < codeList.Length; i++)
             {
-                if (!int.TryParse(codeList[i].Trim('\r', ','), out int opCode)) return -i;
+                if (!long.TryParse(codeList[i].Trim('\r', ','), out long opCode)) return -i;
                 codes.Add(opCode);
             }
             Memory = codes.ToArray();

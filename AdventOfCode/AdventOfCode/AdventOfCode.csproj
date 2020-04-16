@@ -50,6 +50,7 @@
     <Compile Include="Days\Classes\OrbitInfo.cs" />
     <Compile Include="Days\Classes\OrbitObject.cs" />
     <Compile Include="Days\Day10.cs" />
+    <Compile Include="Days\Day11.cs" />
     <Compile Include="Days\Day5.cs" />
     <Compile Include="Days\Day4.cs" />
     <Compile Include="Days\Day1.cs" />
