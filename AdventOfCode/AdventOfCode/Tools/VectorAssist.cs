@@ -16,7 +16,7 @@ namespace AdventOfCode.Tools
 
         public static Point Minimize(Point distance)
         {
-            int divisor = GreatestCommonDivisor(distance);
+            int divisor = (int)MathHelper.GreatestCommonDivisor(distance.X, distance.Y);
             return new Point(distance.X / divisor, distance.Y / divisor);
         }
 
@@ -28,24 +28,6 @@ namespace AdventOfCode.Tools
         public static int GetCrossProduct(Point vec1, Point vec2)
         {
             return vec1.X * vec2.X + vec1.Y * vec2.Y;
-        }
-
-        private static int GreatestCommonDivisor(Point equation)
-        {
-            int x = equation.X;
-            int y = equation.Y;
-
-            if (x == 0) return Math.Abs(y);
-            if (y == 0) return Math.Abs(x);
-
-            do
-            {
-                var rest = x % y;
-                x = y;
-                y = rest;
-            } while (y != 0);
-
-            return Math.Abs(x);
         }
     }
 }
