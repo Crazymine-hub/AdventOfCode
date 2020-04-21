@@ -8,7 +8,7 @@ namespace AdventOfCode.Days
 {
     class Day12 : IDay
     {
-        List<MoonInfo3D> Moons = new List<MoonInfo3D>();
+        List<MoonInfo3D> Moons = new List<MoonInfo3D>(); 
         public string Solve(string input, bool part2)
         {
 
