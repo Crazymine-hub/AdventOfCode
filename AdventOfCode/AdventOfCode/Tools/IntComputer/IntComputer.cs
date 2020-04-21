@@ -13,7 +13,8 @@ namespace AdventOfCode.Tools.IntComputer
      *------------------------------------*/
     public class IntComputer
     {
-        public delegate void OutToInputDelegate(long value);
+        public delegate void OutputPushDelegate(long value);
+        public delegate long InputRequestDelegate();
 
         public long[] Memory { get; private set; }
         private int inputPos = 0;
@@ -23,7 +24,8 @@ namespace AdventOfCode.Tools.IntComputer
 
         public long[] Inputs { get; set; }
         public long[] Output { get { return output.ToArray(); } }
-        public event OutToInputDelegate OnOutput;
+        public event OutputPushDelegate OnOutput;
+        public event InputRequestDelegate InputRequested;
         public Task ExecutingTask { get; private set; }
         public string Name { get; set; }
 
@@ -279,6 +281,12 @@ namespace AdventOfCode.Tools.IntComputer
         {
             if (inputPos < Inputs.Length || autoMode)
             {
+                if (InputRequested != null)
+                {
+                    long input = InputRequested.Invoke();
+                    AddInput(input);
+                }
+
                 while (Inputs.Length <= inputPos) { }
                 return Inputs[inputPos++];
             }
@@ -333,10 +341,12 @@ namespace AdventOfCode.Tools.IntComputer
             switch (paramMode)
             {
                 case 1: throw new InvalidOperationException("Immediate Parameter mode not allowed for write operations.");
-                case 2: address = addressOffset + ReadAddress(address);
-                        break;
-                case 0: address = ReadAddress(address);
-                        break;
+                case 2:
+                    address = addressOffset + ReadAddress(address);
+                    break;
+                case 0:
+                    address = ReadAddress(address);
+                    break;
                 default: throw new InvalidOperationException($"Unknown Parametermode: {paramMode}");
             }
             return WriteAddress(address, value, doWrite);
