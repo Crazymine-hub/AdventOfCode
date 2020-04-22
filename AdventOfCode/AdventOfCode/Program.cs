@@ -11,7 +11,7 @@ namespace AdventOfCode
     class Program
     {
         static string message = "";
-        const string path = @"D:\Felix\Documents\Programmieren\C#\Advent of Code\Day";
+        public const string path = @"D:\Felix\Documents\Programmieren\C#\Advent of Code\Day";
 
         static void Main(string[] args)
         {
