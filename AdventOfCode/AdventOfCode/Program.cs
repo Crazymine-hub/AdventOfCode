@@ -23,7 +23,9 @@ namespace AdventOfCode
                 int dayNr = ConsoleAssist.GetUserInput(
                     "Advent Of Code\r\n" +
                     "Enter the number of the Day to use\r\n" +
-                    "Use Ctrl+C to quit.");
+                    "Use Ctrl+C or enter 0 to quit.");
+
+                if (dayNr <= 0) return;
 
                 Type DayType = Type.GetType("AdventOfCode.Days.Day" + dayNr);
                 if(DayType == null)
