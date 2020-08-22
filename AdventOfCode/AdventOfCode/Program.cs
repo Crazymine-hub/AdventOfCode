@@ -20,6 +20,7 @@ namespace AdventOfCode
                 Console.Clear();
                 if (message != "") Console.WriteLine(message);
                 message = "";
+                Console.Title = "Advent Of Code - Day Select.";
                 int dayNr = ConsoleAssist.GetUserInput(
                     "Advent Of Code\r\n" +
                     "Enter the number of the Day to use\r\n" +
@@ -28,13 +29,14 @@ namespace AdventOfCode
                 if (dayNr <= 0) return;
 
                 Type DayType = Type.GetType("AdventOfCode.Days.Day" + dayNr);
-                if(DayType == null)
+                if (DayType == null)
                 {
                     message = "Day doesn't exist";
                     continue;
                 }
 
                 Console.Clear();
+                Console.Title = "Advent Of Code - Day " + dayNr;
                 Console.WriteLine("You Chose: Day " + dayNr);
 
                 Console.WriteLine("do you want to use part 2? (y/n)");
@@ -61,7 +63,11 @@ namespace AdventOfCode
                 if (useSecond == 1 && File.Exists(path + dayNr + "_2.txt"))
                     fileextension = "_2.txt";
                 Console.Clear();
-                Console.WriteLine(((IDay)Activator.CreateInstance(DayType)).Solve(LoadInput(path+dayNr+fileextension), useSecond == 1));
+                if (useSecond == 1)
+                    Console.Title += " Part 2";
+                else
+                    Console.Title += " Part 1";
+                Console.WriteLine(((IDay)Activator.CreateInstance(DayType)).Solve(LoadInput(path + dayNr + fileextension), useSecond == 1));
                 Console.WriteLine();
                 Console.WriteLine("Done! Press any Key to return to start.");
                 Console.ReadKey();
