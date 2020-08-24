@@ -15,6 +15,7 @@ namespace AdventOfCode
 
         static void Main(string[] args)
         {
+            Console.OutputEncoding = Encoding.UTF8;
             while (true)
             {
                 Console.Clear();
