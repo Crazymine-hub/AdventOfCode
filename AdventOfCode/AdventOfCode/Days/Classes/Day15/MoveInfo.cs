@@ -8,7 +8,7 @@ namespace AdventOfCode.Days.Classes.Day15
 {
     class MoveInfo
     {
-        public int Direction { get; private set; }
+        public int Direction { get; set; }
         public bool IsIntersection { get; set; }
         public bool NorthBlocked { get; private set; }
         public bool WestBlocked { get; private set; }
@@ -25,21 +25,21 @@ namespace AdventOfCode.Days.Classes.Day15
             EastBlocked = false;
         }
 
-        public void BlockDirection(int direction)
+        public void SetDirectionStatus(int direction, bool value)
         {
             switch (direction & 3)
             {
                 case 0:
-                    NorthBlocked = true;
+                    NorthBlocked = value;
                     break;
                 case 1:
-                    WestBlocked = true;
+                    WestBlocked = value;
                     break;
                 case 2:
-                    SouthBlocked = true;
+                    SouthBlocked = value;
                     break;
                 case 3:
-                    EastBlocked = true;
+                    EastBlocked = value;
                     break;
             }
         }

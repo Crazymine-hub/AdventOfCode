@@ -54,7 +54,7 @@ namespace AdventOfCode.Days
             if (wallHit)
             {
                 directionAdd++;
-                moves.Last().BlockDirection(direction);
+                moves.Last().SetDirectionStatus(direction, true);
             }
             else
             {
@@ -87,7 +87,7 @@ namespace AdventOfCode.Days
                 if (move.IsIntersection)
                 {
                     backtracking = false;
-                    move.BlockDirection(MoveInfo.InvertDirection(direction));
+                    move.SetDirectionStatus(MoveInfo.InvertDirection(direction), true);
                     direction = move.Direction;
                     directionAdd = -1;
                     backtrackMove = move;
@@ -213,6 +213,7 @@ namespace AdventOfCode.Days
             if (wallHit)
             {
                 currField.FieldType = FieldFlag.Wall;
+                DrawPixel(position.X, position.Y);
                 if (direction % 2 == 0)
                     position.Y -= offset;
                 else
