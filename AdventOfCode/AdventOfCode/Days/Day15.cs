@@ -1,4 +1,5 @@
-﻿using AdventOfCode.Tools.IntComputer;
+﻿using AdventOfCode.Days.Classes.Day15;
+using AdventOfCode.Tools.IntComputer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,7 +19,8 @@ namespace AdventOfCode.Days
         int direction = 0; //0 = North 1 = West 2 = South 3 = East
                            //0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
         readonly char[] paths = new char[] { ' ', '╵', '╷', '│', '╴', '┘', '┐', '┤', '╶', '└', '┌', '├', '─', '┴', '┬', '┼' };
-        List<int> moves = new List<int>();
+
+        List<MoveInfo> moves = new List<MoveInfo>();
         /* Bit  Set/Unset
          * 0 = Wall
          * 1 = Intersection (0 & 1 set = Path)
@@ -27,42 +29,91 @@ namespace AdventOfCode.Days
          * 4 = West
          * 5 = East
          */
-        List<List<long>> canvas = new List<List<long>>();
+        List<List<FieldInfo>> canvas = new List<List<FieldInfo>>();
         Point dimensions = new Point(1, 1);
 
         bool wallHit = false;
         int directionAdd = 0;
+        private bool isIntersection;
+        private bool backtracking = false;
+        private MoveInfo backtrackMove;
 
         public string Solve(string input, bool part2)
         {
             if (part2) return "Part 2 is unavailable";
-            canvas.Add(new List<long>() { 64 });
+            canvas.Add(new List<FieldInfo>() { new FieldInfo() { FieldType = FieldFlag.Path } });
             computer.OnOutput += OnMoveFeedback;
             computer.InputRequested += Computer_InputRequested;
             computer.ReadMemory(input);
             computer.Run();
-            return "";
+            return "Moves Used: " + moves.Count;
         }
 
         private long Computer_InputRequested()
         {
             if (wallHit)
+            {
                 directionAdd++;
+                moves.Last().BlockDirection(direction);
+            }
             else
             {
+                backtrackMove = null;
                 directionAdd = 0;
-                moves.Add(direction);
+                if (!backtracking)
+                {
+                    moves.Add(new MoveInfo(direction));
+                    if (isIntersection)
+                    {
+                        moves[moves.Count - 2].IsIntersection = true;
+                    }
+                }
+            }
+            if (directionAdd == 3 || (backtrackMove != null && backtrackMove.GetNextFreeDirection() == -1))
+            {
+                Console.Beep(261, 100);
+                Console.Beep(261, 100);
+                backtracking = true;
+                directionAdd = -1;
+                if (moves.Last() == backtrackMove)
+                    backtrackMove.IsIntersection = false;
             }
             if (directionAdd >= 4)
                 throw new InvalidOperationException("Path not found");
 
-            if ((canvas[position.X][position.Y] & 3) == 2 && (canvas[position.X][position.Y] & ~511) > 256 * 5 && directionAdd == 0)
+            if (backtracking)
             {
-                Console.Beep(261, 250);
-                directionAdd = 1;
+                MoveInfo move = moves.Last();
+                if (move.IsIntersection)
+                {
+                    backtracking = false;
+                    move.BlockDirection(MoveInfo.InvertDirection(direction));
+                    direction = move.Direction;
+                    directionAdd = -1;
+                    backtrackMove = move;
+                }
+                else
+                {
+                    if (moves.Count == 0)
+                    {
+                        backtracking = false;
+                        moves.Add(new MoveInfo(0));
+                        return 1;
+                    }
+                    moves.RemoveAt(moves.Count - 1);
+                    direction = MoveInfo.InvertDirection(move.Direction);
+                }
             }
-
-            direction += directionAdd;
+            else
+            {
+                if (backtrackMove != null)
+                {
+                    direction = backtrackMove.GetNextFreeDirection();
+                    directionAdd = 0;
+                }
+                else
+                    direction += directionAdd;
+            }
             if (direction >= 4)
                 direction -= 4;
 
@@ -86,7 +137,6 @@ namespace AdventOfCode.Days
                     break;
                 case 2:
                     Move();
-                    canvas[position.X][position.Y] = canvas[position.X][position.Y] | 128;
                     Console.Beep(440, 100);
                     Console.Beep(523, 100);
                     Console.Beep(440, 100);
@@ -100,41 +150,69 @@ namespace AdventOfCode.Days
         private void Move()
         {
             Console.SetCursorPosition(position.X, position.Y);
-            if ((canvas[position.X][position.Y] & 3) == 0)
-                canvas[position.X][position.Y] = canvas[position.X][position.Y] | (long)(wallHit ? 2 : 3);
-            if ((canvas[position.X][position.Y] & 3) == 2 && !wallHit)
+            FieldInfo currField = canvas[position.X][position.Y];
+            isIntersection = false;
+
+            if (currField.FieldType == FieldFlag.Path && !wallHit)
             {
-                canvas[position.X][position.Y] = canvas[position.X][position.Y] | (canvas[position.X][position.Y] + 256);
+                currField.FieldType = FieldFlag.Intersection;
+                isIntersection = true;
             }
+            else
+                currField.FieldType = FieldFlag.Path;
 
             int offset = direction - 2 < 0 ? -1 : 1;
             if (direction % 2 == 0)
             {//Y-Movement
                 if (!wallHit)
-                    canvas[position.X][position.Y] = canvas[position.X][position.Y] | (long)(offset == -1 ? 4 : 8);
+                {
+                    if (offset == -1)
+                        currField.ConnectsNorth = true;
+                    else
+                        currField.ConnectsSouth = true;
+                }
                 DrawPixel(position.X, position.Y);
                 position.Y += offset;
                 if (position.Y < 0 || position.Y >= dimensions.Y)
                     ResizeCanvas(true, offset < 0);
+
+                currField = canvas[position.X][position.Y];
                 if (!wallHit)
-                    canvas[position.X][position.Y] = canvas[position.X][position.Y] | (long)(offset == 1 ? 4 : 8);
+                {
+                    if (offset == 1)
+                        currField.ConnectsNorth = true;
+                    else
+                        currField.ConnectsSouth = true;
+                }
             }
             else
             {//X-Movement
                 if (!wallHit)
-                    canvas[position.X][position.Y] = canvas[position.X][position.Y] | (long)(offset == -1 ? 16 : 32);
+                {
+                    if (offset == -1)
+                        currField.ConnectsWest = true;
+                    else
+                        currField.ConnectsEast = true;
+                }
                 DrawPixel(position.X, position.Y);
                 position.X += offset;
                 if (position.X < 0 || position.X >= dimensions.X)
                     ResizeCanvas(false, offset < 0);
+                currField = canvas[position.X][position.Y];
                 if (!wallHit)
-                    canvas[position.X][position.Y] = canvas[position.X][position.Y] | (long)(offset == 1 ? 16 : 32);
+                {
+                    if (offset == 1)
+                        currField.ConnectsWest = true;
+                    else
+                        currField.ConnectsEast = true;
+                }
             }
 
             Console.SetCursorPosition(position.X, position.Y);
 
             if (wallHit)
             {
+                currField.FieldType = FieldFlag.Wall;
                 if (direction % 2 == 0)
                     position.Y -= offset;
                 else
@@ -154,8 +232,8 @@ namespace AdventOfCode.Days
                     pos = dimensions.Y - 1;
                 else
                     position.Y++;
-                foreach (List<long> column in canvas)
-                    column.Insert(pos, 0);
+                foreach (List<FieldInfo> column in canvas)
+                    column.Insert(pos, new FieldInfo());
             }
             else
             {
@@ -164,7 +242,9 @@ namespace AdventOfCode.Days
                     pos = dimensions.X - 1;
                 else
                     position.X++;
-                List<long> newRow = (new long[dimensions.Y]).ToList();
+                List<FieldInfo> newRow = (new FieldInfo[dimensions.Y]).ToList();
+                for (int i = 0; i < newRow.Count; i++)
+                    newRow[i] = new FieldInfo();
                 canvas.Insert(pos, newRow);
             }
             Redraw();
@@ -184,16 +264,16 @@ namespace AdventOfCode.Days
 
         private void DrawPixel(int x, int y)
         {
-            switch (canvas[x][y] & 3)
+            switch (canvas[x][y].FieldType)
             {
-                case 1:
+                case FieldFlag.Wall:
                     Console.Write('█');
                     break;
-                case 0:
+                case FieldFlag.Unknown:
                     Console.Write('░');
                     break;
                 default:
-                    Console.Write(paths[(canvas[x][y] & 0x3C) >> 2]);
+                    Console.Write(paths[(int)canvas[x][y].GetPathFlag()]);
                     break;
             }
         }
