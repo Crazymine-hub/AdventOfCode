@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace AdventOfCode.Days.Classes
+namespace AdventOfCode.Days.Classes.Day14
 {
     class Reaction
     {

@@ -5,7 +5,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using AdventOfCode.Days.Classes;
+using AdventOfCode.Days.Classes.Day10;
 using AdventOfCode.Tools;
 using System.Threading;
 

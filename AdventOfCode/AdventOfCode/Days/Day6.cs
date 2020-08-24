@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AdventOfCode.Days.Classes;
+using AdventOfCode.Days.Classes.Day6;
 
 namespace AdventOfCode.Days
 {

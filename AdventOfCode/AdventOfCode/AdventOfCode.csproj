@@ -46,13 +46,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Day.cs" />
-    <Compile Include="Days\Classes\MoonInfo3D.cs" />
-    <Compile Include="Days\Classes\AsteroidInfo.cs" />
-    <Compile Include="Days\Classes\OrbitInfo.cs" />
-    <Compile Include="Days\Classes\OrbitObject.cs" />
-    <Compile Include="Days\Classes\ReactionItem.cs" />
-    <Compile Include="Days\Classes\Topological.cs" />
-    <Compile Include="Days\Classes\Vector3D.cs" />
+    <Compile Include="Days\Classes\Day15\FieldFlag.cs" />
+    <Compile Include="Days\Classes\Day15\FieldInfo.cs" />
+    <Compile Include="Days\Classes\Day15\MoveInfo.cs" />
+    <Compile Include="Days\Classes\Day12\MoonInfo3D.cs" />
+    <Compile Include="Days\Classes\Day10\AsteroidInfo.cs" />
+    <Compile Include="Days\Classes\Day6\OrbitInfo.cs" />
+    <Compile Include="Days\Classes\Day6\OrbitObject.cs" />
+    <Compile Include="Days\Classes\Day14\ReactionItem.cs" />
+    <Compile Include="Days\Classes\Day14\Topological.cs" />
+    <Compile Include="Days\Classes\Day12\Vector3D.cs" />
     <Compile Include="Days\Day10.cs" />
     <Compile Include="Days\Day11.cs" />
     <Compile Include="Days\Day12.cs" />

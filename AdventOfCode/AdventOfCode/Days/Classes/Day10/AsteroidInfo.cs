@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using AdventOfCode.Tools;
 
-namespace AdventOfCode.Days.Classes
+namespace AdventOfCode.Days.Classes.Day10
 {
     class AsteroidInfo
     {

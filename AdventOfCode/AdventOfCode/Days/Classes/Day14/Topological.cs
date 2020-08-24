@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdventOfCode.Days.Classes
+namespace AdventOfCode.Days.Classes.Day14
 {
     class Topological
     {

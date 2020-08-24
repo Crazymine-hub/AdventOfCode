@@ -1,4 +1,4 @@
-﻿using AdventOfCode.Days.Classes;
+﻿using AdventOfCode.Days.Classes.Day12;
 using System;
 using System.Collections.Generic;
 using System.Text;
