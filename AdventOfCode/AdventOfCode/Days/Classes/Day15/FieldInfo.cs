@@ -13,6 +13,9 @@ namespace AdventOfCode.Days.Classes.Day15
         public bool ConnectsWest { get; set; }
         public bool ConnectsSouth { get; set; }
         public bool ConnectsEast { get; set; }
+        public bool IsStart { get; set; }
+        public bool IsOxygen { get; set; }
+        public bool WasBacktracked { get; set; }
 
         public int GetPathFlag()
         {
@@ -21,6 +24,7 @@ namespace AdventOfCode.Days.Classes.Day15
             result |= ConnectsSouth ? 2 : 0;
             result |= ConnectsWest ? 4 : 0;
             result |= ConnectsEast ? 8 : 0;
+            result |= WasBacktracked ? 16 : 0;
             return result;
         }
     }

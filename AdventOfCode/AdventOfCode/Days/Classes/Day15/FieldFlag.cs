@@ -5,6 +5,6 @@
         Unknown,
         Wall,
         Intersection,
-        Path
+        Path,
     }
 }

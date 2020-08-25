@@ -17,8 +17,8 @@ namespace AdventOfCode.Days
         IntComputer computer = new IntComputer(true);
         Point position = new Point();
         int direction = 0; //0 = North 1 = West 2 = South 3 = East
-                           //0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
-        readonly char[] paths = new char[] { ' ', '╵', '╷', '│', '╴', '┘', '┐', '┤', '╶', '└', '┌', '├', '─', '┴', '┬', '┼' };
+                                            //0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31
+        readonly char[] paths = new char[] { ' ', '╵', '╷', '│', '╴', '┘', '┐', '┤', '╶', '└', '┌', '├', '─', '┴', '┬', '┼', ' ', '╹', '╻', '┃', '╺', '┛', '┓', '┫', '╺', '┗', '┏', '┣', '━', '┻', '┳', '╋' };
 
         List<MoveInfo> moves = new List<MoveInfo>();
         /* Bit  Set/Unset
@@ -37,11 +37,12 @@ namespace AdventOfCode.Days
         private bool isIntersection;
         private bool backtracking = false;
         private MoveInfo backtrackMove;
+        private bool outletFound;
 
         public string Solve(string input, bool part2)
         {
             if (part2) return "Part 2 is unavailable";
-            canvas.Add(new List<FieldInfo>() { new FieldInfo() { FieldType = FieldFlag.Path } });
+            canvas.Add(new List<FieldInfo>() { new FieldInfo() { FieldType = FieldFlag.Path, IsStart = true } });
             computer.OnOutput += OnMoveFeedback;
             computer.InputRequested += Computer_InputRequested;
             computer.ReadMemory(input);
@@ -61,36 +62,34 @@ namespace AdventOfCode.Days
                 backtrackMove = null;
                 directionAdd = 0;
                 if (!backtracking)
-                {
-                    moves.Add(new MoveInfo(direction));
-                    if (isIntersection)
-                    {
-                        moves[moves.Count - 2].IsIntersection = true;
-                    }
-                }
+                    moves.Add(new MoveInfo(direction) { IsIntersection = true });
             }
             if (directionAdd == 3 || (backtrackMove != null && backtrackMove.GetNextFreeDirection() == -1))
             {
-                Console.Beep(261, 100);
-                Console.Beep(261, 100);
+                //Console.Beep(261, 100);
+                //Console.Beep(261, 100);
                 backtracking = true;
                 directionAdd = -1;
-                if (moves.Last() == backtrackMove)
-                    backtrackMove.IsIntersection = false;
+                if (moves.Last().IsIntersection)
+                    moves.Last().IsIntersection = false;
             }
             if (directionAdd >= 4)
                 throw new InvalidOperationException("Path not found");
 
             if (backtracking)
             {
+                canvas[position.X][position.Y].WasBacktracked = true;
                 MoveInfo move = moves.Last();
-                if (move.IsIntersection)
+                move.SetDirectionStatus(MoveInfo.InvertDirection(direction), true);
+                bool hasDirectionsLeft = move.GetNextFreeDirection() != -1;
+                move.SetDirectionStatus(MoveInfo.InvertDirection(direction), false);
+                if (move.IsIntersection && hasDirectionsLeft)
                 {
                     backtracking = false;
                     move.SetDirectionStatus(MoveInfo.InvertDirection(direction), true);
-                    direction = move.Direction;
-                    directionAdd = -1;
                     backtrackMove = move;
+                    direction = backtrackMove.GetNextFreeDirection();
+                    directionAdd = -1;
                 }
                 else
                 {
@@ -130,19 +129,22 @@ namespace AdventOfCode.Days
         private void OnMoveFeedback(long value)
         {
             wallHit = false;
+            outletFound = false;
             switch (value)
             {
                 case 0:
                     wallHit = true;
                     break;
                 case 2:
-                    Move();
-                    Console.Beep(440, 100);
-                    Console.Beep(523, 100);
-                    Console.Beep(440, 100);
-                    Console.SetCursorPosition(0, dimensions.Y + 2);
-                    computer.Reset();
-                    return;
+                    outletFound = true;
+                    //Move();
+                    //Console.Beep(440, 100);
+                    //Console.Beep(523, 100);
+                    //Console.Beep(440, 100);
+                    //Console.SetCursorPosition(0, dimensions.Y + 2);
+                    //computer.Reset();
+                    //return;
+                    break;
             }
             Move();
         }
@@ -210,6 +212,9 @@ namespace AdventOfCode.Days
 
             Console.SetCursorPosition(position.X, position.Y);
 
+            if(outletFound)
+                canvas[position.X][position.Y].IsOxygen = true;
+
             if (wallHit)
             {
                 currField.FieldType = FieldFlag.Wall;
@@ -265,6 +270,16 @@ namespace AdventOfCode.Days
 
         private void DrawPixel(int x, int y)
         {
+            if (canvas[x][y].IsStart)
+            {
+                Console.Write('#');
+                return;
+            }
+            if (canvas[x][y].IsOxygen)
+            {
+                Console.Write('O');
+                return;
+            }
             switch (canvas[x][y].FieldType)
             {
                 case FieldFlag.Wall:
