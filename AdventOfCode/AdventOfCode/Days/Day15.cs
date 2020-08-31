@@ -15,10 +15,11 @@ namespace AdventOfCode.Days
     class Day15 : IDay
     {
         IntComputer computer = new IntComputer(true);
+        private bool part2 = false;
         Point position = new Point();
         int direction = 0; //0 = North 1 = West 2 = South 3 = East
-                                            //0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31
-        readonly char[] paths = new char[] { ' ', '╵', '╷', '│', '╴', '┘', '┐', '┤', '╶', '└', '┌', '├', '─', '┴', '┬', '┼', ' ', '╹', '╻', '┃', '╺', '┛', '┓', '┫', '╺', '┗', '┏', '┣', '━', '┻', '┳', '╋' };
+                           //                 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31
+        readonly char[] paths = new char[] { ' ', '╵', '╷', '│', '╴', '┘', '┐', '┤', '╶', '└', '┌', '├', '─', '┴', '┬', '┼', ' ', '╹', '╻', '┃', '╸', '┛', '┓', '┫', '╺', '┗', '┏', '┣', '━', '┻', '┳', '╋' };
 
         List<MoveInfo> moves = new List<MoveInfo>();
         /* Bit  Set/Unset
@@ -34,20 +35,24 @@ namespace AdventOfCode.Days
 
         bool wallHit = false;
         int directionAdd = 0;
-        private bool isIntersection;
         private bool backtracking = false;
         private MoveInfo backtrackMove;
-        private bool outletFound;
+        private int distance;
+        private int maxdist;
+        private bool outletFound = false;
 
         public string Solve(string input, bool part2)
         {
-            if (part2) return "Part 2 is unavailable";
+            this.part2 = part2;
             canvas.Add(new List<FieldInfo>() { new FieldInfo() { FieldType = FieldFlag.Path, IsStart = true } });
             computer.OnOutput += OnMoveFeedback;
             computer.InputRequested += Computer_InputRequested;
             computer.ReadMemory(input);
             computer.Run();
-            return "Moves Used: " + moves.Count;
+            if (part2)
+                return "Maximum distance: " + maxdist;
+            else
+                return "Moves Used: " + moves.Count;
         }
 
         private long Computer_InputRequested()
@@ -62,7 +67,12 @@ namespace AdventOfCode.Days
                 backtrackMove = null;
                 directionAdd = 0;
                 if (!backtracking)
+                {
                     moves.Add(new MoveInfo(direction) { IsIntersection = true });
+                    if (distance > maxdist)
+                        maxdist = distance;
+                    canvas[position.X][position.Y].Distance = distance++;
+                }
             }
             if (directionAdd == 3 || (backtrackMove != null && backtrackMove.GetNextFreeDirection() == -1))
             {
@@ -74,7 +84,7 @@ namespace AdventOfCode.Days
                     moves.Last().IsIntersection = false;
             }
             if (directionAdd >= 4)
-                throw new InvalidOperationException("Path not found");
+                throw new InvalidOperationException("Path Not Found");
 
             if (backtracking)
             {
@@ -100,6 +110,7 @@ namespace AdventOfCode.Days
                         return 1;
                     }
                     moves.RemoveAt(moves.Count - 1);
+                    distance--;
                     direction = MoveInfo.InvertDirection(move.Direction);
                 }
             }
@@ -116,7 +127,6 @@ namespace AdventOfCode.Days
             if (direction >= 4)
                 direction -= 4;
 
-
             switch (direction)
             {
                 case 1: return 3;
@@ -129,22 +139,46 @@ namespace AdventOfCode.Days
         private void OnMoveFeedback(long value)
         {
             wallHit = false;
-            outletFound = false;
             switch (value)
             {
                 case 0:
                     wallHit = true;
                     break;
                 case 2:
-                    outletFound = true;
-                    //Move();
-                    //Console.Beep(440, 100);
-                    //Console.Beep(523, 100);
-                    //Console.Beep(440, 100);
-                    //Console.SetCursorPosition(0, dimensions.Y + 2);
-                    //computer.Reset();
-                    //return;
-                    break;
+                    if (part2)
+                    {
+                        if (outletFound)
+                        {
+                            Console.SetCursorPosition(0, dimensions.Y + 2);
+                            computer.Reset();
+                            Imagine();
+                            return;
+                        }
+                        Move();
+                        distance = 0;
+                        canvas = new List<List<FieldInfo>>();
+                        canvas.Add(new List<FieldInfo>() { new FieldInfo() { FieldType = FieldFlag.Path, IsOxygen = true } });
+                        wallHit = false;
+                        directionAdd = 0;
+                        backtracking = false;
+                        moves = new List<MoveInfo>();
+                        backtrackMove = null;
+                        dimensions = new Point(1, 1);
+                        position = new Point();
+                        direction = 0;
+                        outletFound = true;
+                        return;
+                    }
+                    else
+                    {
+                        Move();
+                        Console.Beep(440, 100);
+                        Console.Beep(523, 100);
+                        Console.Beep(440, 100);
+                        Console.SetCursorPosition(0, dimensions.Y + 2);
+                        computer.Reset();
+                        return;
+                    }
             }
             Move();
         }
@@ -153,12 +187,10 @@ namespace AdventOfCode.Days
         {
             Console.SetCursorPosition(position.X, position.Y);
             FieldInfo currField = canvas[position.X][position.Y];
-            isIntersection = false;
 
             if (currField.FieldType == FieldFlag.Path && !wallHit)
             {
                 currField.FieldType = FieldFlag.Intersection;
-                isIntersection = true;
             }
             else
                 currField.FieldType = FieldFlag.Path;
@@ -211,9 +243,6 @@ namespace AdventOfCode.Days
             }
 
             Console.SetCursorPosition(position.X, position.Y);
-
-            if(outletFound)
-                canvas[position.X][position.Y].IsOxygen = true;
 
             if (wallHit)
             {
@@ -298,6 +327,25 @@ namespace AdventOfCode.Days
         {
             Console.SetCursorPosition(position.X, position.Y);
             Console.Write("8");
+        }
+
+        private void Imagine()
+        {
+            Bitmap map = new Bitmap(dimensions.X, dimensions.Y);
+
+            for (int x = 0; x < canvas.Count; x++)
+                for (int y = 0; y < canvas[x].Count; y++)
+                {
+                    FieldInfo field = canvas[x][y];
+                    int value = Convert.ToInt32(field.Distance / (double)maxdist * 0xFF);
+                    //value |= -16777216; // 0xFF000000
+                    Color col = Color.Black;
+                    if (field.FieldType != FieldFlag.Unknown && field.FieldType != FieldFlag.Wall)
+                        //col = Color.FromArgb(field.Distance | -16777216);
+                        col = Color.FromArgb(value, 0, 255);
+                    map.SetPixel(x, y, col);
+                }
+            //map.Save("Day15_map.bmp");
         }
     }
 }

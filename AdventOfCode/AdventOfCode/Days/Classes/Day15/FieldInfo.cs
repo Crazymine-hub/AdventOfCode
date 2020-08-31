@@ -16,6 +16,7 @@ namespace AdventOfCode.Days.Classes.Day15
         public bool IsStart { get; set; }
         public bool IsOxygen { get; set; }
         public bool WasBacktracked { get; set; }
+        public int Distance { get; set; }
 
         public int GetPathFlag()
         {
