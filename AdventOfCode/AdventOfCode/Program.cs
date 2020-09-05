@@ -40,51 +40,76 @@ namespace AdventOfCode
                 Console.Title = "Advent Of Code - Day " + dayNr;
                 Console.WriteLine("You Chose: Day " + dayNr);
 
-                Console.WriteLine("do you want to use part 2? (y/n)");
+                Console.WriteLine("Select a Mode by pressing the Key in ():");
+                Console.WriteLine("Part (1)");
+                Console.WriteLine("Part (2)");
+                Console.WriteLine("(T)est Part 1");
+                Console.WriteLine("Test (P)art 2");
+                Console.WriteLine("Any other Key: cancel");
                 byte useSecond = 0;
-                do
+                bool custIn = false;
+                switch (Console.ReadKey(true).Key)
                 {
-                    switch (Console.ReadKey(true).Key)
-                    {
-                        case ConsoleKey.Y:
-                            useSecond = 1;
-                            break;
-                        case ConsoleKey.N:
-                            useSecond = 2;
-                            break;
-                        default:
-                            Console.SetCursorPosition(0, 3);
-                            Console.WriteLine("Invalid Input. Try again");
-                            break;
+                    case ConsoleKey.NumPad1:
+                        useSecond = 1;
+                        break;
+                    case ConsoleKey.D1:
+                        useSecond = 1;
+                        break;
+                    case ConsoleKey.NumPad2:
+                        useSecond = 2;
+                        break;
+                    case ConsoleKey.T:
+                        custIn = true;
+                        useSecond = 1;
+                        break;
+                    case ConsoleKey.P:
+                        custIn = true;
+                        useSecond = 2;
+                        break;
 
-                    }
-                } while (useSecond == 0);
+                }
 
-                string fileextension = ".txt";
-                if (useSecond == 1 && File.Exists(path + dayNr + "_2.txt"))
-                    fileextension = "_2.txt";
-                Console.Clear();
+                if (useSecond == 0)
+                    continue;
+
+                    Console.Clear();
                 if (useSecond == 1)
                     Console.Title += " Part 2";
                 else
                     Console.Title += " Part 1";
-                Console.WriteLine(((IDay)Activator.CreateInstance(DayType)).Solve(LoadInput(path + dayNr + fileextension), useSecond == 1));
+
+                string fileextension = ".txt";
+                if (useSecond == 1 && File.Exists(path + dayNr + "_2.txt"))
+                    fileextension = "_2.txt";
+                Console.WriteLine(((IDay)Activator.CreateInstance(DayType)).Solve(LoadInput(path + dayNr + fileextension, custIn), useSecond == 1));
                 Console.WriteLine();
                 Console.WriteLine("Done! Press any Key to return to start.");
                 Console.ReadKey();
             }
         }
 
-        static string LoadInput(string fileName)
+        static string LoadInput(string fileName, bool userInput)
         {
-            FileStream input = File.OpenRead(fileName);
-            byte[] content = new byte[input.Length];
-            if (input.Length != input.Read(content, 0, (int)input.Length))
-                throw new Exception("nicht alles gelesen");
-            input.Close();
-            char[] text = new char[content.Length];
-            content.CopyTo(text, 0);
-            return string.Join("", text);
+            if (userInput)
+            {
+                Console.Clear();
+                Console.WriteLine("Please enter the Testinput to use.");
+                Console.WriteLine("Be aware, that the input is not checked. Proceed with caution");
+                Console.WriteLine("Use \\n for line breaks");
+                return Console.ReadLine().Replace("\\n", "\r\n");
+            }
+            else
+            {
+                FileStream input = File.OpenRead(fileName);
+                byte[] content = new byte[input.Length];
+                if (input.Length != input.Read(content, 0, (int)input.Length))
+                    throw new Exception("nicht alles gelesen");
+                input.Close();
+                char[] text = new char[content.Length];
+                content.CopyTo(text, 0);
+                return string.Join("", text);
+            }
         }
     }
 }
