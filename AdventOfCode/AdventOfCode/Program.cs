@@ -74,7 +74,7 @@ namespace AdventOfCode
                     continue;
 
                     Console.Clear();
-                if (useSecond == 1)
+                if (useSecond == 2)
                     Console.Title += " Part 2";
                 else
                     Console.Title += " Part 1";
@@ -93,11 +93,12 @@ namespace AdventOfCode
         {
             if (userInput)
             {
-                Console.Clear();
                 Console.WriteLine("Please enter the Testinput to use.");
                 Console.WriteLine("Be aware, that the input is not checked. Proceed with caution");
                 Console.WriteLine("Use \\n for line breaks");
-                return Console.ReadLine().Replace("\\n", "\r\n");
+                var input = Console.ReadLine().Replace("\\n", "\r\n");
+                Console.Clear();
+                return input;
             }
             else
             {
