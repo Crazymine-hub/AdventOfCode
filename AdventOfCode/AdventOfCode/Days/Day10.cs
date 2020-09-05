@@ -104,7 +104,7 @@ namespace AdventOfCode.Days
                     }
                     pos++;
                 }
-                //TODO: Erst nach Richtung Gruppieren dann innerhalb sortieren, dann iterieren, dann Wählen
+
                 Console.SetCursorPosition(0, 1);
                 Console.Write(input.Replace(".", " "));
                 for(int i = 0; i < Asteroids.Count; i++)

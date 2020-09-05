@@ -82,7 +82,7 @@ namespace AdventOfCode
                 string fileextension = ".txt";
                 if (useSecond == 1 && File.Exists(path + dayNr + "_2.txt"))
                     fileextension = "_2.txt";
-                Console.WriteLine(((IDay)Activator.CreateInstance(DayType)).Solve(LoadInput(path + dayNr + fileextension, custIn), useSecond == 1));
+                Console.WriteLine(((IDay)Activator.CreateInstance(DayType)).Solve(LoadInput(path + dayNr + fileextension, custIn), useSecond == 2));
                 Console.WriteLine();
                 Console.WriteLine("Done! Press any Key to return to start.");
                 Console.ReadKey();
