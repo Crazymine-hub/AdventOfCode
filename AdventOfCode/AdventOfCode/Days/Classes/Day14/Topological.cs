@@ -28,7 +28,6 @@ namespace AdventOfCode.Days.Classes.Day14
             foreach (var ingredient in recipes.Where(x => recipe.Ingredients.ContainsKey(x.Name)))
                 if (!isTraced.Contains(ingredient.Name))
                 {
-
                     Trace(ingredient, recipes);
                 }
 
