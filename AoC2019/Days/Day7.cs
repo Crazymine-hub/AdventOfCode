@@ -21,7 +21,7 @@ namespace AdventOfCode.Days
             while (settingPos < computerSettings.Count)
             {
                 for (int i = 0; i <= 4; i++)
-                    computers[i] = new IntComputer(true);
+                    computers[i] = new IntComputer(true, enableOutputLog: true);
                 for (int i = 0; i <= 4; i++)
                 {
                     computers[i].ReadMemory(input);
