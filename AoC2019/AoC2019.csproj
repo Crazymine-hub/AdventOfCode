@@ -50,6 +50,8 @@
     <Compile Include="Days\Classes\Day15\FieldFlag.cs" />
     <Compile Include="Days\Classes\Day15\FieldInfo.cs" />
     <Compile Include="Days\Classes\Day15\MoveInfo.cs" />
+    <Compile Include="Days\Classes\Day18\Node.cs" />
+    <Compile Include="Days\Classes\Day18\NodeConnection.cs" />
     <Compile Include="Days\Classes\Day6\OrbitInfo.cs" />
     <Compile Include="Days\Classes\Day6\OrbitObject.cs" />
     <Compile Include="Days\Day1.cs" />
@@ -61,6 +63,7 @@
     <Compile Include="Days\Day15.cs" />
     <Compile Include="Days\Day16.cs" />
     <Compile Include="Days\Day17.cs" />
+    <Compile Include="Days\Day18.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
@@ -113,6 +116,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Inputs\Day17_addition.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Inputs\Day18.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Inputs\Day2.txt">
