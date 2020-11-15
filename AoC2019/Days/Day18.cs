@@ -21,14 +21,14 @@ namespace AdventOfCode.Days
         {
             if (part2) return "Part 2 is unavailable";
             GetNodes(input);
-            PrintConnections(connections, false);
-            
+            PrintConnections(connections, 50, false);
+
             AStar pathfind = new AStar(connections);
-            var target = nodes.Last();
+            var target = nodes[7];
             foreach (Node node in nodes)
                 node.UpdateTargetDistance(target);
             var path = pathfind.GetPath(startNode, target, out var traceConnections);
-            PrintConnections(traceConnections, true);
+            PrintConnections(traceConnections, 50, true);
 
             Console.SetCursorPosition(0, maxHeight);
             if (path.LastOrDefault() != target)
@@ -36,11 +36,13 @@ namespace AdventOfCode.Days
             return "";
         }
 
+
+
         private void GetNodes(string maze)
         {
             var mazeLines = maze.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            nodes = new  List<BaseNode>();
-            targets = new  List<BaseNode>();
+            nodes = new List<BaseNode>();
+            targets = new List<BaseNode>();
             connections = new List<BaseNodeConnection>();
             Node[] aboveNodes = new Node[mazeLines[0].Length];
             maxHeight = mazeLines.Length + 1;
@@ -93,12 +95,19 @@ namespace AdventOfCode.Days
             }
         }
 
-        private void PrintConnections(List<BaseNodeConnection> connections, bool bold)
+        private void PrintConnections(List<BaseNodeConnection> connections, int vOffset = 0, bool bold = false)
         {
             foreach (NodeConnection con in connections)
             {
-                Console.SetCursorPosition(con.NodeA.X, con.NodeA.Y);
-                Console.Write(TraceChars.paths[con.NodeA.PathIndex | (bold ? 16 : 0)]);
+                Console.SetCursorPosition(con.NodeA.X, con.NodeA.Y + vOffset);
+                if (con.NodeA.Key != '\0')
+                    Console.Write(con.NodeA.Key);
+                else if (con.NodeA.Lock != '\0')
+                    Console.Write(con.NodeA.Lock);
+                else
+                    Console.Write(TraceChars.paths[con.NodeA.PathIndex | (bold ? 16 : 0)]);
+
+
                 if (con.IsHorizontal)
                 {
                     for (int i = Math.Min(con.NodeA.X, con.NodeB.X) + 1; i < Math.Max(con.NodeA.X, con.NodeB.X); i++)
@@ -112,12 +121,18 @@ namespace AdventOfCode.Days
                     for (int i = Math.Min(con.NodeA.Y, con.NodeB.Y) + 1; i < Math.Max(con.NodeA.Y, con.NodeB.Y); i++)
                     {
                         Console.CursorLeft--;
-                        Console.CursorTop = i;
+                        Console.CursorTop = i + vOffset;
                         Console.Write(TraceChars.GetPathChar(true, true, false, false, bold));
                     }
                 }
-                Console.SetCursorPosition(con.NodeB.X, con.NodeB.Y);
-                Console.Write(TraceChars.paths[con.NodeB.PathIndex | (bold ? 16 : 0)]);
+
+                Console.SetCursorPosition(con.NodeB.X, con.NodeB.Y + vOffset);
+                if (con.NodeB.Key != '\0')
+                    Console.Write(con.NodeB.Key);
+                else if (con.NodeB.Lock != '\0')
+                    Console.Write(con.NodeB.Lock);
+                else
+                    Console.Write(TraceChars.paths[con.NodeB.PathIndex | (bold ? 16 : 0)]);
             }
         }
     }
