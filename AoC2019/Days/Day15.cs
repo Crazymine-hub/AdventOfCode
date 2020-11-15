@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using PathHelp = AdventOfCode.Tools.TraceChars;
 
 namespace AdventOfCode.Days
 {
@@ -18,8 +19,6 @@ namespace AdventOfCode.Days
         private bool part2 = false;
         Point position = new Point();
         int direction = 0; //0 = North 1 = West 2 = South 3 = East
-                           //                 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31
-        readonly char[] paths = new char[] { ' ', '╵', '╷', '│', '╴', '┘', '┐', '┤', '╶', '└', '┌', '├', '─', '┴', '┬', '┼', ' ', '╹', '╻', '┃', '╸', '┛', '┓', '┫', '╺', '┗', '┏', '┣', '━', '┻', '┳', '╋' };
 
         List<MoveInfo> moves = new List<MoveInfo>();
         /* Bit  Set/Unset
@@ -318,7 +317,7 @@ namespace AdventOfCode.Days
                     Console.Write('░');
                     break;
                 default:
-                    Console.Write(paths[(int)canvas[x][y].GetPathFlag()]);
+                    Console.Write(PathHelp.paths[(int)canvas[x][y].GetPathFlag()]);
                     break;
             }
         }

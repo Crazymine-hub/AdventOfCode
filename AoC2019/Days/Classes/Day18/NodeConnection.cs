@@ -6,44 +6,23 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Days.Classes.Day18
 {
-    class NodeConnection
+    class NodeConnection: Tools.Pathfinding.BaseNodeConnection
     {
-        private Node nodeA;
-        private Node nodeB;
-        private int distance;
-        public int Distance { get {
-                if (nodeA.Lock != '\0' || nodeB.Lock != '\0')
+        public new Node NodeA { get => (Node)base.NodeA; protected set => base.NodeA = value; }
+        public new Node NodeB { get => (Node)base.NodeB; protected set => base.NodeB = value; }
+        public bool IsHorizontal { get; private set; }
+
+        public new int Distance { get {
+                if (NodeA.Lock != '\0' || NodeB.Lock != '\0')
                     return -1;
                 else
-                    return distance;
+                    return base.Distance;
             }
         }
 
-        public NodeConnection(Node a, Node b)
+        public NodeConnection(Node a, Node b): base(a, b)
         {
-            nodeA = a;
-            nodeB = b;
-            if (nodeA.X == nodeB.X && nodeA.Y != nodeB.Y)
-                distance = Math.Abs(nodeA.Y - nodeB.Y);
-            else if (nodeA.Y == nodeB.Y && nodeA.X != nodeB.X)
-                distance = Math.Abs(nodeA.X - nodeB.X);
-            else
-                throw new InvalidOperationException("Nodes are not on same X or Y axis.");
-        }
-
-        public bool HasConnectionTo(Node target)
-        {
-            return (nodeA == target || nodeB == target);
-        }
-
-        public Node GetLinkFrom(Node target)
-        {
-            if (nodeA == target)
-                return nodeB;
-            else if (nodeB == target)
-                return nodeA;
-            else
-                throw new ArgumentException("Node not in this connection");
+            IsHorizontal = NodeA.X != NodeB.X;
         }
     }
 }

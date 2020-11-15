@@ -6,17 +6,14 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Days.Classes.Day18
 {
-    class Node
+    class Node: Tools.Pathfinding.BaseNode
     {
-        public int X { get; set; }
-        public int Y { get; set; }
         public char Lock { get; set; } = '\0';
         public char Key { get; set; } = '\0';
+        public int PathIndex { get; set; }
 
-        public Node(int x, int y, char keyChar)
+        public Node(int x, int y, char keyChar): base(x, y)
         {
-            X = x;
-            Y = y;
             if (keyChar >= 65 && keyChar <= 90)
                 Lock = keyChar;
             else if (keyChar >= 97 && keyChar <= 122)
@@ -25,7 +22,7 @@ namespace AdventOfCode.Days.Classes.Day18
 
         public override string ToString()
         {
-            string koords = $" @{X}/{Y}"; ;
+            string koords = base.ToString().Remove(0, 1);
             if (Key != '\0')
                 return Key +koords;
             if (Lock != '\0')
