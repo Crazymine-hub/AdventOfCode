@@ -8,10 +8,10 @@ namespace AdventOfCode.Tools.Pathfinding
 {
     public class BaseNodeConnection
     {
-        public BaseNode NodeA { get; protected set; }
-        public BaseNode NodeB { get; protected set; }
+        public virtual BaseNode NodeA { get; protected set; }
+        public virtual BaseNode NodeB { get; protected set; }
         private int distance;
-        public int Distance => distance;
+        public virtual int Distance => distance;
         public double Rating { get; set; }
 
         public BaseNodeConnection(BaseNode a, BaseNode b)

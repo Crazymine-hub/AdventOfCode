@@ -12,7 +12,7 @@ namespace AdventOfCode.Days.Classes.Day18
         public new Node NodeB { get => (Node)base.NodeB; protected set => base.NodeB = value; }
         public bool IsHorizontal { get; private set; }
 
-        public new int Distance { get {
+        public override int Distance { get {
                 if (NodeA.Lock != '\0' || NodeB.Lock != '\0')
                     return -1;
                 else

@@ -35,6 +35,8 @@ namespace AdventOfCode.Tools.Pathfinding
                 {
                     var connTarget = currConn.GetOtherNode(active);
                     currConn.Rating = pathCost + currConn.Distance + connTarget.DistanceToTarget;
+                    if (currConn.Distance < 0)
+                        currConn.Rating = -1;
                 }
 
                 var chosen = neighbours.OrderBy(conn => conn.Rating).FirstOrDefault(conn => conn.Rating >= 0);
