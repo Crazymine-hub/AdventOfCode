@@ -18,13 +18,18 @@ namespace AdventOfCode.Tools.Pathfinding
             connections = connectionList;
         }
 
-        public BaseNode[] GetPath(BaseNode start, BaseNode finish, out List<BaseNodeConnection> connectionList)
+        public BaseNode[] GetPath(BaseNode start, BaseNode finish)
+        {
+            return GetPath(start, finish, out List<BaseNodeConnection> cons, out int cost);
+        }
+
+        public BaseNode[] GetPath(BaseNode start, BaseNode finish, out List<BaseNodeConnection> connectionList, out int pathCost)
         {
             path = new List<BaseNode>();
             ignored = new List<BaseNode>();
             path.Add(start);
             var active = start;
-            int pathCost = 0;
+            pathCost = 0;
             connectionList = new List<BaseNodeConnection>();
 
             while (active != finish)
@@ -45,7 +50,7 @@ namespace AdventOfCode.Tools.Pathfinding
                     if (active == start) break;
                     ignored.Add(active);
                     path.Remove(active);
-                    pathCost += connectionList.Last().Distance;
+                    pathCost -= connectionList.Last().Distance;
                     connectionList.Remove(connectionList.Last());
                 }
                 else

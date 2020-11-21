@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools
 {
-    public static class ConsoleAssist
+    public class ConsoleAssist
     {
+        readonly static char[] progressIndicator = new char[] { '|', '/', '─', '\\' };
+        int progressPos = 0;
+
         public static int GetUserInput(string prompt, bool noInitialClear = true)
         {
             string message = "";
@@ -30,6 +33,14 @@ namespace AdventOfCode.Tools
                 else
                     return inputNr;
             }
+        }
+
+        public char GetNextProgressChar()
+        {
+            progressPos++;
+            if (progressPos >= progressIndicator.Length)
+                progressPos = 0;
+            return progressIndicator[progressPos];
         }
     }
 }
