@@ -6,13 +6,16 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Days.Classes.Day18
 {
-    class Node: Tools.Pathfinding.BaseNode
+    class Node : Tools.Pathfinding.BaseNode
     {
-        public char Lock { get; set; } = '\0';
-        public char Key { get; set; } = '\0';
+        public char Lock { get; } = '\0';
+        public char Key { get; } = '\0';
+        bool unlocked;
+        public bool IsUnlocked { get => unlocked || Lock == '\0'; set => unlocked = value; }
         public int PathIndex { get; set; }
+        public Node BlockedBy { get; set; }
 
-        public Node(int x, int y, char keyChar): base(x, y)
+        public Node(int x, int y, char keyChar) : base(x, y)
         {
             if (keyChar >= 65 && keyChar <= 90)
                 Lock = keyChar;
@@ -23,11 +26,30 @@ namespace AdventOfCode.Days.Classes.Day18
         public override string ToString()
         {
             string koords = base.ToString().Remove(0, 1);
+            if (BlockedBy != null)
+                koords += "|" + BlockedBy.ToString();
+
             if (Key != '\0')
-                return Key +koords;
+                return Key + koords;
             if (Lock != '\0')
                 return Lock + koords;
+
             return "+" + koords;
+        }
+
+        public bool CanBeUnlocked(char key)
+        {
+            return (byte)key - 32 == Lock;
+        }
+
+        public bool TryUnlock(char key)
+        {
+            if (CanBeUnlocked(key))
+            {
+                unlocked = true;
+                return true;
+            }
+            return false;
         }
     }
 }
