@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools
 {
-    static class Bitwise
+    public static class Bitwise
     {
         public static int SetBit(int data, int bitNr, bool value)
         {

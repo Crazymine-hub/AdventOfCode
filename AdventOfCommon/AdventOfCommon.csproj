@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Day.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\Bitwise.cs" />
     <Compile Include="Tools\ConsoleAssist.cs" />
     <Compile Include="Tools\MathHelper.cs" />
     <Compile Include="Tools\NumberLists.cs" />
