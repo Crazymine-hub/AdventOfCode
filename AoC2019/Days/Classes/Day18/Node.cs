@@ -51,5 +51,10 @@ namespace AdventOfCode.Days.Classes.Day18
             }
             return false;
         }
+
+        public int GetKeyBitPos()
+        {
+            return (int)Key - 97;
+        }
     }
 }
