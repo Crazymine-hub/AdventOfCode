@@ -65,7 +65,7 @@ namespace AdventOfCode.Tools.IntComputer
 
         public void Run()
         {
-
+            addressOffset = 0;
             output = new List<long>();
             int stepSize = 0;
             for (long i = 0; i < Memory.Length; i += stepSize)
