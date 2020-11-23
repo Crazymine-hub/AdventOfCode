@@ -21,5 +21,26 @@ namespace AdventOfCode.Tools
         {
             return (data & (1 << bitNr)) != 0;
         }
+        public static long SetBit(long data, int bitNr, bool value)
+        {
+            long mask = 1l << bitNr;
+            data = data & ~mask;
+            if (value)
+                data = data | mask;
+            return data;
+        }
+
+        public static bool IsBitSet(long data, int bitNr)
+        {
+            return (data & (1l << bitNr)) != 0;
+        }
+
+        public static long GetBitMask(int length)
+        {
+            long result = 1;
+            for (int i = 1; i < length; i++)
+                result = (result << 1) | 1;
+            return result;
+        }
     }
 }

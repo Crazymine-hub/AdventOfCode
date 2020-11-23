@@ -18,9 +18,12 @@ namespace AdventOfCode.Days
         List<Node> keys;
         List<Node> doors;
         int maxHeight = 0;
+        int singleHeight = 0;
         int printouts = 0;
         AStar pathfind;
         ConsoleAssist outAssis = new ConsoleAssist();
+        List<Node> pois = null;
+        Dictionary<long, Tuple<int, List<Node>>> knownPaths = new Dictionary<long, Tuple<int, List<Node>>>();
 
         public override string Solve(string input, bool part2)
         {
@@ -33,9 +36,13 @@ namespace AdventOfCode.Days
             string order = "";
 
 
-            Console.SetCursorPosition(0, maxHeight * (printouts+1));
-            var path = GetKeyOrder();
-            var singleHeight = Console.CursorTop - maxHeight;
+            Console.SetCursorPosition(0, maxHeight * (printouts + 1));
+            pois = Prioritize();
+            singleHeight = Console.CursorTop - maxHeight;
+            printouts++;
+            var path = TraceRecursive((Node)startNode, 0, out int moves);
+            foreach (Node door in doors) door.IsUnlocked = true;
+            singleHeight = Console.CursorTop - maxHeight;
             BaseNode currStart = startNode;
             foreach (Node next in path)
             {
@@ -48,7 +55,7 @@ namespace AdventOfCode.Days
             }
 
             Console.SetCursorPosition(0, maxHeight * ++printouts + singleHeight);
-            return "Moves: " + totalMoves + " Order: " + order;
+            return "Moves: " + totalMoves + "/" + moves + " Order: " + order;
         }
 
         private List<Node> Prioritize()
@@ -218,33 +225,6 @@ namespace AdventOfCode.Days
             }
         }
 
-        private Node GetClosestKey(Node start, List<Node> keys)
-        {
-            return GetClosestKey(start, keys, out int dist, out List<BaseNodeConnection> trace);
-        }
-
-        private Node GetClosestKey(Node start, List<Node> keys, out int distance, out List<BaseNodeConnection> trace)
-        {
-            distance = 0;
-            trace = new List<BaseNodeConnection>();
-            Node key = null;
-
-            foreach (Node target in keys)
-            {
-                foreach (Node node in nodes)
-                    node.UpdateTargetDistance(target);
-                var path = pathfind.GetPath(start, target, out var traceConnections, out int moves);
-                if (path.LastOrDefault() != target) continue;
-                if (moves < distance || distance == 0)
-                {
-                    distance = moves;
-                    key = target;
-                    trace = traceConnections;
-                }
-            }
-            return key;
-        }
-
         private List<Node> GetReachableNodes(List<Node> nodes, Node tryKey = null)
         {
             List<Node> reachable = nodes.Where(x => x.BlockedBy == null).ToList();
@@ -256,60 +236,176 @@ namespace AdventOfCode.Days
             return reachable;
         }
 
-        private List<Node> GetKeys(List<Node> nodes)
+        private List<Node> TraceRecursive(Node start, long collectedKeys, out int newCost, int depth = 0, string pathText = "")
         {
-            return nodes.Where(x => x.Key != '\0').ToList();
-        }
-
-        private List<Node> GetKeyOrder()
-        {
-            var prios = Prioritize();
-            List<Node> keyOrder = new List<Node>();
-            Console.Write("Finding optimal Path... ");
-
-            while (keyOrder.Count < this.keys.Count)
+            long dictKey = Bitwise.SetBit(collectedKeys, start.GetKeyBitPos() + 27, true);
+            if (knownPaths.ContainsKey(dictKey))
             {
-                Console.CursorLeft--;
-                Console.Write(outAssis.GetNextProgressChar());
-                foreach (Node door in prios)
-                {
-                    door.IsUnlocked = false;
-                    foreach (Node key in keyOrder)
-                        door.TryUnlock(key.Key);
-                }
-
-                var reachableNodes = GetReachableNodes(prios);
-                var keys = GetKeys(reachableNodes).Where(x => !keyOrder.Contains(x)).ToList();
-                Node lastKey = null;
-
-                foreach (Node key in keys)
-                {
-                    Console.CursorLeft--;
-                    Console.Write(outAssis.GetNextProgressChar());
-                    var reach = GetReachableNodes(prios, key);
-                    if (reach.Count > reachableNodes.Count)
-                    {
-                        reachableNodes = reach;
-                        lastKey = key;
-                    }
-                }
-                if (lastKey == null)
-                {
-                    while (keys.Count > 0)
-                    {
-                        var closest = GetClosestKey(keyOrder.Last(), keys);
-                        keyOrder.Add(closest);
-                        keys.Remove(closest);
-                    }
-                    Console.WriteLine();
-                    return keyOrder;
-                }
-                foreach (Node node in pathfind.GetPath(keyOrder.LastOrDefault() ?? startNode, lastKey).Select(x => (Node)x))
-                    if (node.Key != '\0' && !keyOrder.Contains(node)) keyOrder.Add(node);
+                newCost = knownPaths[dictKey].Item1;
+                return knownPaths[dictKey].Item2.ToList();
             }
 
-            Console.WriteLine();
-            return keyOrder;
+            var reachable = GetReachableNodes(pois);
+            var keys = reachable.Where(x => x.Key != '\0' && !Bitwise.IsBitSet(collectedKeys, x.GetKeyBitPos())).ToList();
+            newCost = 0;
+            if (keys.Count == 0)
+            {
+                long mask = Bitwise.GetBitMask(this.keys.Count);
+                if ((collectedKeys & mask) == mask)
+                    return new List<Node>();
+                else
+                    return null;
+            }
+
+            var selCost = 0;
+            List<Node> selection = null;
+            Node selected = null;
+            for (int i = 0; i < keys.Count; i++)
+            {
+                var key = keys[i];
+                collectedKeys = Bitwise.SetBit(collectedKeys, key.GetKeyBitPos(), true);
+                int currCost;
+                List<Node> currSel;
+                var unlocked = new List<Node>();
+
+                //Console.SetCursorPosition(0, maxHeight * (printouts) + singleHeight);
+                //Console.Write(outAssis.GetNextProgressChar() + depth.ToString() + " ");
+                //Console.CursorLeft = 10;
+                //Console.Write((pathText + key.Key).PadRight(20));
+                Console.Write(key.Key);
+
+                foreach (Node door in doors)
+                    if (door.TryUnlock(key.Key))
+                        unlocked.Add(door);
+                var path = pathfind.GetPath(start, key, out List<BaseNodeConnection> cons, out int partCost).Select(x => (Node)x).ToList();
+                if (path.Last() == start) continue;
+                var newKey = path.FirstOrDefault(x => x.Key != '\0' && x != key && x != start && !Bitwise.IsBitSet(collectedKeys, x.GetKeyBitPos()));
+                if (newKey != null)
+                {
+                    collectedKeys = Bitwise.SetBit(collectedKeys, key.GetKeyBitPos(), false);
+                    key = newKey;
+                    path = pathfind.GetPath(start, key, out cons, out partCost).Select(x => (Node)x).ToList();
+                    if (path.Last() == start) continue;
+                    collectedKeys = Bitwise.SetBit(collectedKeys, key.GetKeyBitPos(), true);
+                }
+
+
+                //PrintConnections(connections, maxHeight * printouts + singleHeight, false);
+                //PrintConnections(cons, maxHeight * printouts + singleHeight, true);
+                //Console.CursorLeft = key.X;
+                //Console.CursorTop = key.Y + maxHeight * printouts + singleHeight;
+                //Console.Write("*");
+
+                currSel = TraceRecursive(key, collectedKeys, out currCost, depth + 1, pathText + key.Key);
+                Console.CursorLeft--;
+                Console.Write(" ");
+                Console.CursorLeft--;
+
+
+                if (currSel != null && currCost + partCost < selCost || selCost == 0)
+                {
+                    selection = currSel;
+                    selCost = currCost + partCost;
+                    selected = key;
+                }
+                collectedKeys = Bitwise.SetBit(collectedKeys, key.GetKeyBitPos(), false);
+                foreach (Node door in unlocked)
+                    door.IsUnlocked = false;
+            }
+            if (selection != null && selected != null)
+                selection.Insert(0, selected);
+            newCost = selCost;
+
+            //dictKey = Bitwise.SetBit(collectedKeys, selected.GetKeyBitPos() + 27, true);
+            if (!knownPaths.ContainsKey(dictKey))
+                knownPaths.Add(dictKey, new Tuple<int, List<Node>>(newCost, selection?.ToList()));
+            return selection;
         }
+
+        #region unused
+        //private Node GetClosestKey(Node start, List<Node> keys)
+        //{
+        //    return GetClosestKey(start, keys, out int dist, out List<BaseNodeConnection> trace);
+        //}
+
+        //private Node GetClosestKey(Node start, List<Node> keys, out int distance, out List<BaseNodeConnection> trace)
+        //{
+        //    distance = 0;
+        //    trace = new List<BaseNodeConnection>();
+        //    Node key = null;
+
+        //    foreach (Node target in keys)
+        //    {
+        //        foreach (Node node in nodes)
+        //            node.UpdateTargetDistance(target);
+        //        var path = pathfind.GetPath(start, target, out var traceConnections, out int moves);
+        //        if (path.LastOrDefault() != target) continue;
+        //        if (moves < distance || distance == 0)
+        //        {
+        //            distance = moves;
+        //            key = target;
+        //            trace = traceConnections;
+        //        }
+        //    }
+        //    return key;
+        //}
+
+        //private List<Node> GetKeys(List<Node> nodes)
+        //{
+        //    return nodes.Where(x => x.Key != '\0').ToList();
+        //}
+
+        //private List<Node> GetKeyOrder()
+        //{
+        //    List<Node> keyOrder = new List<Node>();
+        //    Console.Write("Finding optimal Path... ");
+
+        //    while (keyOrder.Count < this.keys.Count)
+        //    {
+        //        Console.CursorLeft--;
+        //        Console.Write(outAssis.GetNextProgressChar());
+        //        foreach (Node door in pois)
+        //        {
+        //            door.IsUnlocked = false;
+        //            foreach (Node key in keyOrder)
+        //                door.TryUnlock(key.Key);
+        //        }
+
+        //        var reachableNodes = GetReachableNodes(pois);
+        //        var keys = GetKeys(reachableNodes).Where(x => !keyOrder.Contains(x)).ToList();
+        //        Node lastKey = null;
+
+        //        foreach (Node key in keys)
+        //        {
+        //            Console.CursorLeft--;
+        //            Console.Write(outAssis.GetNextProgressChar());
+        //            var reach = GetReachableNodes(pois, key);
+        //            if (reach.Count > reachableNodes.Count)
+        //            {
+        //                reachableNodes = reach;
+        //                lastKey = key;
+        //            }
+        //        }
+
+
+        //        if (lastKey == null)
+        //        {
+        //            while (keys.Count > 0)
+        //            {
+        //                var closest = GetClosestKey(keyOrder.Last(), keys);
+        //                keyOrder.Add(closest);
+        //                keys.Remove(closest);
+        //            }
+        //            Console.WriteLine();
+        //            return keyOrder;
+        //        }
+        //        foreach (Node node in pathfind.GetPath(keyOrder.LastOrDefault() ?? startNode, lastKey).Select(x => (Node)x))
+        //            if (node.Key != '\0' && !keyOrder.Contains(node)) keyOrder.Add(node);
+        //    }
+
+        //    Console.WriteLine();
+        //    return keyOrder;
+        //}
+        #endregion
     }
 }
