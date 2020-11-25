@@ -20,10 +20,10 @@ namespace AdventOfCode.Tools.Pathfinding
 
         public BaseNode[] GetPath(BaseNode start, BaseNode finish)
         {
-            return GetPath(start, finish, out List<BaseNodeConnection> cons, out int cost);
+            return GetPath(start, finish, out List<BaseNodeConnection> cons, out double cost);
         }
 
-        public BaseNode[] GetPath(BaseNode start, BaseNode finish, out List<BaseNodeConnection> connectionList, out int pathCost)
+        public BaseNode[] GetPath(BaseNode start, BaseNode finish, out List<BaseNodeConnection> connectionList, out double pathCost)
         {
             path = new List<BaseNode>();
             ignored = new List<BaseNode>();

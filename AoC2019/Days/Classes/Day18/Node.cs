@@ -12,8 +12,14 @@ namespace AdventOfCode.Days.Classes.Day18
         public char Key { get; } = '\0';
         bool unlocked;
         public bool IsUnlocked { get => unlocked || Lock == '\0'; set => unlocked = value; }
-        public int PathIndex { get; set; }
         public Node BlockedBy { get; set; }
+
+        public override char CharRepresentation { get {
+                if (Key != '\0')
+                    return Key;
+                else
+                    return Lock;
+            } }
 
         public Node(int x, int y, char keyChar) : base(x, y)
         {

@@ -23,7 +23,7 @@ namespace AdventOfCode.Tools
         }
         public static long SetBit(long data, int bitNr, bool value)
         {
-            long mask = 1l << bitNr;
+            long mask = 1L << bitNr;
             data = data & ~mask;
             if (value)
                 data = data | mask;
@@ -32,7 +32,7 @@ namespace AdventOfCode.Tools
 
         public static bool IsBitSet(long data, int bitNr)
         {
-            return (data & (1l << bitNr)) != 0;
+            return (data & (1L << bitNr)) != 0;
         }
 
         public static long GetBitMask(int length)

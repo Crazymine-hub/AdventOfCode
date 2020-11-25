@@ -10,10 +10,9 @@ namespace AdventOfCode.Days.Classes.Day18
     {
         public new Node NodeA { get => (Node)base.NodeA; protected set => base.NodeA = value; }
         public new Node NodeB { get => (Node)base.NodeB; protected set => base.NodeB = value; }
-        public bool IsHorizontal { get; private set; }
         public bool AllowPassLockedDoor { get; set; } = false;
 
-        public override int Distance { get {
+        public override double Distance { get {
                 if (!AllowPassLockedDoor && !(NodeA.IsUnlocked && NodeB.IsUnlocked))
                     return -1;
                 else
@@ -23,7 +22,6 @@ namespace AdventOfCode.Days.Classes.Day18
 
         public NodeConnection(Node a, Node b): base(a, b)
         {
-            IsHorizontal = NodeA.X != NodeB.X;
         }
     }
 }

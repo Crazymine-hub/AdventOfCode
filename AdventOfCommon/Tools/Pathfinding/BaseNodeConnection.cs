@@ -10,20 +10,17 @@ namespace AdventOfCode.Tools.Pathfinding
     {
         public virtual BaseNode NodeA { get; protected set; }
         public virtual BaseNode NodeB { get; protected set; }
-        private int distance;
-        public virtual int Distance => distance;
+        protected double distance;
+        public virtual double Distance => distance;
+        public bool IsHorizontal { get; protected set; }
         public double Rating { get; set; }
 
         public BaseNodeConnection(BaseNode a, BaseNode b)
         {
             NodeA = a;
             NodeB = b;
-            if (NodeA.X == NodeB.X && NodeA.Y != NodeB.Y)
-                distance = Math.Abs(NodeA.Y - NodeB.Y);
-            else if (NodeA.Y == NodeB.Y && NodeA.X != NodeB.X)
-                distance = Math.Abs(NodeA.X - NodeB.X);
-            else
-                throw new InvalidOperationException("Nodes are not on same X or Y axis.");
+            distance = Math.Sqrt(Math.Pow(Math.Abs(NodeB.X - NodeA.X), 2) + Math.Pow(Math.Abs(NodeB.Y - NodeA.Y), 2));
+            IsHorizontal = NodeA.X != NodeB.X;
         }
 
         public bool HasConnectionTo(BaseNode target)
@@ -39,6 +36,48 @@ namespace AdventOfCode.Tools.Pathfinding
                 return NodeA;
             else
                 throw new ArgumentException("Node not in this connection");
+        }
+
+        public static void PrintConnections(List<BaseNodeConnection> connections, int vOffset, bool bold = false)
+        {
+            foreach (BaseNodeConnection con in connections)
+            {
+                Console.SetCursorPosition(con.NodeA.X, con.NodeA.Y + vOffset);
+                if (con.NodeA.CharRepresentation != '\0')
+                    Console.Write(con.NodeA.CharRepresentation);
+                else
+                    Console.Write(TraceChars.paths[con.NodeA.PathIndex | (bold ? 16 : 0)]);
+
+
+                if (con.IsHorizontal)
+                {
+                    for (int i = Math.Min(con.NodeA.X, con.NodeB.X) + 1; i < Math.Max(con.NodeA.X, con.NodeB.X); i++)
+                    {
+                        Console.CursorLeft = i;
+                        Console.Write(TraceChars.GetPathChar(false, false, true, true, bold));
+                    }
+                }
+                else
+                {
+                    for (int i = Math.Min(con.NodeA.Y, con.NodeB.Y) + 1; i < Math.Max(con.NodeA.Y, con.NodeB.Y); i++)
+                    {
+                        Console.CursorLeft--;
+                        Console.CursorTop = i + vOffset;
+                        Console.Write(TraceChars.GetPathChar(true, true, false, false, bold));
+                    }
+                }
+
+                Console.SetCursorPosition(con.NodeB.X, con.NodeB.Y + vOffset);
+                if (con.NodeB.CharRepresentation != '\0')
+                    Console.Write(con.NodeB.CharRepresentation);
+                else
+                    Console.Write(TraceChars.paths[con.NodeB.PathIndex | (bold ? 16 : 0)]);
+            }
+        }
+
+        public new string ToString()
+        {
+            return NodeA + " <-> " + NodeB + " @" + distance;
         }
     }
 }

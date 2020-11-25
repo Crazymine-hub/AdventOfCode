@@ -23,16 +23,16 @@ namespace AdventOfCode.Days
         AStar pathfind;
         ConsoleAssist outAssis = new ConsoleAssist();
         List<Node> pois = null;
-        Dictionary<long, Tuple<int, List<Node>>> knownPaths = new Dictionary<long, Tuple<int, List<Node>>>();
+        Dictionary<long, Tuple<double, List<Node>>> knownPaths = new Dictionary<long, Tuple<double, List<Node>>>();
 
         public override string Solve(string input, bool part2)
         {
             if (part2) return "Part 2 is unavailable";
             GetNodes(input);
-            PrintConnections(connections, 0, false);
+            BaseNodeConnection.PrintConnections(connections, 0, false);
             pathfind = new AStar(connections);
 
-            int totalMoves = 0;
+            double totalMoves = 0;
             string order = "";
 
 
@@ -40,16 +40,16 @@ namespace AdventOfCode.Days
             pois = Prioritize();
             singleHeight = Console.CursorTop - maxHeight;
             printouts++;
-            var path = TraceRecursive((Node)startNode, 0, out int moves);
+            var path = TraceRecursive((Node)startNode, 0, out double moves);
             foreach (Node door in doors) door.IsUnlocked = true;
             singleHeight = Console.CursorTop - maxHeight;
             BaseNode currStart = startNode;
             foreach (Node next in path)
             {
-                pathfind.GetPath(currStart, next, out List<BaseNodeConnection> cons, out int dist);
+                pathfind.GetPath(currStart, next, out List<BaseNodeConnection> cons, out double dist);
                 totalMoves += dist;
-                PrintConnections(connections, maxHeight * ++printouts + singleHeight, false);
-                PrintConnections(cons, maxHeight * printouts + singleHeight, true);
+                BaseNodeConnection.PrintConnections(connections, maxHeight * ++printouts + singleHeight, false);
+                BaseNodeConnection.PrintConnections(cons, maxHeight * printouts + singleHeight, true);
                 currStart = next;
                 order += next.Key;
             }
@@ -79,7 +79,7 @@ namespace AdventOfCode.Days
 
             for (int i = 0; i < pois.Count(); i++)
             {
-                unlockedPaths.Add(pathfind.GetPath(startNode, pois[i], out List<BaseNodeConnection> cons, out int cost).Select(x => (Node)x).ToList());
+                unlockedPaths.Add(pathfind.GetPath(startNode, pois[i], out List<BaseNodeConnection> cons, out double cost).Select(x => (Node)x).ToList());
                 Console.CursorLeft = 0;
                 Console.Write((outAssis.GetNextProgressChar() + " " + (pois.Count / 100f * i) + "%").PadRight(20));
             }
@@ -184,47 +184,6 @@ namespace AdventOfCode.Days
             }
         }
 
-        private void PrintConnections(List<BaseNodeConnection> connections, int vOffset = 0, bool bold = false)
-        {
-            foreach (NodeConnection con in connections)
-            {
-                Console.SetCursorPosition(con.NodeA.X, con.NodeA.Y + vOffset);
-                if (con.NodeA.Key != '\0')
-                    Console.Write(con.NodeA.Key);
-                else if (con.NodeA.Lock != '\0')
-                    Console.Write(con.NodeA.Lock);
-                else
-                    Console.Write(TraceChars.paths[con.NodeA.PathIndex | (bold ? 16 : 0)]);
-
-
-                if (con.IsHorizontal)
-                {
-                    for (int i = Math.Min(con.NodeA.X, con.NodeB.X) + 1; i < Math.Max(con.NodeA.X, con.NodeB.X); i++)
-                    {
-                        Console.CursorLeft = i;
-                        Console.Write(TraceChars.GetPathChar(false, false, true, true, bold));
-                    }
-                }
-                else
-                {
-                    for (int i = Math.Min(con.NodeA.Y, con.NodeB.Y) + 1; i < Math.Max(con.NodeA.Y, con.NodeB.Y); i++)
-                    {
-                        Console.CursorLeft--;
-                        Console.CursorTop = i + vOffset;
-                        Console.Write(TraceChars.GetPathChar(true, true, false, false, bold));
-                    }
-                }
-
-                Console.SetCursorPosition(con.NodeB.X, con.NodeB.Y + vOffset);
-                if (con.NodeB.Key != '\0')
-                    Console.Write(con.NodeB.Key);
-                else if (con.NodeB.Lock != '\0')
-                    Console.Write(con.NodeB.Lock);
-                else
-                    Console.Write(TraceChars.paths[con.NodeB.PathIndex | (bold ? 16 : 0)]);
-            }
-        }
-
         private List<Node> GetReachableNodes(List<Node> nodes, Node tryKey = null)
         {
             List<Node> reachable = nodes.Where(x => x.BlockedBy == null).ToList();
@@ -236,7 +195,7 @@ namespace AdventOfCode.Days
             return reachable;
         }
 
-        private List<Node> TraceRecursive(Node start, long collectedKeys, out int newCost, int depth = 0, string pathText = "")
+        private List<Node> TraceRecursive(Node start, long collectedKeys, out double newCost, int depth = 0, string pathText = "")
         {
             long dictKey = Bitwise.SetBit(collectedKeys, start.GetKeyBitPos() + 27, true);
             if (knownPaths.ContainsKey(dictKey))
@@ -257,14 +216,14 @@ namespace AdventOfCode.Days
                     return null;
             }
 
-            var selCost = 0;
+            double selCost = 0;
             List<Node> selection = null;
             Node selected = null;
             for (int i = 0; i < keys.Count; i++)
             {
                 var key = keys[i];
                 collectedKeys = Bitwise.SetBit(collectedKeys, key.GetKeyBitPos(), true);
-                int currCost;
+                double currCost;
                 List<Node> currSel;
                 var unlocked = new List<Node>();
 
@@ -277,7 +236,7 @@ namespace AdventOfCode.Days
                 foreach (Node door in doors)
                     if (door.TryUnlock(key.Key))
                         unlocked.Add(door);
-                var path = pathfind.GetPath(start, key, out List<BaseNodeConnection> cons, out int partCost).Select(x => (Node)x).ToList();
+                var path = pathfind.GetPath(start, key, out List<BaseNodeConnection> cons, out double partCost).Select(x => (Node)x).ToList();
                 if (path.Last() == start) continue;
                 var newKey = path.FirstOrDefault(x => x.Key != '\0' && x != key && x != start && !Bitwise.IsBitSet(collectedKeys, x.GetKeyBitPos()));
                 if (newKey != null)
@@ -318,7 +277,7 @@ namespace AdventOfCode.Days
 
             //dictKey = Bitwise.SetBit(collectedKeys, selected.GetKeyBitPos() + 27, true);
             if (!knownPaths.ContainsKey(dictKey))
-                knownPaths.Add(dictKey, new Tuple<int, List<Node>>(newCost, selection?.ToList()));
+                knownPaths.Add(dictKey, new Tuple<double, List<Node>>(newCost, selection?.ToList()));
             return selection;
         }
 

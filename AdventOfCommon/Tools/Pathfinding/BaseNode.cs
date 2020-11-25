@@ -11,6 +11,8 @@ namespace AdventOfCode.Tools.Pathfinding
         public int X { get; protected set; }
         public int Y { get; protected set; }
         public double DistanceToTarget;
+        public int PathIndex { get; set; }
+        public virtual char CharRepresentation => '\0';
 
         public BaseNode(int x, int y)
         {
@@ -21,7 +23,7 @@ namespace AdventOfCode.Tools.Pathfinding
         public override string ToString()
         {
             string koords = $" @{X}/{Y}";
-            return "+" + koords;
+            return (CharRepresentation == '\0' ? '+' : CharRepresentation) + koords;
         }
 
         public void UpdateTargetDistance(BaseNode target)
