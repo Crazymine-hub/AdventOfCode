@@ -10,7 +10,7 @@ namespace AdventOfCode.Tools.Pathfinding
     {
         public int X { get; protected set; }
         public int Y { get; protected set; }
-        public double DistanceToTarget;
+        public double DistanceToTarget { get; set; }
         public int PathIndex { get; set; }
         public virtual char CharRepresentation => '\0';
 

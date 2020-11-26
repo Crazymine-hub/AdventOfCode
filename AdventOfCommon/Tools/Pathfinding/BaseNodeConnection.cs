@@ -19,8 +19,13 @@ namespace AdventOfCode.Tools.Pathfinding
         {
             NodeA = a;
             NodeB = b;
-            distance = Math.Sqrt(Math.Pow(Math.Abs(NodeB.X - NodeA.X), 2) + Math.Pow(Math.Abs(NodeB.Y - NodeA.Y), 2));
+            RefreshDistance();
             IsHorizontal = NodeA.X != NodeB.X;
+        }
+
+        public void RefreshDistance()
+        {
+            distance = Math.Sqrt(Math.Pow(NodeB.X - NodeA.X, 2) + Math.Pow(NodeB.Y - NodeA.Y, 2));
         }
 
         public bool HasConnectionTo(BaseNode target)

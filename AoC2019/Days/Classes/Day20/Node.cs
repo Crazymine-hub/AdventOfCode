@@ -9,6 +9,8 @@ namespace AdventOfCode.Days.Classes.Day20
 {
     class Node: BaseNode
     {
+        public new int X { get => base.X; set => base.X = value; }
+        public new int Y { get => base.Y; set => base.Y = value; }
         public string PortalCode { get; set; } = "";
         public override char CharRepresentation => PortalCode.Length > 0 ? PortalCode[0] : '\0';
 
