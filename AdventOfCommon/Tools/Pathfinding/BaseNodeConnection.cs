@@ -43,6 +43,16 @@ namespace AdventOfCode.Tools.Pathfinding
                 throw new ArgumentException("Node not in this connection");
         }
 
+        public new string ToString()
+        {
+            return NodeA + " <-> " + NodeB + " @" + distance;
+        }
+
+        public virtual bool IsSameConnection(BaseNodeConnection other)
+        {
+            return other.NodeA == NodeA && other.NodeB == NodeB || other.NodeA == NodeB && other.NodeB == NodeA;
+        }
+
         public static void PrintConnections(List<BaseNodeConnection> connections, int vOffset, bool bold = false)
         {
             foreach (BaseNodeConnection con in connections)
@@ -78,11 +88,6 @@ namespace AdventOfCode.Tools.Pathfinding
                 else
                     Console.Write(TraceChars.paths[con.NodeB.PathIndex | (bold ? 16 : 0)]);
             }
-        }
-
-        public new string ToString()
-        {
-            return NodeA + " <-> " + NodeB + " @" + distance;
         }
     }
 }

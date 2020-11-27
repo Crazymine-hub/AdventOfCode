@@ -23,6 +23,11 @@ namespace AdventOfCode.Tools.Pathfinding
             return GetPath(start, finish, out List<BaseNodeConnection> cons, out double cost);
         }
 
+        public BaseNode[] GetPath(BaseNode start, BaseNode finish, out double cost)
+        {
+            return GetPath(start, finish, out List<BaseNodeConnection> cons, out cost);
+        }
+
         public BaseNode[] GetPath(BaseNode start, BaseNode finish, out List<BaseNodeConnection> connectionList, out double pathCost)
         {
             path = new List<BaseNode>();

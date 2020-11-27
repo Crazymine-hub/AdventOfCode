@@ -17,6 +17,9 @@ namespace AdventOfCode.Days
         private List<NodeConnection> shortcuts;
         private int maxHeight = 0;
         private const char wallChar = '#';
+        Node start = null;
+        Node end = null;
+        Dictionary<BaseNodeConnection, Tuple<List<Node>, double>> portalAccess = null;
 
         public override string Solve(string input, bool part2)
         {
@@ -49,6 +52,7 @@ namespace AdventOfCode.Days
                         else
                             con.NodeB.Y--;
                     }
+                    portals.Add(con.NodeB);
                     connections.Single(x => x.HasConnectionTo(con.NodeB) && !ReferenceEquals(con, x)).RefreshDistance();
                     Console.WriteLine(con.NodeB.PortalCode);
                 }
@@ -71,6 +75,7 @@ namespace AdventOfCode.Days
                         else
                             con.NodeA.Y++;
                     }
+                    portals.Add(con.NodeA);
                     connections.Single(x => x.HasConnectionTo(con.NodeA) && !ReferenceEquals(con, x)).RefreshDistance();
                     Console.WriteLine(con.NodeA.PortalCode);
                 }
@@ -97,26 +102,68 @@ namespace AdventOfCode.Days
                 Console.WriteLine();
             }
 
-            var start = nodes.Single(x => x.PortalCode == "AA");
-            var end = nodes.Single(x => x.PortalCode == "ZZ");
-            foreach (Node node in nodes) node.UpdateTargetDistance(start);
-            var pathfind = new AStar(connections.Concat(shortcuts).ToList());
+            start = nodes.Single(x => x.PortalCode == "AA");
+            end = nodes.Single(x => x.PortalCode == "ZZ");
+            var pathfind = new AStar(connections);
+            portalAccess = new Dictionary<BaseNodeConnection, Tuple<List<Node>, double>>();
 
+            foreach (Node portalA in portals)
+            {
+                foreach (Node opposite in nodes) opposite.UpdateTargetDistance(portalA);
+                foreach (Node portalB in portals.Where(x => x != portalA))
+                {
+                    var con = new BaseNodeConnection(portalA, portalB);
+                    if (portalAccess.Keys.SingleOrDefault(x => x.IsSameConnection(con)) != null) continue;
+                    var path = pathfind.GetPath(portalA, portalB, out double currCost).Select(x => (Node)x).ToList();
+                    if (path.Last() == portalA) path = null;
+                    portalAccess.Add(con, new Tuple<List<Node>, double>(path, currCost));
+                }
+            }
 
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("PATH");
-            double cost = 0;
-            List<BaseNodeConnection> cons = null;
-            foreach (Node node in pathfind.GetPath(start, end, out cons, out cost))
-                Console.WriteLine(node);
+            var finalPath = TraceRecursively(start, new List<NodeConnection>(), out double cost);
+            finalPath.Reverse();
+            Console.WriteLine("================");
 
-            Console.WriteLine();
-            Console.WriteLine("CONNS");
-            foreach (NodeConnection con in cons)
-                Console.WriteLine(con.ToString());
+            foreach (var entry in finalPath) Console.WriteLine(entry.ToString());
 
             return "now you're thinking with portals. -> " + cost;
+        }
+
+        private List<BaseNodeConnection> TraceRecursively(BaseNode currNode, List<NodeConnection> usedShortcuts, out double cost)
+        {
+            cost = 0;
+            var cons = portalAccess.Where(x => x.Value.Item1 != null && x.Key.HasConnectionTo(currNode)).ToList();
+            double minCost = 0;
+            List<BaseNodeConnection> result = null;
+            BaseNodeConnection selCon = null;
+            double selCost = 0;
+            foreach (var con in cons)
+            {
+                var partner = con.Key.GetOtherNode(currNode);
+                if (partner == start) continue;
+                if (partner == end)
+                {
+                    cost = con.Value.Item2;
+                    return new List<BaseNodeConnection>() { con.Key };
+                }
+                if (usedShortcuts.FirstOrDefault(x => x.HasConnectionTo(partner)) != null) continue;
+                var shortCut = shortcuts.Single(x => x.HasConnectionTo(partner));
+                usedShortcuts.Add(shortCut);
+                var currPath = TraceRecursively(shortCut.GetOtherNode(partner), usedShortcuts, out double currCost);
+                usedShortcuts.Remove(shortCut);
+                currCost++;
+                if (currPath != null && currCost < minCost || minCost == 0)
+                {
+                    minCost = currCost;
+                    result = currPath;
+                    selCost = con.Value.Item2;
+                    selCon = con.Key;
+                }
+            }
+            if (result == null || selCon == null) return null;
+            cost = minCost + selCost;
+            result.Add(selCon);
+            return result;
         }
 
         private void GetNodes(string maze)
@@ -153,7 +200,6 @@ namespace AdventOfCode.Days
                             var currNode = new Node(x, y, currPos);
                             if (aboveNodes[x] != null) connections.Add(new NodeConnection(currNode, aboveNodes[x]));
                             if (previousNode != null) connections.Add(new NodeConnection(currNode, previousNode));
-                            if (!string.IsNullOrWhiteSpace(currNode.PortalCode)) portals.Add(currNode);
                             nodes.Add(currNode);
 
                             currNode.PathIndex = TraceChars.GetPathNumber(above, below, left, right, false);
