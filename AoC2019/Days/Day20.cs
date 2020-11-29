@@ -27,12 +27,12 @@ namespace AdventOfCode.Days
         public override string Solve(string input, bool part2)
         {
             LoadMaze(input);
-            var finalPath = TraceRecursively(start, new List<NodeConnection>(), out double cost);
+            var finalPath = TraceRecursively(start, new Dictionary<int, List<NodeConnection>>(), out double cost, part2 ? 0 : -1);
             if (finalPath == null) return "No Path found! (The Cake is a lie)";
             finalPath.Reverse();
             Console.WriteLine("================");
 
-            foreach (var entry in finalPath) Console.WriteLine(entry.ToString());
+            foreach (var entry in finalPath) Console.WriteLine(entry.Item1.ToString()+ "\tD: " + entry.Item2);
 
             return "now you're thinking with portals. -> " + cost;
         }
@@ -139,15 +139,23 @@ namespace AdventOfCode.Days
             }
         }
 
-        private List<BaseNodeConnection> TraceRecursively(BaseNode currNode, List<NodeConnection> usedShortcuts, out double cost)
+        private List<Tuple<BaseNodeConnection, int>> TraceRecursively(BaseNode currNode, Dictionary<int, List<NodeConnection>> usedShortcuts, out double cost, int depth, int recursiveDepth = 0)
         {
             cost = 0;
-            var cons = portalAccess.Where(x => x.Value.Item1 != null && x.Key.HasConnectionTo(currNode)).ToList();
+            var cons = portalAccess.Where(x =>
+            x.Value.Item1 != null && 
+            x.Key.HasConnectionTo(currNode) && 
+            (depth != 0 || !((Node)x.Key.GetOtherNode(currNode)).IsOuterPortal || (x.Key.GetOtherNode(currNode) == end))
+            ).OrderBy(x => ((Node)x.Key.GetOtherNode(currNode)).IsOuterPortal ? 0 : -1).ToList();
+
             double minCost = 0;
-            List<BaseNodeConnection> result = null;
+            List<Tuple<BaseNodeConnection, int>> result = null;
             BaseNodeConnection selCon = null;
             BaseNodeConnection selShort = null;
             double selCost = 0;
+            if (recursiveDepth >= 500) return null;
+            if (!usedShortcuts.ContainsKey(depth))
+                usedShortcuts.Add(depth, new List<NodeConnection>());
             foreach (var con in cons)
             {
                 Console.CursorLeft = 0;
@@ -156,15 +164,18 @@ namespace AdventOfCode.Days
                 if (partner == start) continue;
                 if (partner == end)
                 {
-                    cost = con.Value.Item2;
-                    return new List<BaseNodeConnection>() { con.Key };
+                    if (depth <= 0)
+                    {
+                        cost = con.Value.Item2;
+                        return new List<Tuple<BaseNodeConnection, int>>() { new Tuple<BaseNodeConnection, int>(con.Key, depth) };
+                    }
+                    else continue;
                 }
-                if (usedShortcuts.FirstOrDefault(x => x.HasConnectionTo(partner)) != null) continue;
+                if (usedShortcuts[depth].FirstOrDefault(x => x.HasConnectionTo(partner)) != null) continue;
                 var shortCut = shortcuts.Single(x => x.HasConnectionTo(partner));
-                usedShortcuts.Add(shortCut);
-                var currPath = TraceRecursively(shortCut.GetOtherNode(partner), usedShortcuts, out double currCost);
-                usedShortcuts.Remove(shortCut);
-                currCost++;
+                usedShortcuts[depth].Add(shortCut);
+                var currPath = TraceRecursively(shortCut.GetOtherNode(partner), usedShortcuts, out double currCost, depth == -1 ? -1 : (partner.IsOuterPortal ? depth - 1 : depth + 1), recursiveDepth + 1);
+                usedShortcuts[depth].Remove(shortCut);
                 if (currPath != null && currCost < minCost || minCost == 0)
                 {
                     minCost = currCost;
@@ -176,8 +187,8 @@ namespace AdventOfCode.Days
             }
             if (result == null || selCon == null) return null;
             cost = minCost + selCost + 1;
-            result.Add(selShort);
-            result.Add(selCon);
+            result.Add(new Tuple<BaseNodeConnection, int>(selShort, depth));
+            result.Add(new Tuple<BaseNodeConnection, int>(selCon, depth));
             return result;
         }
 
