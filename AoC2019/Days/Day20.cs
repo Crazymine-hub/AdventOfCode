@@ -20,6 +20,7 @@ namespace AdventOfCode.Days
         private const char wallChar = '#';
         Node start = null;
         Node end = null;
+        //KEY Connection between portals, VALUE(Nodes on Path, Path length)
         Dictionary<BaseNodeConnection, Tuple<List<Node>, double>> portalAccess = null;
         ConsoleAssist assis = new ConsoleAssist();
         AStar pathfind = null;
@@ -27,12 +28,13 @@ namespace AdventOfCode.Days
         public override string Solve(string input, bool part2)
         {
             LoadMaze(input);
-            var finalPath = TraceRecursively(start, new Dictionary<int, List<NodeConnection>>(), out double cost, part2 ? 0 : -1);
+            Console.WriteLine();
+            var finalPath = TraceRecursively(start, new List<Tuple<BaseNodeConnection, int, BaseNode>>(), out double cost, part2 ? 0 : -1);
             if (finalPath == null) return "No Path found! (The Cake is a lie)";
             finalPath.Reverse();
             Console.WriteLine("================");
 
-            foreach (var entry in finalPath) Console.WriteLine(entry.Item1.ToString()+ "\tD: " + entry.Item2);
+            foreach (var entry in finalPath) Console.WriteLine(entry.Item1.ToString() + "\tD: " + entry.Item2);
 
             return "now you're thinking with portals. -> " + cost;
         }
@@ -137,29 +139,33 @@ namespace AdventOfCode.Days
                     portalAccess.Add(con, new Tuple<List<Node>, double>(path, currCost));
                 }
             }
+
+            //foreach (var empty in portalAccess.Where(x => x.Value.Item1 == null).ToList())
+            //    portalAccess.Remove(empty.Key);
         }
 
-        private List<Tuple<BaseNodeConnection, int>> TraceRecursively(BaseNode currNode, Dictionary<int, List<NodeConnection>> usedShortcuts, out double cost, int depth, int recursiveDepth = 0)
+        private List<Tuple<BaseNodeConnection, int>> TraceRecursively(BaseNode currNode, List<Tuple<BaseNodeConnection, int, BaseNode>> usedShortcuts, out double cost, int depth, int recursiveDepth = 0)
         {
             cost = 0;
             var cons = portalAccess.Where(x =>
-            x.Value.Item1 != null && 
-            x.Key.HasConnectionTo(currNode) && 
+            x.Value.Item1 != null &&
+            x.Key.HasConnectionTo(currNode) &&
             (depth != 0 || !((Node)x.Key.GetOtherNode(currNode)).IsOuterPortal || (x.Key.GetOtherNode(currNode) == end))
-            ).OrderBy(x => ((Node)x.Key.GetOtherNode(currNode)).IsOuterPortal ? 0 : -1).ToList();
+            ).OrderBy(x => ((Node)x.Key.GetOtherNode(currNode)).IsOuterPortal ? 0 : 1).ToList();
 
             double minCost = 0;
             List<Tuple<BaseNodeConnection, int>> result = null;
             BaseNodeConnection selCon = null;
             BaseNodeConnection selShort = null;
+
+
             double selCost = 0;
-            if (recursiveDepth >= 500) return null;
-            if (!usedShortcuts.ContainsKey(depth))
-                usedShortcuts.Add(depth, new List<NodeConnection>());
+            if (recursiveDepth > 500) return null;
+            if (depth >= portals.Count) return null;
             foreach (var con in cons)
             {
-                Console.CursorLeft = 0;
                 Console.Write(assis.GetNextProgressChar());
+                Console.CursorLeft = 0;
                 Node partner = (Node)con.Key.GetOtherNode(currNode);
                 if (partner == start) continue;
                 if (partner == end)
@@ -171,12 +177,14 @@ namespace AdventOfCode.Days
                     }
                     else continue;
                 }
-                if (usedShortcuts[depth].FirstOrDefault(x => x.HasConnectionTo(partner)) != null) continue;
+                if (usedShortcuts.FirstOrDefault(x => (depth == -1 && x.Item1.HasConnectionTo(partner)) ||
+                (x.Item2 < depth && x.Item1.IsSameConnection(con.Key) && x.Item3 == partner)) != null) continue;
                 var shortCut = shortcuts.Single(x => x.HasConnectionTo(partner));
-                usedShortcuts[depth].Add(shortCut);
+                var shortDepth = new Tuple<BaseNodeConnection, int, BaseNode>(depth == -1 ? shortCut : con.Key, depth, partner);
+                usedShortcuts.Add(shortDepth);
                 var currPath = TraceRecursively(shortCut.GetOtherNode(partner), usedShortcuts, out double currCost, depth == -1 ? -1 : (partner.IsOuterPortal ? depth - 1 : depth + 1), recursiveDepth + 1);
-                usedShortcuts[depth].Remove(shortCut);
-                if (currPath != null && currCost < minCost || minCost == 0)
+                usedShortcuts.RemoveAt(usedShortcuts.Count - 1);
+                if (currPath != null && (currCost < minCost || minCost == 0))
                 {
                     minCost = currCost;
                     result = currPath;
