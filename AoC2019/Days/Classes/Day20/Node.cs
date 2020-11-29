@@ -12,6 +12,7 @@ namespace AdventOfCode.Days.Classes.Day20
         public new int X { get => base.X; set => base.X = value; }
         public new int Y { get => base.Y; set => base.Y = value; }
         public string PortalCode { get; set; } = "";
+        public bool IsOuterPortal { get; set; } = true;
         public override char CharRepresentation => PortalCode.Length > 0 ? PortalCode[0] : '\0';
 
         public Node(int x, int y, char portalChar) : base(x, y)

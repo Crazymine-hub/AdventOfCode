@@ -45,7 +45,7 @@ namespace AdventOfCode.Tools.Pathfinding
 
         public new string ToString()
         {
-            return NodeA + " <-> " + NodeB + " @" + distance;
+            return NodeA.ToString().PadRight(10) + "<-> " + NodeB.ToString().PadRight(10) + "@".PadLeft(5) + distance.ToString("0.00");
         }
 
         public virtual bool IsSameConnection(BaseNodeConnection other)

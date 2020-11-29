@@ -3,6 +3,7 @@ using AdventOfCode.Tools;
 using AdventOfCode.Tools.Pathfinding;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,10 +21,24 @@ namespace AdventOfCode.Days
         Node start = null;
         Node end = null;
         Dictionary<BaseNodeConnection, Tuple<List<Node>, double>> portalAccess = null;
+        ConsoleAssist assis = new ConsoleAssist();
+        AStar pathfind = null;
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return "Part 2 is unavailable";
+            LoadMaze(input);
+            var finalPath = TraceRecursively(start, new List<NodeConnection>(), out double cost);
+            if (finalPath == null) return "No Path found! (The Cake is a lie)";
+            finalPath.Reverse();
+            Console.WriteLine("================");
+
+            foreach (var entry in finalPath) Console.WriteLine(entry.ToString());
+
+            return "now you're thinking with portals. -> " + cost;
+        }
+
+        private void LoadMaze(string input)
+        {
             GetNodes(input);
             BaseNodeConnection.PrintConnections(connections, 0);
             Console.SetCursorPosition(0, maxHeight);
@@ -104,14 +119,17 @@ namespace AdventOfCode.Days
 
             start = nodes.Single(x => x.PortalCode == "AA");
             end = nodes.Single(x => x.PortalCode == "ZZ");
-            var pathfind = new AStar(connections);
             portalAccess = new Dictionary<BaseNodeConnection, Tuple<List<Node>, double>>();
+
+            pathfind = new AStar(connections);
 
             foreach (Node portalA in portals)
             {
                 foreach (Node opposite in nodes) opposite.UpdateTargetDistance(portalA);
                 foreach (Node portalB in portals.Where(x => x != portalA))
                 {
+                    Console.CursorLeft = 0;
+                    Console.Write(assis.GetNextProgressChar());
                     var con = new BaseNodeConnection(portalA, portalB);
                     if (portalAccess.Keys.SingleOrDefault(x => x.IsSameConnection(con)) != null) continue;
                     var path = pathfind.GetPath(portalA, portalB, out double currCost).Select(x => (Node)x).ToList();
@@ -119,14 +137,6 @@ namespace AdventOfCode.Days
                     portalAccess.Add(con, new Tuple<List<Node>, double>(path, currCost));
                 }
             }
-
-            var finalPath = TraceRecursively(start, new List<NodeConnection>(), out double cost);
-            finalPath.Reverse();
-            Console.WriteLine("================");
-
-            foreach (var entry in finalPath) Console.WriteLine(entry.ToString());
-
-            return "now you're thinking with portals. -> " + cost;
         }
 
         private List<BaseNodeConnection> TraceRecursively(BaseNode currNode, List<NodeConnection> usedShortcuts, out double cost)
@@ -136,10 +146,13 @@ namespace AdventOfCode.Days
             double minCost = 0;
             List<BaseNodeConnection> result = null;
             BaseNodeConnection selCon = null;
+            BaseNodeConnection selShort = null;
             double selCost = 0;
             foreach (var con in cons)
             {
-                var partner = con.Key.GetOtherNode(currNode);
+                Console.CursorLeft = 0;
+                Console.Write(assis.GetNextProgressChar());
+                Node partner = (Node)con.Key.GetOtherNode(currNode);
                 if (partner == start) continue;
                 if (partner == end)
                 {
@@ -158,27 +171,44 @@ namespace AdventOfCode.Days
                     result = currPath;
                     selCost = con.Value.Item2;
                     selCon = con.Key;
+                    selShort = shortCut;
                 }
             }
             if (result == null || selCon == null) return null;
-            cost = minCost + selCost;
+            cost = minCost + selCost + 1;
+            result.Add(selShort);
             result.Add(selCon);
             return result;
         }
 
         private void GetNodes(string maze)
         {
-            var mazeLines = maze.Replace(' ', '#').Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var mazeLines = maze.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             nodes = new List<Node>();
             portals = new List<Node>();
             connections = new List<BaseNodeConnection>();
             Node[] aboveNodes = new Node[mazeLines[0].Length];
             maxHeight = mazeLines.Length + 1;
+            Point start = Point.Empty;
+            Point end = Point.Empty;
 
 
             for (int y = 0; y < mazeLines.Length; y++)
             {
-                var currLine = mazeLines[y];
+                var currLine = mazeLines[y].Replace(' ', '#');
+                if (start == Point.Empty)
+                {
+                    var startX = mazeLines[y].IndexOf('#');
+                    if (startX >= 0)
+                        start = new Point(startX, y);
+                }
+                else
+                {
+                    var endX = mazeLines[y].LastIndexOf('#');
+                    if (endX >= 0)
+                        end = new Point(endX, y);
+                }
+                mazeLines[y] = currLine;
                 Node previousNode = null;
                 for (int x = 0; x < currLine.Length; x++)
                 {
@@ -198,6 +228,7 @@ namespace AdventOfCode.Days
                         if (((!above || !below || left || right) && (above || below || !left || !right)) || currPos != '.')
                         {
                             var currNode = new Node(x, y, currPos);
+                            currNode.IsOuterPortal = x < start.X || y < start.Y || x > end.X || y > end.Y;
                             if (aboveNodes[x] != null) connections.Add(new NodeConnection(currNode, aboveNodes[x]));
                             if (previousNode != null) connections.Add(new NodeConnection(currNode, previousNode));
                             nodes.Add(currNode);
