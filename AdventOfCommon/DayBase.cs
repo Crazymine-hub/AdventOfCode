@@ -12,5 +12,10 @@ namespace AdventOfCode
         public bool UsesAdditionalContent { get; protected set; } = false;
         public abstract string Title { get; }
         public abstract string Solve(string input, bool part2);
+
+        protected List<string> GetLines(string input)
+        {
+            return input.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+        }
     }
 }

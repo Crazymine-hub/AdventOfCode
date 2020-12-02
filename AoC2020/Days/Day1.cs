@@ -16,8 +16,7 @@ namespace AdventOfCode.Days
         public override string Solve(string input, bool part2)
         {
             //Convert Input into List<int> (valid ints assumed)
-            numbers = input.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => int.Parse(x)).ToList();
+            numbers = GetLines(input).Select(x => int.Parse(x)).ToList();
 
             string result = null;
             bool numberMoved = true;
