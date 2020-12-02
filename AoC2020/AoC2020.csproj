@@ -7,7 +7,7 @@
     <ProjectGuid>{AF512998-15F2-4844-A6BE-E0DE7D279274}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AoC2020</RootNamespace>
+    <RootNamespace>AdventOfCode</RootNamespace>
     <AssemblyName>AoC2020</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -48,10 +48,14 @@
     <ProjectReference Include="..\AdventOfCommon\AdventOfCommon.csproj">
       <Project>{4f6e4037-b01c-4c1c-b13f-bf7452fd1c37}</Project>
       <Name>AdventOfCommon</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Inputs\" />
+    <Content Include="Inputs\Day1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
