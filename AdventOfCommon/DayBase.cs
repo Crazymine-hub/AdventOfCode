@@ -10,6 +10,7 @@ namespace AdventOfCode
     {
         public string AdditionalContent { get; set; }
         public bool UsesAdditionalContent { get; protected set; } = false;
+        public abstract string Title { get; }
         public abstract string Solve(string input, bool part2);
     }
 }

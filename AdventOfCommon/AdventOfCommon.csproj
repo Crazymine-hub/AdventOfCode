@@ -43,7 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Day.cs" />
+    <Compile Include="DayBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\Bitwise.cs" />
     <Compile Include="Tools\ConsoleAssist.cs" />

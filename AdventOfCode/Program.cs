@@ -38,7 +38,7 @@ namespace AdventOfCode
                 Console.Clear();
                 if (message != "") Console.WriteLine(message);
                 Console.Title = $"Advent Of Code {year} - Day Select.";
-                int dayNr = ConsoleAssist.GetUserInput( 
+                int dayNr = ConsoleAssist.GetUserInput(
                     $"Advent Of Code {year}\r\n" +
                     "Enter the number of the Day to use\r\n" +
                     "Use Ctrl+C or enter 0 to quit.", false);
@@ -121,10 +121,6 @@ namespace AdventOfCode
             if (useSecond == 0) return false;
 
             Console.Clear();
-            if (useSecond == 2)
-                Console.Title += " Part 2";
-            else
-                Console.Title += " Part 1";
 
             string fileExtension = ".txt";
             if (useSecond == 1)
@@ -142,9 +138,17 @@ namespace AdventOfCode
 
 
             var day = (DayBase)Activator.CreateInstance(DayType);
+
+            if (!string.IsNullOrWhiteSpace(day.Title))
+                Console.Title += " ---" + day.Title + "---";
+            if (useSecond == 2)
+                Console.Title += " Part 2";
+            else
+                Console.Title += " Part 1";
+
             if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + "_addition" + fileExtension))
                 day.AdditionalContent = File.ReadAllText(dayPath + dayNr + "_addition" + fileExtension);
-            
+
             Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
 
             if (day.UsesAdditionalContent && day.AdditionalContent != null)
