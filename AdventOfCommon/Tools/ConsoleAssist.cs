@@ -6,14 +6,18 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools
 {
-    public static class ConsoleAssist
+    public class ConsoleAssist
     {
-        public static int GetUserInput(string prompt)
+        readonly static char[] progressIndicator = new char[] { '|', '/', '─', '\\' };
+        int progressPos = 0;
+
+        public static int GetUserInput(string prompt, bool noInitialClear = true)
         {
             string message = "";
             while (true)
             {
-                Console.Clear();
+                if (noInitialClear) Console.Clear();
+                noInitialClear = true;
                 if (message != "") Console.WriteLine(message);
                 message = "";
                 Console.WriteLine(prompt);
@@ -21,12 +25,22 @@ namespace AdventOfCode.Tools
 
                 if (!int.TryParse(input, out int inputNr))
                 {
-                    message = "You didn't enter a number";
+                    message = "==========================\r\n";
+                    message += "YOU DIDN'T ENTER A NUMBER!\r\n";
+                    message += "==========================\r\n";
                     continue;
                 }
                 else
                     return inputNr;
             }
+        }
+
+        public char GetNextProgressChar()
+        {
+            progressPos++;
+            if (progressPos >= progressIndicator.Length)
+                progressPos = 0;
+            return progressIndicator[progressPos];
         }
     }
 }

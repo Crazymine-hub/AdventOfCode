@@ -51,6 +51,10 @@
     <Compile Include="Days\Classes\Day15\FieldFlag.cs" />
     <Compile Include="Days\Classes\Day15\FieldInfo.cs" />
     <Compile Include="Days\Classes\Day15\MoveInfo.cs" />
+    <Compile Include="Days\Classes\Day18\Node.cs" />
+    <Compile Include="Days\Classes\Day18\NodeConnection.cs" />
+    <Compile Include="Days\Classes\Day20\Node.cs" />
+    <Compile Include="Days\Classes\Day20\NodeConnection.cs" />
     <Compile Include="Days\Classes\Day6\OrbitInfo.cs" />
     <Compile Include="Days\Classes\Day6\OrbitObject.cs" />
     <Compile Include="Days\Day1.cs" />
@@ -62,7 +66,10 @@
     <Compile Include="Days\Day15.cs" />
     <Compile Include="Days\Day16.cs" />
     <Compile Include="Days\Day17.cs" />
+    <Compile Include="Days\Day18.cs" />
+    <Compile Include="Days\Day19.cs" />
     <Compile Include="Days\Day2.cs" />
+    <Compile Include="Days\Day20.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
     <Compile Include="Days\Day5.cs" />
@@ -98,7 +105,7 @@
     <Content Include="Inputs\Day13.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Inputs\Day13_additional.txt">
+    <Content Include="Inputs\Day13_addition.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Inputs\Day14.txt">
@@ -113,7 +120,19 @@
     <Content Include="Inputs\Day17.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Inputs\Day17_addition.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Inputs\Day18.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Inputs\Day19.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Inputs\Day2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Inputs\Day20.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Inputs\Day3.txt">

@@ -37,12 +37,12 @@ namespace AdventOfCode
             {
                 Console.Clear();
                 if (message != "") Console.WriteLine(message);
-                message = "";
                 Console.Title = $"Advent Of Code {year} - Day Select.";
-                int dayNr = ConsoleAssist.GetUserInput(
+                int dayNr = ConsoleAssist.GetUserInput( 
                     $"Advent Of Code {year}\r\n" +
                     "Enter the number of the Day to use\r\n" +
-                    "Use Ctrl+C or enter 0 to quit.");
+                    "Use Ctrl+C or enter 0 to quit.", false);
+                message = "";
 
                 if (dayNr <= 0) return;
 
@@ -78,9 +78,9 @@ namespace AdventOfCode
             Type DayType = lib.GetType("AdventOfCode.Days.Day" + dayNr);
             if (DayType == null)
             {
-                message = "=================";
-                message += "DAY DOESN'T EXIST";
-                message += "=================";
+                message = "=================\r\n";
+                message += "DAY DOESN'T EXIST\r\n";
+                message += "=================\r\n";
                 return false;
             }
 
@@ -131,9 +131,9 @@ namespace AdventOfCode
             {
                 if (!File.Exists(dayPath + dayNr + fileExtension) && !custIn)
                 {
-                    message = "===================";
-                    message += "NO INPUT FILE FOUND";
-                    message += "===================";
+                    message = "===================\r\n";
+                    message += "NO INPUT FILE FOUND\r\n";
+                    message += "===================\r\n";
                     return false;
                 }
             }
@@ -147,7 +147,7 @@ namespace AdventOfCode
             
             Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
 
-            if (day.UsesAdditionalContent)
+            if (day.UsesAdditionalContent && day.AdditionalContent != null)
                 File.WriteAllText(dayPath + dayNr + "_addition" + fileExtension, day.AdditionalContent);
             Console.WriteLine();
             Console.WriteLine();

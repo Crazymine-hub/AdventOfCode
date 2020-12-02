@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace AdventOfCode.Tools.IntComputer
 {
     /*------------------------------------
-     * Complte! Undocumented But Complete
+     * Complete! Undocumented But Complete
      *------------------------------------*/
     internal class IntComputer
     {
@@ -17,25 +17,28 @@ namespace AdventOfCode.Tools.IntComputer
         public delegate long InputRequestDelegate();
 
         public long[] Memory { get; private set; }
-        private int inputPos = 0;
         private List<long> output;
         private bool autoMode;
         private long addressOffset = 0;
+        private List<long> inputs;
+        private bool logOutput;
 
-        public long[] Inputs { get; set; }
+        public long[] Input { get { return inputs.ToArray(); } }
+        public bool HasInputsQueued { get => inputs.Count > 0; }
         public long[] Output { get { return output.ToArray(); } }
         public event OutputPushDelegate OnOutput;
         public event InputRequestDelegate InputRequested;
         public Task ExecutingTask { get; private set; }
         public string Name { get; set; }
 
-        public IntComputer(bool useAutoMode = false, long[] inputList = null)
+        public IntComputer(bool useAutoMode = false, IEnumerable<long> inputList = null, bool enableOutputLog = false)
         {
             if (inputList == null)
-                Inputs = new long[0];
+                inputs = new List<long>();
             else
-                Inputs = inputList;
+                inputs = inputList.ToList();
             autoMode = useAutoMode;
+            logOutput = enableOutputLog;
             Name = "Computer";
         }
 
@@ -56,14 +59,13 @@ namespace AdventOfCode.Tools.IntComputer
         public void Reset()
         {
             Memory = new long[0];
-            Inputs = new long[0];
+            inputs = new List<long>();
             output = new List<long>();
-            inputPos = 0;
         }
 
         public void Run()
         {
-
+            addressOffset = 0;
             output = new List<long>();
             int stepSize = 0;
             for (long i = 0; i < Memory.Length; i += stepSize)
@@ -89,9 +91,7 @@ namespace AdventOfCode.Tools.IntComputer
 
         public void AddInput(long input)
         {
-            List<long> inputList = Inputs.ToList();
-            inputList.Add(input);
-            Inputs = inputList.ToArray();
+            inputs.Add(input);
         }
 
         public void Debug()
@@ -219,7 +219,8 @@ namespace AdventOfCode.Tools.IntComputer
                             OnOutput?.Invoke(result);
                         else
                             Console.WriteLine("Output:" + result);
-                        output.Add(result);
+                        if(logOutput)
+                            output.Add(result);
                     }
                     break;
                 case 5:
@@ -279,7 +280,7 @@ namespace AdventOfCode.Tools.IntComputer
 
         private long ReadInput()
         {
-            if (inputPos < Inputs.Length || autoMode)
+            if (HasInputsQueued || autoMode)
             {
                 if (InputRequested != null)
                 {
@@ -287,8 +288,10 @@ namespace AdventOfCode.Tools.IntComputer
                     AddInput(input);
                 }
 
-                while (Inputs.Length <= inputPos) { }
-                return Inputs[inputPos++];
+                while (inputs.Count <= 0) { }
+                var content = inputs.First();
+                inputs.RemoveAt(0);
+                return content;
             }
             return ConsoleAssist.GetUserInput("Enter a number...");
         }
