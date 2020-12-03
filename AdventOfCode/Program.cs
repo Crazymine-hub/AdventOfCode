@@ -49,7 +49,7 @@ namespace AdventOfCode
                 if (!RunDay(dayNr, out message)) continue;
 
                 Console.WriteLine("Done! Press enter to return to start.");
-                while (Console.ReadKey(false).Key != ConsoleKey.Enter) { /*that is not the key i want*/}
+                while (Console.ReadKey(true).Key != ConsoleKey.Enter) { /*that is not the key i want*/}
             }
         }
 
