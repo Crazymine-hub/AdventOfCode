@@ -18,7 +18,7 @@ namespace AdventOfCode.Days
         {
             map = GetLines(input).ToArray();
             Console.Write(input);
-
+            //All slopes to check
             slopes.Add(new Point(1, 1), 0);
             slopes.Add(new Point(3, 1), 0);
             slopes.Add(new Point(5, 1), 0);
@@ -28,7 +28,7 @@ namespace AdventOfCode.Days
             int minLine = -1;
             long product = 1;
             for (int i = 0; i < slopes.Count; i++)
-            {
+            {//for each slope calculate tree hugs.
                 var slope = slopes.ElementAt(i);
                 slopes[slope.Key] = TestSlope(slope.Key.X, slope.Key.Y);
                 slope = slopes.ElementAt(i);
@@ -45,19 +45,20 @@ namespace AdventOfCode.Days
         }
 
         private int TestSlope(int dx, int dy)
-        {
+        {//Count tree hugs here
             char result;
             int trees = 0;
             position.X = 0;
             position.Y = 0;
             do
             {
+                //Move as given
                 result = Move(dx, dy);
                 Console.SetCursorPosition(position.X, position.Y);
-                if (result == '#')
+                if (result == '#') // check for tree
                 {
                     Console.Write('x');
-                    trees++;
+                    trees++; //watch out
                 }
                 else Console.Write('O');
 
@@ -69,7 +70,9 @@ namespace AdventOfCode.Days
         {
             position.Offset(dx, dy);
             if (position.Y >= map.Length) return '\0';
+            //Wrap back to the left if required
             if (position.X >= map[0].Length) position.Offset(-map[0].Length, 0);
+            //return char at new position
             return map[position.Y][position.X];
         }
     }
