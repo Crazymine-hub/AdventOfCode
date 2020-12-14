@@ -24,7 +24,7 @@ namespace AdventOfCode.Days
                 {"pid", ValidatePassNumber}
             };
             //passports are seperated by a double line break
-            string[] passports = input.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            List<string> passports = GetGroupedLines(input);
             int validPassports = 0;
             foreach (string passport in passports)
             {//get all fields with some lovely RegEx

@@ -17,5 +17,10 @@ namespace AdventOfCode
         {
             return input.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
+
+        protected List<string> GetGroupedLines(string input)
+        {
+            return input.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+        }
     }
 }
