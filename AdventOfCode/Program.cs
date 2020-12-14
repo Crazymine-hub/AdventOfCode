@@ -83,10 +83,14 @@ namespace AdventOfCode
                 message += "=================\r\n";
                 return false;
             }
+            var day = (DayBase)Activator.CreateInstance(DayType);
 
             Console.Clear();
             Console.Title = $"Advent Of Code - {year} Day " + dayNr;
-            Console.WriteLine("You Chose: Day " + dayNr);
+            Console.Write("You Chose: Day " + dayNr);
+            if (!string.IsNullOrWhiteSpace(day.Title))
+                Console.WriteLine(": " + day.Title);
+            else Console.WriteLine();
 
             Console.WriteLine("Select a Mode by pressing the Key in ():");
             Console.WriteLine("Part (1)");
@@ -135,9 +139,6 @@ namespace AdventOfCode
             }
             else if (File.Exists(dayPath + dayNr + "_2.txt"))
                 fileExtension = "_2.txt";
-
-
-            var day = (DayBase)Activator.CreateInstance(DayType);
 
             if (!string.IsNullOrWhiteSpace(day.Title))
                 Console.Title += " ---" + day.Title + "---";
