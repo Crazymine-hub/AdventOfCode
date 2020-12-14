@@ -42,5 +42,17 @@ namespace AdventOfCode.Tools
                 result = (result << 1) | 1;
             return result;
         }
+
+        public static int CountSetBits(int data)
+        {
+            int cntr = 0;
+            while (data != 0)
+            {
+                if ((data & 1) == 1)
+                    cntr++;
+                data >>= 1;
+            }
+            return cntr;
+        }
     }
 }
