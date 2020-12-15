@@ -47,7 +47,6 @@
     <Compile Include="Days\Classes\Day12\MoonInfo3D.cs" />
     <Compile Include="Days\Classes\Day12\Vector3D.cs" />
     <Compile Include="Days\Classes\Day14\ReactionItem.cs" />
-    <Compile Include="Days\Classes\Day14\Topological.cs" />
     <Compile Include="Days\Classes\Day15\FieldFlag.cs" />
     <Compile Include="Days\Classes\Day15\FieldInfo.cs" />
     <Compile Include="Days\Classes\Day15\MoveInfo.cs" />
