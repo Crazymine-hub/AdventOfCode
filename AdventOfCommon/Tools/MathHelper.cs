@@ -68,20 +68,28 @@ namespace AdventOfCode.Tools
             throw new NotImplementedException();
         }
 
-
-        public static long[] GetFactorsByResult(long[] factorList, int factorNumber, long desired, bool desiredIsProduct, out long otherValue)
+        /// <summary>
+        /// Gets all operands, that are required to reach a desired number
+        /// </summary>
+        /// <param name="factorList">the list of all numbers to consider</param>
+        /// <param name="operandCount">the amount of operands</param>
+        /// <param name="desiredResult">the result, that must be reached</param>
+        /// <param name="desiredIsProduct">Whether the desired result is a product or a sum.</param>
+        /// <param name="otherValue">The Result of the other operation executed with the operands (Sum if <paramref name="desiredIsProduct"/> ist true. Product if false)</param>
+        /// <returns>An Array with all required operands to get to the Result with the given operation. Or null, if no operands could be found.</returns>
+        public static long[] GetOperandsByResult(long[] factorList, int operandCount, long desiredResult, bool desiredIsProduct, out long otherValue)
         {
             bool numberMoved = true;
-            int[] positions = new int[factorNumber];
+            int[] positions = new int[operandCount];
             long? product = null;
-            long sum = ~desired;
+            long sum = ~desiredResult;
             //Initialize positions
             for (int pos = 0; pos < positions.Length; pos++)
                 positions[pos] = pos;
 
 
             List<long> factors = new List<long>();
-            while (desired != (desiredIsProduct ? product : sum) && numberMoved)
+            while (desiredResult != (desiredIsProduct ? product : sum) && numberMoved)
             {//repeat until found or done
                 product = GetProduct(factorList, positions, out sum);
                 factors.Clear();
@@ -96,6 +104,13 @@ namespace AdventOfCode.Tools
             return factors.ToArray();
         }
 
+        /// <summary>
+        /// Gets the Product (and Sum) of the numbers at certain position
+        /// </summary>
+        /// <param name="numbers">a list of numbers</param>
+        /// <param name="positions">the position of the numbers to multiply (and sum)</param>
+        /// <param name="sum">the sum of the given numbers</param>
+        /// <returns></returns>
         private static long? GetProduct(long[] numbers, int[] positions, out long sum)
         {
             sum = 0;
@@ -111,6 +126,15 @@ namespace AdventOfCode.Tools
             return product;
         }
 
+        /// <summary>
+        /// Increases the positions array at the given position
+        /// <para>Uses Recursion</para>
+        /// <para>Note: increases until the last first position reaches the Limit, given by <paramref name="numbers"/></para>
+        /// </summary>
+        /// <param name="position">the index of the position to increase</param>
+        /// <param name="positions">the list of positions</param>
+        /// <param name="numbers">the list of numbers, the positions refer to</param>
+        /// <returns>True, if the position could be advanced, otherwise false.</returns>
         private static bool MoveNextNumber(int position, int[] positions, long[] numbers)
         {
             //tried to change position below range. We're done.

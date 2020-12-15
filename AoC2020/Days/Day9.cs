@@ -17,13 +17,14 @@ namespace AdventOfCode.Days
             List<long> praembel = new List<long>();
             List<long> numbers = new List<long>();
             long? invalidNumber = null;
+            //Move over the numbers to find the first invalid number
             foreach (string line in GetLines(input))
             {
                 long number = long.Parse(line);
                 if (invalidNumber == null)
                 {
                     if (praembel.Count >= praembelLength)
-                    {
+                    {// numbers are invalid, if not exactly two of the previous 25 numbers add up to it.
                         if (!InPraembel(number, praembel)) invalidNumber = number;
                         praembel.RemoveAt(0);
                     }
@@ -36,9 +37,9 @@ namespace AdventOfCode.Days
 
             if (part2)
             {
-                int numLength = 2;
+                int numLength = 3;
                 while(numLength < numbers.Count)
-                {
+                {//find the weakness, by increasing the range and moving the range over all numbers
                     for(int pos = 0; pos < numbers.Count - numLength; pos++)
                     {
                         long sum = 0;
@@ -48,6 +49,8 @@ namespace AdventOfCode.Days
                             currNumbers.Add(numbers[i]);
                             sum += numbers[i];
                         }
+                        //The Weakness is found, by summing up all contiguous numbers in this range and
+                        //returning the sum of the smallest and largest number in this range.
                         if (sum == invalidNumber)
                             return "The weakness is: " + (currNumbers.Min() + currNumbers.Max());
                     }
@@ -63,7 +66,7 @@ namespace AdventOfCode.Days
 
         private bool InPraembel(long number, List<long> praembel)
         {
-            return MathHelper.GetFactorsByResult(praembel.ToArray(), 2, number, false, out long sum) != null;
+            return MathHelper.GetOperandsByResult(praembel.ToArray(), 2, number, false, out long sum) != null;
         }
     }
 }

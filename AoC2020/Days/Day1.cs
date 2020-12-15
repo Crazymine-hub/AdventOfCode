@@ -14,7 +14,7 @@ namespace AdventOfCode.Days
         public override string Solve(string input, bool part2)
         {
             //Convert Input into List<int> (valid ints assumed)
-            long[] factors = MathHelper.GetFactorsByResult(GetLines(input).Select(x => long.Parse(x)).ToArray(), part2 ? 3 : 2, 2020, false, out long result);
+            long[] factors = MathHelper.GetOperandsByResult(GetLines(input).Select(x => long.Parse(x)).ToArray(), part2 ? 3 : 2, 2020, false, out long result);
             if (factors == null)
                 return "No match found!";
             else
