@@ -49,8 +49,11 @@
     <Compile Include="Days\Day5.cs" />
     <Compile Include="Days\Day6.cs" />
     <Compile Include="Days\Day7.cs" />
+    <Compile Include="Days\Day8.cs" />
     <Compile Include="Days\Tools\Day7\Bag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\AsmComputer\AsmComputer.cs" />
+    <Compile Include="Tools\AsmComputer\InstructionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AdventOfCommon\AdventOfCommon.csproj">
@@ -87,6 +90,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day6.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day8.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
