@@ -13,6 +13,7 @@ namespace AdventOfCode.Tools.AsmComputer
     {
         //State of the Computer
         protected int position = 0;
+        long executiontimer = 0;
         public long Accumulator { get; protected set; }
         public List<InstructionInfo> Instructions { get; set; } = new List<InstructionInfo>();
 
@@ -24,17 +25,21 @@ namespace AdventOfCode.Tools.AsmComputer
 
         }
 
-        public void Reset()
+        public void Reset(bool wipe)
         {
-            Instructions = new List<InstructionInfo>();
+            if (wipe)
+                Instructions = new List<InstructionInfo>();
+            foreach (var instr in Instructions)
+                instr.ExecutionTime = -1;
             position = 0;
             Accumulator = 0;
+            executiontimer = 0;
         }
 
         public void LoadMemory(List<string> inputLines)
         {
-            Reset();
-            foreach(string instruction in inputLines)
+            Reset(true);
+            foreach (string instruction in inputLines)
             {//each line has to contain one instruction
                 string[] segments = instruction.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 long arg = long.Parse(segments[1]);
@@ -42,14 +47,14 @@ namespace AdventOfCode.Tools.AsmComputer
             }
         }
 
-        public void Run()
+        public int Run()
         {
-            Accumulator = 0;
-            for(position = 0; position < Instructions.Count; ++position)
+            Reset(false);
+            for (position = 0; position < Instructions.Count; ++position)
             {
                 var currInst = Instructions.ElementAt(position);
-                if (PreventDoubleExecution && currInst.WasExecuted) return;
-                currInst.WasExecuted = true;
+                if (PreventDoubleExecution && currInst.ExecutionTime >= 0) return -1;
+                currInst.ExecutionTime = executiontimer++;
                 //Execute the current instruction.
                 switch (currInst.Instruction)
                 {
@@ -68,6 +73,38 @@ namespace AdventOfCode.Tools.AsmComputer
                     default: throw new InvalidOperationException("Unknown Instruction: " + currInst.Instruction);
                 }
             }
+            return 0;
+        }
+
+        private void PrintDebugHead()
+        {
+            Console.WriteLine("AsmComputer v1.0");
+            Console.WriteLine("Accumulator: " + Accumulator);
+            Console.WriteLine("ExecutionTime: " + executiontimer);
+        }
+
+        private void PrintInstructionLine(int lineNumber)
+        {
+            int linePad = Instructions.Count.ToString().Count();
+            Console.Write(lineNumber == position ? ">" : " ");
+            Console.Write(lineNumber.ToString().PadLeft(linePad) + " | ");
+            Console.WriteLine(Instructions.ElementAt(lineNumber).ToString());
+        }
+
+        public void PrintState()
+        {
+            PrintDebugHead();
+            for (int i = 0; i < Instructions.Count; i++)
+                PrintInstructionLine(i);
+        }
+
+        public void PrintTrace()
+        {
+            if (!PreventDoubleExecution) Console.WriteLine("Double Execution must be prevented");
+            PrintDebugHead();
+            for (int i = 0; i < executiontimer; i++)
+                PrintInstructionLine(Instructions.IndexOf(Instructions.Single(x => x.ExecutionTime == i)));
+            PrintInstructionLine(position);
         }
     }
 }

@@ -10,18 +10,20 @@ namespace AdventOfCode.Tools.AsmComputer
     {
         public string Instruction { get; set; }
         public long Argument { get; set; }
-        public bool WasExecuted { get; set; }
+        public long ExecutionTime { get; set; }
 
         public InstructionInfo(string instruction, long arg)
         {
             Instruction = instruction;
             Argument = arg;
-            WasExecuted = false;
+            ExecutionTime = -1;
         }
 
         public override string ToString()
         {
-            return Instruction + " " + Argument;
+            return Instruction.PadRight(5) + " " +
+                Argument.ToString().PadRight(5) +
+                " @" + ExecutionTime;
         }
     }
 }
