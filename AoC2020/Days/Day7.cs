@@ -17,6 +17,7 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
+            //Set up the bags
             LoadBags(input);
             bagSorter = new Topological<Bag>(bags);
             bags = bagSorter.Ordered;
@@ -40,7 +41,7 @@ namespace AdventOfCode.Days
             Dictionary<Bag, int> newRequired = new Dictionary<Bag, int>();
             newRequired.Add(myBag, 1);
             do
-            {
+            {//get all bags that are required for my bag to be valid and theirs aswell
                 required = newRequired;
                 newRequired = new Dictionary<Bag, int>();
                 newRequired.Add(myBag, 1);
@@ -55,6 +56,7 @@ namespace AdventOfCode.Days
                 }
             } while (newRequired.Except(required).Count() != 0);
 
+            //sum up all required bags
             long sum = 0;
             foreach (var bag in newRequired)
             {
@@ -62,6 +64,7 @@ namespace AdventOfCode.Days
                 sum += bag.Value;
             }
 
+            //i already own my bag
             sum -= newRequired[myBag];
 
             return "Required Bags: " + sum;
@@ -72,12 +75,13 @@ namespace AdventOfCode.Days
             List<Bag> usable;
             List<Bag> newUsable = new List<Bag>();
             do
-            {
+            {//Get all bags, that contain Main bag and all bags, that contain such bags
                 usable = newUsable;
                 newUsable = bags.Where(x => x.ContainedBags.ContainsKey(myBag.Name)).ToList();
                 foreach (Bag bag in usable)
                     newUsable.AddRange(bags.Where(x => x.ContainedBags.ContainsKey(bag.Name)));
                 newUsable = newUsable.Distinct().ToList();
+                //until no new bags are found
             } while (newUsable.Except(usable).Count() != 0);
 
             foreach (Bag bag in newUsable)
@@ -88,13 +92,14 @@ namespace AdventOfCode.Days
 
         private void LoadBags(string input)
         {
+            //Prepare Regex for Bag detection (style color bags(s))
             Regex bagMatch = new Regex(@"(\d )?(\w+ \w+) bag(?:s)?");
             foreach (string bagDescrioption in GetLines(input))
             {
                 MatchCollection bagDetails = bagMatch.Matches(bagDescrioption);
                 Bag currBag = null;
                 for (int i = 0; i < bagDetails.Count; i++)
-                {
+                {//get the bag if already exists otherwise add it.
                     string bagName = bagDetails[i].Groups[2].Value;
                     int bagAmount = 1;
                     if (bagDetails[i].Groups[1].Success)
@@ -107,6 +112,7 @@ namespace AdventOfCode.Days
                         namedBag = new Bag() { Name = bagName };
                         bags.Add(namedBag);
                     }
+                    //The first bag is our active Bag, the other are contained bags.
                     if (i == 0)
                         currBag = namedBag;
                     else
