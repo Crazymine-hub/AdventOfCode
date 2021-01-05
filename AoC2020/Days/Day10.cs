@@ -13,13 +13,41 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return "Part2 is unavailable";
             List<int> adapters = GetLines(input).Select(x => int.Parse(x)).ToList();
             adapters.Add(0);
             adapters.Add(adapters.Max() + 3);
             adapters.Sort();
+            if (!part2)
+                return CountGaps(adapters);
+            else
+                return CountCombos(adapters);
+        }
+
+        private string CountCombos(List<int> adapters)
+        {
+            Dictionary<int, long> combinations = new Dictionary<int, long>();
+            for(int i = adapters.Count - 1; i >= 0; i--)
+            {
+                int[] connecting = adapters.Where(x => x > adapters[i] && x <= adapters[i] + 3).ToArray();
+                long connections = 0;
+                Console.Write(adapters[i]);
+                Console.Write(" -> ");
+                foreach (int connectingAdapter in connecting)
+                {
+                    connections += combinations[connectingAdapter];
+                    Console.Write(connectingAdapter + "(" + combinations[connectingAdapter] + ")\t");
+                }
+                Console.WriteLine();
+                if (connections == 0) connections = 1;
+                combinations.Add(adapters[i], connections);
+            }
+            return "Possible Connections: " + combinations[0];
+        }
+
+        private string CountGaps(List<int> adapters)
+        {
             int[] differences = new int[3];
-            for(int i = 1; i < adapters.Count; i++)
+            for (int i = 1; i < adapters.Count; i++)
             {
                 int diff = adapters[i] - adapters[i - 1];
                 differences[diff - 1]++;
