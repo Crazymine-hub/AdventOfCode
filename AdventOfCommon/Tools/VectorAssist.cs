@@ -29,5 +29,16 @@ namespace AdventOfCode.Tools
         {
             return vec1.X * vec2.X + vec1.Y * vec2.Y;
         }
+        
+        public static Point PointDifference(Point start, Point end)
+        {
+            return new Point(end.X - start.X, end.Y - start.Y);
+        }
+
+        public static int ManhattanDistance(Point start, Point end)
+        {
+            Point offset = PointDifference(start, end);
+            return Math.Abs(offset.X) + Math.Abs(offset.Y);
+        }
     }
 }
