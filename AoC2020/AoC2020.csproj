@@ -47,6 +47,7 @@
     <Compile Include="Days\Day10.cs" />
     <Compile Include="Days\Day11.cs" />
     <Compile Include="Days\Day12.cs" />
+    <Compile Include="Days\Day14.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
@@ -130,7 +131,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Inputs\Day13_2.txt">
+    <None Include="Inputs\Day14.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
