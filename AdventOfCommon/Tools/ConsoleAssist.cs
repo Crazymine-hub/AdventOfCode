@@ -42,5 +42,12 @@ namespace AdventOfCode.Tools
                 progressPos = 0;
             return progressIndicator[progressPos];
         }
+
+        public static string Center(string text, int width)
+        {
+            int left = width - text.Length;
+            if (left < 0) left = 0;
+            return text.PadLeft(left / 2 + text.Length).PadRight(left + text.Length);
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace AdventOfCode.Tools
 {
     public static class MathHelper
     {
-        public static long LeastCommonMultiple(long[] numbers)
+        public static long LeastCommonMultiple(params long[] numbers)
         {
             if (numbers.Length == 0) throw new ArgumentException("numbers has to contain at least one element", "numbers");
             if (numbers.Length == 1) return numbers[0];
