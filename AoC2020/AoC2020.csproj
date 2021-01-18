@@ -49,6 +49,7 @@
     <Compile Include="Days\Day12.cs" />
     <Compile Include="Days\Day14.cs" />
     <Compile Include="Days\Day15.cs" />
+    <Compile Include="Days\Day16.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="Days\Day8.cs" />
     <Compile Include="Days\Day9.cs" />
     <Compile Include="Days\Tools\Day13\ShuttleBus.cs" />
+    <Compile Include="Days\Tools\Day16\Range.cs" />
     <Compile Include="Days\Tools\Day7\Bag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\AsmComputer\AsmComputer.cs" />
@@ -138,6 +140,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day15.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day16.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
