@@ -24,6 +24,7 @@ namespace AdventOfCode.Days
             Reset(input);
             PrintLayer(1);
             PrintLayer(0);
+            AdjustBorder();
             return "";
         }
 
@@ -73,7 +74,8 @@ namespace AdventOfCode.Days
                     row.Add(false);
                 grid.Add(row);
             }
-            universe.Insert(front ? 0 : zDim++, grid);
+            universe.Insert(front ? 0 : zDim, grid);
+            zDim++;
         }
 
         private void PrintLayer(int zLayer)
@@ -95,6 +97,53 @@ namespace AdventOfCode.Days
                 for (int y = 0; y < yDim; y++)
                     Console.WriteLine(ConsoleAssist.Center("<EMPTY>", xDim, '-'));
             }
+        }
+
+        private void AdjustBorder()
+        {
+            int minZ = universe.FindIndex(x => x.FirstOrDefault(y => y.Contains(true)) != default(List<bool>));
+            int maxZ = universe.FindLastIndex(x => x.FirstOrDefault(y => y.Contains(true)) != default(List<bool>));
+            int minY = -1;
+            int maxY = -1;
+            int minX = -1;
+            int maxX = -1;
+            foreach(var layer in universe)
+            {
+                int currMinY = layer.FindIndex(x => x.Contains(true));
+                int currMaxY = layer.FindLastIndex(x => x.Contains(true));
+                if (currMinY < minY || minY == -1) minY = currMinY;
+                if (currMaxY > maxY || maxY == -1) maxY = currMaxY;
+                foreach(var column in layer)
+                {
+                    int currMinX = column.FindIndex(x => x);
+                    int currMaxX = column.FindLastIndex(x => x);
+                    if (currMinX < minX || minX == -1) minX = currMinY;
+                    if (currMaxX > maxX || maxX == -1) maxX = currMaxY;
+                }
+            }
+            if(minZ == 0)
+            {
+                IncreaseZ(true);
+                ++maxZ;
+            }
+            if(maxZ == zDim - 1)
+                IncreaseZ(false);
+
+            if(minY == 0)
+            {
+                IncreaseY(true);
+                ++maxY;
+            }
+            if(maxY == yDim - 1)
+                IncreaseY(false);
+
+            if(minX == 0)
+            {
+                IncreaseX(true);
+                ++maxX;
+            }
+            if(maxX == xDim - 1)
+                IncreaseX(false);
         }
     }
 }
