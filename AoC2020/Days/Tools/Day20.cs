@@ -92,7 +92,7 @@ namespace AdventOfCode.Days
             foreach (var connection in uniqueBorderConnections.Where(x => x.Item2.Count == 4))
                 product *= connection.Item1;
 
-            ArrangeImage(borderConnections, innerConnections, uniqueBorderConnections, uniqueInnerConnections);
+            ArrangeImage(uniqueBorderConnections, uniqueInnerConnections);
 
             Render();
 
@@ -100,8 +100,6 @@ namespace AdventOfCode.Days
         }
 
         private void ArrangeImage(
-            IEnumerable<IGrouping<int, (int, int, char)>> borderConnections,
-            IEnumerable<IGrouping<int, (int, int, char)>> innerConnections,
             //id (border connection)
             List<(int, List<(int, char)>)> uniqueBorderConnections,
             //id id border direction border direction
@@ -121,13 +119,17 @@ namespace AdventOfCode.Days
                 int upperBorderValue = upperImage?.BottomBorderNr ?? invalidBorderValue;
                 int leftBorderValue = leftImage?.RightBorderNr ?? invalidBorderValue;
 
-
+                CameraImage selImg;
+                List<(int, char)> connecting;
+                List<(int, char)> borders;
+                Func<CameraImage, List<(int, char)>, List<(int, char)>, int, bool, bool, bool, bool> checkImageOrientation;
 
                 if (upperBorderValue == invalidBorderValue && leftBorderValue == invalidBorderValue)
                 {
                     (int selId, List<(int, char)> borderValues) = uniqueBorderConnections.First(img => img.Item2.Count == 4);
-                    CameraImage selImg = images.Single(x => x.ID == selId);
-                    List<(int, char)> connecting = new List<(int, char)>();
+                    selImg = images.Single(x => x.ID == selId);
+                    connecting = new List<(int, char)>();
+                    borders = borderValues;
 
                     foreach (var connection in uniqueInnerConnections.Where(x => x.Item1 == selId || x.Item2 == selId))
                     {
@@ -135,154 +137,109 @@ namespace AdventOfCode.Days
                         connecting.Add((connection.Item5, connection.Item6[connection.Item1 == selId ? 0 : 1]));
                     }
 
-                    int rotationCount = 0;
-                    bool flipped = false;
-                    while (!borderValues.Any(x => x.Item1 == selImg.LeftBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'R' : 'L') : x.Item2 == (flipped ? 'U' : 'D'))) ||
-                        !borderValues.Any(x => x.Item1 == selImg.TopBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'D' : 'U') : x.Item2 == (flipped ? 'L' : 'R'))) ||
-                        !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'L' : 'R') : x.Item2 == (flipped ? 'D' : 'U'))) ||
-                        !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'U' : 'D') : x.Item2 == (flipped ? 'R' : 'L'))))
+                    checkImageOrientation = (img, borderValues, connectingValues, rotations, isFlipped, _0, _1) =>
                     {
-                        selImg.RotateRight();
-                        if (++rotationCount >= 4)
-                        {
-                            if (flipped)
-                            {
-                                if (rotationCount >= 5)
-                                    throw new InvalidOperationException("LOOP");
-                                else continue;
-                            }
-                            selImg.Flip();
-                            rotationCount = 0;
-                            flipped = true;
-                        }
+                        return (!borderValues.Any(x => x.Item1 == img.LeftBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'R' : 'L') : x.Item2 == (isFlipped ? 'U' : 'D'))) ||
+                            !borderValues.Any(x => x.Item1 == img.TopBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'D' : 'U') : x.Item2 == (isFlipped ? 'L' : 'R'))) ||
+                            !connectingValues.Any(x => x.Item1 == img.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
+                            !connectingValues.Any(x => x.Item1 == img.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))));
+                    };
+                }
+                else if (upperBorderValue != invalidBorderValue && leftBorderValue == invalidBorderValue)
+                {
+                    (int id1, int id2, int border1, string side1, int border2, string side2) = uniqueInnerConnections.Single(
+                        x => (x.Item1 == upperImage.ID || x.Item2 == upperImage.ID) && (x.Item3 == upperBorderValue || x.Item5 == upperBorderValue));
+                    int selId = id1 == upperImage.ID ? id2 : id1;
+
+                    selImg = images.Single(x => x.ID == selId);
+                    borders = uniqueBorderConnections.Single(x => x.Item1 == selId).Item2;
+                    connecting = new List<(int, char)>();
+                    foreach (var connection in uniqueInnerConnections.Where(x => x.Item1 == selId || x.Item2 == selId))
+                    {
+                        connecting.Add((connection.Item3, connection.Item4[connection.Item1 == selId ? 0 : 1]));
+                        connecting.Add((connection.Item5, connection.Item6[connection.Item1 == selId ? 0 : 1]));
                     }
-                    newImg.Add(selImg);
+
+                    checkImageOrientation = (img, borderValues, connectingValues, rotations, isFlipped, isBottom, isRight) =>
+                    {
+                        return (!borderValues.Any(x => x.Item1 == selImg.LeftBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'R' : 'L') : x.Item2 == (isFlipped ? 'U' : 'D'))) ||
+                         selImg.TopBorderNr != upperBorderValue ||
+                         !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
+                         !isBottom && !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))) ||
+                         isBottom && !borderValues.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))));
+                    };
+                }
+                else if (upperBorderValue == invalidBorderValue && leftBorderValue != invalidBorderValue)
+                {
+                    (int id1, int id2, int border1, string side1, int border2, string side2) = uniqueInnerConnections.Single(
+                        x => (x.Item1 == leftImage.ID || x.Item2 == leftImage.ID) && (x.Item3 == leftBorderValue || x.Item5 == leftBorderValue));
+                    int selId = id1 == leftImage.ID ? id2 : id1;
+                    selImg = images.Single(x => x.ID == selId);
+                    borders = uniqueBorderConnections.Single(x => x.Item1 == selId).Item2;
+
+                    connecting = new List<(int, char)>();
+                    foreach (var connection in uniqueInnerConnections.Where(x => x.Item1 == selId || x.Item2 == selId))
+                    {
+                        connecting.Add((connection.Item3, connection.Item4[connection.Item1 == selId ? 0 : 1]));
+                        connecting.Add((connection.Item5, connection.Item6[connection.Item1 == selId ? 0 : 1]));
+                    }
+
+                    checkImageOrientation = (img, borderValues, connectingValues, rotations, isFlipped, isBottom, isRight) =>
+                    {
+                        return (leftBorderValue != selImg.LeftBorderNr ||
+                        !borderValues.Any(x => x.Item1 == selImg.TopBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'D' : 'U') : x.Item2 == (isFlipped ? 'L' : 'R'))) ||
+                        !isRight && !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
+                        isRight && !borderValues.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
+                        !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))));
+                    };
                 }
                 else
                 {
-                    if (upperBorderValue != invalidBorderValue && leftBorderValue == invalidBorderValue)
+                    (int id1, int id2, int border1, string side1, int border2, string side2) = uniqueInnerConnections.Single(
+                        x => (x.Item1 == leftImage.ID || x.Item2 == leftImage.ID) && (x.Item3 == leftBorderValue || x.Item5 == leftBorderValue));
+                    int selId = id1 == leftImage.ID ? id2 : id1;
+                    selImg = images.Single(x => x.ID == selId);
+
+                    borders = uniqueBorderConnections.SingleOrDefault(x => x.Item1 == selId).Item2;
+                    connecting = new List<(int, char)>();
+                    foreach (var connection in uniqueInnerConnections.Where(x => x.Item1 == selId || x.Item2 == selId))
                     {
-                        (int id1, int id2, int border1, string side1, int border2, string side2) = uniqueInnerConnections.Single(
-                            x => (x.Item1 == upperImage.ID || x.Item2 == upperImage.ID) && (x.Item3 == upperBorderValue || x.Item5 == upperBorderValue));
-
-                        int selId = id1 == upperImage.ID ? id2 : id1;
-                        CameraImage selImg = images.Single(x => x.ID == selId);
-                        List<(int, char)> borderValues = uniqueBorderConnections.Single(x => x.Item1 == selId).Item2;
-
-                        List<(int, char)> connecting = new List<(int, char)>();
-                        foreach (var connection in uniqueInnerConnections.Where(x => x.Item1 == selId || x.Item2 == selId))
-                        {
-                            connecting.Add((connection.Item3, connection.Item4[connection.Item1 == selId ? 0 : 1]));
-                            connecting.Add((connection.Item5, connection.Item6[connection.Item1 == selId ? 0 : 1]));
-                        }
-
-                        int rotationCount = 0;
-                        bool flipped = false;
-                        bool isBottom = (newImg.Count) / dimension == dimension - 1;
-                        while (!borderValues.Any(x => x.Item1 == selImg.LeftBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'R' : 'L') : x.Item2 == (flipped ? 'U' : 'D'))) ||
-                            selImg.TopBorderNr != upperBorderValue ||
-                            !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'L' : 'R') : x.Item2 == (flipped ? 'D' : 'U'))) ||
-                            !isBottom && !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'U' : 'D') : x.Item2 == (flipped ? 'R' : 'L'))) ||
-                            isBottom && !borderValues.Any(x => x.Item1 == selImg.BottomBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'U' : 'D') : x.Item2 == (flipped ? 'R' : 'L'))))
-                        {
-                            selImg.RotateRight();
-                            if (++rotationCount >= 4)
-                            {
-                                if (flipped)
-                                {
-                                    if (rotationCount >= 5)
-                                        throw new InvalidOperationException("LOOP");
-                                    else continue;
-                                }
-                                selImg.Flip();
-                                rotationCount = 0;
-                                flipped = true;
-                            }
-                        }
-                        newImg.Add(selImg);
+                        connecting.Add((connection.Item3, connection.Item4[connection.Item1 == selId ? 0 : 1]));
+                        connecting.Add((connection.Item5, connection.Item6[connection.Item1 == selId ? 0 : 1]));
                     }
-                    else if (upperBorderValue == invalidBorderValue && leftBorderValue != invalidBorderValue)
+
+                    checkImageOrientation = (img, borderValues, connectingValues, rotations, isFlipped, isBottom, isRight) =>
                     {
-                        (int id1, int id2, int border1, string side1, int border2, string side2) = uniqueInnerConnections.Single(
-                            x => (x.Item1 == leftImage.ID || x.Item2 == leftImage.ID) && (x.Item3 == leftBorderValue || x.Item5 == leftBorderValue));
-                        int selId = id1 == leftImage.ID ? id2 : id1;
-                        CameraImage selImg = images.Single(x => x.ID == selId);
-                        List<(int, char)> borderValues = uniqueBorderConnections.Single(x => x.Item1 == selId).Item2;
+                        return (leftBorderValue != selImg.LeftBorderNr || upperBorderValue != selImg.TopBorderNr ||
+                        !isRight && !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
+                        isRight && !borderValues.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
+                        !isBottom && !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))) ||
+                        isBottom && !borderValues.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))));
+                    };
+                }
 
-                        List<(int, char)> connecting = new List<(int, char)>();
-                        foreach (var connection in uniqueInnerConnections.Where(x => x.Item1 == selId || x.Item2 == selId))
-                        {
-                            connecting.Add((connection.Item3, connection.Item4[connection.Item1 == selId ? 0 : 1]));
-                            connecting.Add((connection.Item5, connection.Item6[connection.Item1 == selId ? 0 : 1]));
-                        }
 
-                        int rotationCount = 0;
-                        bool flipped = false;
-                        bool isRight = (newImg.Count + 1) % dimension == 0;
-                        while (leftBorderValue != selImg.LeftBorderNr ||
-                            !borderValues.Any(x => x.Item1 == selImg.TopBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'D' : 'U') : x.Item2 == (flipped ? 'L' : 'R'))) ||
-                            !isRight && !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'L' : 'R') : x.Item2 == (flipped ? 'D' : 'U'))) ||
-                            isRight && !borderValues.Any(x => x.Item1 == selImg.RightBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'L' : 'R') : x.Item2 == (flipped ? 'D' : 'U'))) ||
-                            !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'U' : 'D') : x.Item2 == (flipped ? 'R' : 'L'))))
-                        {
-                            selImg.RotateRight();
-                            if (++rotationCount >= 4)
-                            {
-                                if (flipped)
-                                {
-                                    if (rotationCount >= 5)
-                                        throw new InvalidOperationException("LOOP");
-                                    else continue;
-                                }
-                                selImg.Flip();
-                                rotationCount = 0;
-                                flipped = true;
-                            }
-                        }
-                        newImg.Add(selImg);
-                    }
-                    else
+                int rotationCount = 0;
+                bool flipped = false;
+                bool isBottom = (newImg.Count) / dimension == dimension - 1;
+                bool isRight = (newImg.Count + 1) % dimension == 0;
+                while (checkImageOrientation(selImg, borders, connecting, rotationCount, flipped, isBottom, isRight))
+                {
+                    selImg.RotateRight();
+                    if (++rotationCount >= 4)
                     {
-                        (int id1, int id2, int border1, string side1, int border2, string side2) = uniqueInnerConnections.Single(
-                            x => (x.Item1 == leftImage.ID || x.Item2 == leftImage.ID) && (x.Item3 == leftBorderValue || x.Item5 == leftBorderValue));
-                        int selId = id1 == leftImage.ID ? id2 : id1;
-                        CameraImage selImg = images.Single(x => x.ID == selId);
-
-                        List<(int, char)> borderValues = uniqueBorderConnections.SingleOrDefault(x => x.Item1 == selId).Item2;
-                        List<(int, char)> connecting = new List<(int, char)>();
-                        foreach (var connection in uniqueInnerConnections.Where(x => x.Item1 == selId || x.Item2 == selId))
+                        if (flipped)
                         {
-                            connecting.Add((connection.Item3, connection.Item4[connection.Item1 == selId ? 0 : 1]));
-                            connecting.Add((connection.Item5, connection.Item6[connection.Item1 == selId ? 0 : 1]));
+                            if (rotationCount >= 5)
+                                throw new InvalidOperationException("LOOP");
+                            else continue;
                         }
-
-                        int rotationCount = 0;
-                        bool flipped = false;
-                        bool isOuter = (newImg.Count + 1) % dimension == 0;
-                        bool isBottom = (newImg.Count) / dimension == dimension - 1;
-                        while (leftBorderValue != selImg.LeftBorderNr || upperBorderValue != selImg.TopBorderNr ||
-                            !isOuter && !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'L' : 'R') : x.Item2 == (flipped ? 'D' : 'U'))) ||
-                            isOuter && !borderValues.Any(x => x.Item1 == selImg.RightBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'L' : 'R') : x.Item2 == (flipped ? 'D' : 'U'))) ||
-                            !isBottom && !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'U' : 'D') : x.Item2 == (flipped ? 'R' : 'L'))) ||
-                            isBottom && !borderValues.Any(x => x.Item1 == selImg.BottomBorderNr && ((!flipped || rotationCount % 2 == 0) ? x.Item2 == (flipped ? 'U' : 'D') : x.Item2 == (flipped ? 'R' : 'L'))))
-                        {
-                            selImg.RotateRight();
-                            if (++rotationCount >= 4)
-                            {
-                                if (flipped)
-                                {
-                                    if (rotationCount >= 5)
-                                        throw new InvalidOperationException("LOOP");
-                                    else continue;
-                                }
-                                selImg.Flip();
-                                rotationCount = 0;
-                                flipped = true;
-                            }
-                        }
-                        newImg.Add(selImg);
+                        selImg.Flip();
+                        rotationCount = 0;
+                        flipped = true;
                     }
                 }
+                newImg.Add(selImg);
             }
 
             images = newImg;
