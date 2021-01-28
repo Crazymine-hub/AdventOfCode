@@ -151,11 +151,17 @@ namespace AdventOfCode.Days.Tools.Day20
 
         public override string ToString()
         {
+            return ToString(false);
+        }
+
+        public string ToString(bool stripBorder)
+        {
             string outp = "";
-            for (int y = 0; y < Image[0].Count; ++y)
+            int offset = stripBorder ? 1 : 0;
+            for (int y = offset; y < Image[0].Count - offset; ++y)
             {
-                for (int x = 0; x < Image.Count; ++x)
-                    outp += Image[y][x] ? "█" : " ";
+                for (int x = offset; x < Image.Count - offset; ++x)
+                    outp += Image[y][x] ? "#" : ".";
                 outp += "\r\n";
             }
             return outp.Remove(outp.Length - 2);
