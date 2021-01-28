@@ -123,6 +123,16 @@ namespace AdventOfCode.Days
                 List<(int, char)> connecting;
                 List<(int, char)> borders;
                 Func<CameraImage, List<(int, char)>, List<(int, char)>, int, bool, bool, bool, bool> checkImageOrientation;
+                bool checkImageBorder(int border, int targetBorder, char orientation, string orientations, bool flipped, int rotations)
+                {
+                    bool borderNr = border == targetBorder;
+                    bool borderOrientation = false;
+                    if (!flipped || rotations % 2 == 0)
+                        borderOrientation = orientation == (flipped ? orientations[0] : orientations[1]);
+                    else
+                        borderOrientation = orientation == (flipped ? orientations[2] : orientations[3]);
+                    return borderNr && borderOrientation;
+                }
 
                 if (upperBorderValue == invalidBorderValue && leftBorderValue == invalidBorderValue)
                 {
@@ -139,10 +149,10 @@ namespace AdventOfCode.Days
 
                     checkImageOrientation = (img, borderValues, connectingValues, rotations, isFlipped, _0, _1) =>
                     {
-                        return (!borderValues.Any(x => x.Item1 == img.LeftBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'R' : 'L') : x.Item2 == (isFlipped ? 'U' : 'D'))) ||
-                            !borderValues.Any(x => x.Item1 == img.TopBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'D' : 'U') : x.Item2 == (isFlipped ? 'L' : 'R'))) ||
-                            !connectingValues.Any(x => x.Item1 == img.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
-                            !connectingValues.Any(x => x.Item1 == img.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))));
+                        return !borderValues.Any(x => checkImageBorder(x.Item1, img.LeftBorderNr, x.Item2, "RLUD", isFlipped, rotations)) ||
+                            !borderValues.Any(x => checkImageBorder(x.Item1, img.TopBorderNr, x.Item2, "DULR", isFlipped, rotations)) ||
+                            !connectingValues.Any(x => checkImageBorder(x.Item1, img.RightBorderNr, x.Item2, "LRDU", isFlipped, rotations)) ||
+                            !connectingValues.Any(x => checkImageBorder(x.Item1, img.BottomBorderNr, x.Item2, "UDRL", isFlipped, rotations));
                     };
                 }
                 else if (upperBorderValue != invalidBorderValue && leftBorderValue == invalidBorderValue)
@@ -162,11 +172,11 @@ namespace AdventOfCode.Days
 
                     checkImageOrientation = (img, borderValues, connectingValues, rotations, isFlipped, isBottom, isRight) =>
                     {
-                        return (!borderValues.Any(x => x.Item1 == selImg.LeftBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'R' : 'L') : x.Item2 == (isFlipped ? 'U' : 'D'))) ||
+                        return !borderValues.Any(x => checkImageBorder(x.Item1, img.LeftBorderNr, x.Item2, "RLUD", isFlipped, rotations)) ||
                          selImg.TopBorderNr != upperBorderValue ||
-                         !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
-                         !isBottom && !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))) ||
-                         isBottom && !borderValues.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))));
+                         !connecting.Any(x => checkImageBorder(x.Item1, img.RightBorderNr, x.Item2, "LRDU", isFlipped, rotations)) ||
+                         !isBottom && !connecting.Any(x => checkImageBorder(x.Item1, img.BottomBorderNr, x.Item2, "UDRL", isFlipped, rotations)) ||
+                         isBottom && !borderValues.Any(x => checkImageBorder(x.Item1, img.BottomBorderNr, x.Item2, "UDRL", isFlipped, rotations));
                     };
                 }
                 else if (upperBorderValue == invalidBorderValue && leftBorderValue != invalidBorderValue)
@@ -186,11 +196,11 @@ namespace AdventOfCode.Days
 
                     checkImageOrientation = (img, borderValues, connectingValues, rotations, isFlipped, isBottom, isRight) =>
                     {
-                        return (leftBorderValue != selImg.LeftBorderNr ||
-                        !borderValues.Any(x => x.Item1 == selImg.TopBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'D' : 'U') : x.Item2 == (isFlipped ? 'L' : 'R'))) ||
-                        !isRight && !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
-                        isRight && !borderValues.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
-                        !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))));
+                        return leftBorderValue != selImg.LeftBorderNr ||
+                        !borderValues.Any(x => checkImageBorder(x.Item1, img.TopBorderNr, x.Item2, "DULR", isFlipped, rotations)) ||
+                        !isRight && !connecting.Any(x => checkImageBorder(x.Item1, img.RightBorderNr, x.Item2, "LRDU", isFlipped, rotations)) ||
+                        isRight && !borderValues.Any(x => checkImageBorder(x.Item1, img.RightBorderNr, x.Item2, "LRDU", isFlipped, rotations)) ||
+                        !connecting.Any(x => checkImageBorder(x.Item1, img.BottomBorderNr, x.Item2, "UDRL", isFlipped, rotations));
                     };
                 }
                 else
@@ -210,11 +220,11 @@ namespace AdventOfCode.Days
 
                     checkImageOrientation = (img, borderValues, connectingValues, rotations, isFlipped, isBottom, isRight) =>
                     {
-                        return (leftBorderValue != selImg.LeftBorderNr || upperBorderValue != selImg.TopBorderNr ||
-                        !isRight && !connecting.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
-                        isRight && !borderValues.Any(x => x.Item1 == selImg.RightBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'L' : 'R') : x.Item2 == (isFlipped ? 'D' : 'U'))) ||
-                        !isBottom && !connecting.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))) ||
-                        isBottom && !borderValues.Any(x => x.Item1 == selImg.BottomBorderNr && ((!isFlipped || rotations % 2 == 0) ? x.Item2 == (isFlipped ? 'U' : 'D') : x.Item2 == (isFlipped ? 'R' : 'L'))));
+                        return leftBorderValue != selImg.LeftBorderNr || upperBorderValue != selImg.TopBorderNr ||
+                        !isRight && !connecting.Any(x => checkImageBorder(x.Item1, img.RightBorderNr, x.Item2, "LRDU", isFlipped, rotations)) ||
+                        isRight && !borderValues.Any(x => checkImageBorder(x.Item1, img.RightBorderNr, x.Item2, "LRDU", isFlipped, rotations)) ||
+                        !isBottom && !connecting.Any(x => checkImageBorder(x.Item1, img.BottomBorderNr, x.Item2, "UDRL", isFlipped, rotations)) ||
+                        isBottom && !borderValues.Any(x => checkImageBorder(x.Item1, img.BottomBorderNr, x.Item2, "UDRL", isFlipped, rotations));
                     };
                 }
 
