@@ -113,7 +113,7 @@ namespace AdventOfCode.Days.Tools.Day20
             }
         }
 
-        public void RotateLeft()
+        public void RotateRight()
         {
             List<List<bool>> newImg = new List<List<bool>>();
             for(int x = 0; x < Image[0].Count; ++x)
@@ -126,7 +126,7 @@ namespace AdventOfCode.Days.Tools.Day20
             Image = newImg;
         }
 
-        public void RotateRight()
+        public void RotateLeft()
         {
             List<List<bool>> newImg = new List<List<bool>>();
             for (int x = 0; x < Image[0].Count; ++x)
@@ -135,6 +135,16 @@ namespace AdventOfCode.Days.Tools.Day20
                 for (int y = 0; y < Image.Count; ++y)
                     row.Add(Image[y][x]);
                 newImg.Insert(0, row);
+            }
+            Image = newImg;
+        }
+
+        public void Flip()
+        {
+            List<List<bool>> newImg = new List<List<bool>>();
+            for (int y = 0; y < Image[0].Count; ++y)
+            {
+                newImg.Insert(0, Image[y]);
             }
             Image = newImg;
         }
