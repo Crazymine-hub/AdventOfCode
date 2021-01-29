@@ -16,87 +16,16 @@ namespace AdventOfCode.Days.Tools.Day20
 
 
         //Borders are Assembled Left to Right or Top to Bottom.
-        public IReadOnlyList<bool> TopBorder
-        {
-            get
-            {
-                return Image[0].ToList();
-            }
-        }
-        public int TopBorderNr
-        {
-            get
-            {
-                int result = 0;
-                var border = TopBorder;
-                for (int i = 0; i < border.Count; ++i)
-                    result = Bitwise.SetBit(result, i, border[i]);
-                return result;
-            }
-        }
+        public IReadOnlyList<bool> TopBorder => Image[0].ToList();
+        public int TopBorderNr => Bitwise.GetBitMask(TopBorder);
+        public IReadOnlyList<bool> BottomBorder => Image.Last().ToList();
+        public int BottomBorderNr => Bitwise.GetBitMask(BottomBorder);
 
-        public IReadOnlyList<bool> BottomBorder
-        {
-            get
-            {
-                return Image.Last().ToList();
-            }
-        }
-        public int BottomBorderNr
-        {
-            get
-            {
-                int result = 0;
-                var border = BottomBorder;
-                for (int i = 0; i < border.Count; ++i)
-                    result = Bitwise.SetBit(result, i, border[i]);
-                return result;
-            }
-        }
+        public IReadOnlyList<bool> LeftBorder => GetColumnList(0);
+        public int LeftBorderNr => Bitwise.GetBitMask(LeftBorder);
 
-        public IReadOnlyList<bool> LeftBorder
-        {
-            get
-            {
-                List<bool> border = new List<bool>();
-                for (int i = 0; i < Image.Count; ++i)
-                    border.Add(Image[i][0]);
-                return border;
-            }
-        }
-        public int LeftBorderNr
-        {
-            get
-            {
-                int result = 0;
-                var border = LeftBorder;
-                for (int i = 0; i < border.Count; ++i)
-                    result = Bitwise.SetBit(result, i, border[i]);
-                return result;
-            }
-        }
-
-        public IReadOnlyList<bool> RightBorder
-        {
-            get
-            {
-                List<bool> border = new List<bool>();
-                for (int i = 0; i < Image.Count; ++i)
-                    border.Add(Image[i].Last());
-                return border;
-            }
-        }
-        public int RightBorderNr
-        {
-            get
-            {
-                int result = 0;
-                var border = RightBorder;
-                for (int i = 0; i < border.Count; ++i)
-                    result = Bitwise.SetBit(result, i, border[i]);
-                return result;
-            }
-        }
+        public IReadOnlyList<bool> RightBorder => GetColumnList(Image[0].Count - 1);
+        public int RightBorderNr => Bitwise.GetBitMask(RightBorder);
 
 
         public CameraImage(List<string> imageInfo)
@@ -113,6 +42,7 @@ namespace AdventOfCode.Days.Tools.Day20
             }
         }
 
+        //that's clockwise
         public void RotateRight()
         {
             List<List<bool>> newImg = new List<List<bool>>();
@@ -126,6 +56,7 @@ namespace AdventOfCode.Days.Tools.Day20
             Image = newImg;
         }
 
+        //Fun fact: we never rotate counterclockwise
         public void RotateLeft()
         {
             List<List<bool>> newImg = new List<List<bool>>();
@@ -139,6 +70,7 @@ namespace AdventOfCode.Days.Tools.Day20
             Image = newImg;
         }
 
+        //we only need to flip along one axis, since rotation takes care of the flip along the other axis
         public void Flip()
         {
             List<List<bool>> newImg = new List<List<bool>>();
@@ -147,6 +79,14 @@ namespace AdventOfCode.Days.Tools.Day20
                 newImg.Insert(0, Image[y]);
             }
             Image = newImg;
+        }
+
+        public IReadOnlyList<bool> GetColumnList(int column)
+        {
+            List<bool> border = new List<bool>();
+            for (int i = 0; i < Image.Count; ++i)
+                border.Add(Image[i][column]);
+            return border;
         }
 
         public override string ToString()
@@ -158,9 +98,9 @@ namespace AdventOfCode.Days.Tools.Day20
         {
             string outp = "";
             int offset = stripBorder ? 1 : 0;
-            for (int y = offset; y < Image[0].Count - offset; ++y)
+            for (int y = offset; y < Image.Count - offset; ++y)
             {
-                for (int x = offset; x < Image.Count - offset; ++x)
+                for (int x = offset; x < Image[0].Count - offset; ++x)
                     outp += Image[y][x] ? "#" : ".";
                 outp += "\r\n";
             }
