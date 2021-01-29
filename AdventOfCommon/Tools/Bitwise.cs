@@ -43,6 +43,22 @@ namespace AdventOfCode.Tools
             return result;
         }
 
+        public static int GetBitMask(IEnumerable<bool> values)
+        {
+            int result = 0;
+            for (int i = 0; i < values.Count(); ++i)
+                result = SetBit(result, i, values.ElementAt(i));
+            return result;
+        }
+
+        public static long GetBitMaskLong(IEnumerable<bool> values)
+        {
+            long result = 0;
+            for (int i = 0; i < values.Count(); ++i)
+                result = SetBit(result, i, values.ElementAt(i));
+            return result;
+        }
+
         public static int CountSetBits(int data)
         {
             int cntr = 0;
