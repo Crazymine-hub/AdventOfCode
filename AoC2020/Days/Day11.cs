@@ -39,7 +39,7 @@ namespace AdventOfCode.Days
                 seatList.Add(rowSeats.ToArray());
             }
             seats = seatList.ToArray();
-            return "Besetzt: " + GameOfLife();
+            return "Occupied: " + GameOfLife();
         }
 
         private int GameOfLife()
