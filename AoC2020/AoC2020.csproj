@@ -56,6 +56,7 @@
     <Compile Include="Days\Day18.cs" />
     <Compile Include="Days\Day19.cs" />
     <Compile Include="Days\Day2.cs" />
+    <Compile Include="Days\Day21.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
     <Compile Include="Days\Day5.cs" />
@@ -66,7 +67,7 @@
     <Compile Include="Days\Tools\Day13\ShuttleBus.cs" />
     <Compile Include="Days\Tools\Day16\Range.cs" />
     <Compile Include="Days\Tools\Day18\EquationInfo.cs" />
-    <Compile Include="Days\Tools\Day20.cs" />
+    <Compile Include="Days\Day20.cs" />
     <Compile Include="Days\Tools\Day20\CameraImage.cs" />
     <Compile Include="Days\Tools\Day7\Bag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
