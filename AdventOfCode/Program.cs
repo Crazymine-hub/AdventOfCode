@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using AdventOfCode.Tools;
 
 namespace AdventOfCode
@@ -150,12 +147,16 @@ namespace AdventOfCode
             if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + "_addition" + fileExtension))
                 day.AdditionalContent = File.ReadAllText(dayPath + dayNr + "_addition" + fileExtension);
 
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
+            stopwatch.Stop();
 
             if (day.UsesAdditionalContent && day.AdditionalContent != null)
                 File.WriteAllText(dayPath + dayNr + "_addition" + fileExtension, day.AdditionalContent);
             Console.WriteLine();
             Console.WriteLine();
+            Console.WriteLine("Completed in " + stopwatch.Elapsed.ToString());
             return true;
         }
 
