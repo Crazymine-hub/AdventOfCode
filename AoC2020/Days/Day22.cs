@@ -28,9 +28,6 @@ namespace AdventOfCode.Days
 
             var winner = DoGame(ref player1, ref player2);
 
-            Console.WriteLine("P1: " + MakePlayerString(player1));
-            Console.WriteLine("P2: " + MakePlayerString(player2));
-
             return $"The Winner is Player {winner.Item1} with a score of {winner.Item2}.";
         }
 
