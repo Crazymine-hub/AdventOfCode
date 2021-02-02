@@ -57,6 +57,7 @@
     <Compile Include="Days\Day19.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day21.cs" />
+    <Compile Include="Days\Day22.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
     <Compile Include="Days\Day5.cs" />
@@ -181,6 +182,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day21.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day22.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
