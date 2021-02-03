@@ -20,12 +20,13 @@ namespace AdventOfCode.Days
             recursion = part2;
             List<string> players = GetGroupedLines(input);
 
-
+            //Put the cards in each players respective deck
             Queue<int> player1 = new Queue<int>();
             Queue<int> player2 = new Queue<int>();
             LoadPlayer(player1, GetLines(players[0]));
             LoadPlayer(player2, GetLines(players[1]));
 
+            //Determine a winner by playing a game
             var winner = DoGame(ref player1, ref player2);
 
             return $"The Winner is Player {winner.Item1} with a score of {winner.Item2}.";
@@ -48,16 +49,16 @@ namespace AdventOfCode.Days
             HashSet<string> p2Cards = new HashSet<string>();
             while (play1.Any() && play2.Any())
             {
+                //check if one player already has had this card sequence
                 string deck1 = MakePlayerString(play1);
                 string deck2 = MakePlayerString(play2);
-                if (p1Cards.Contains(deck1) || p2Cards.Contains(deck2))
-                {
-                    return (1, 0);
-                }
+                //if so, player one wins by default
+                if (p1Cards.Contains(deck1) || p2Cards.Contains(deck2)) return (1, 0);
                 p1Cards.Add(deck1);
                 p2Cards.Add(deck2);
                 DoTurn(play1, play2, gameNr);
             }
+            //a player wins, if the other got no cards left
             if (play1.Count > 0)
             {
                 return (1, GetScore(play1));
@@ -76,13 +77,14 @@ namespace AdventOfCode.Days
             bool recursed = false;
             bool player1Won = false;
             if (recursion && play1.Count >= p1 && play2.Count >= p2)
-            {
+            {//if recursion is enabled, we need to create a sub-game, if both players have at least as much cards as the value they got.
                 recursed = true;
                 var clone1 = ClonePlayer(play1, p1);
                 var clone2 = ClonePlayer(play2, p2);
                 player1Won = DoGame(ref clone1, ref clone2).Item1 == 1;
             }
 
+            //if we recursed, the winning player is specified, otherwise, high card wins
             if ((!recursed && p1 > p2) || (recursed && player1Won))
             {
                 play1.Enqueue(p1);
@@ -97,6 +99,7 @@ namespace AdventOfCode.Days
 
         private long GetScore(Queue<int> player)
         {
+            //Calculate the score by multiplying the card value with it's position and adding all
             long score = 0;
             while (player.Count > 0)
             {
@@ -119,6 +122,7 @@ namespace AdventOfCode.Days
 
         private Queue<int> ClonePlayer(Queue<int> player, int amount)
         {
+            //create a new queue, that contains the specified cards
             Queue<int> newPlay = new Queue<int>();
             for (int i = 0; i < amount; ++i)
                 newPlay.Enqueue(player.ElementAt(i));
