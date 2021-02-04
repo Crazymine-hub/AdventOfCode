@@ -40,6 +40,8 @@ namespace AdventOfCode.Days
 
         private string CorrectLine(string line, int y)
         {
+            //pad the lines and add the outer left tile border.
+            //since we need to shift the quadratic display to the right further and further.
             string prefix = "".PadLeft(lobby.YDim - y);
             prefix += lobby[0, y] ? "▐" : " ";
             return prefix + line;
@@ -47,19 +49,46 @@ namespace AdventOfCode.Days
 
         private string GetTileString(bool value, int x, int y)
         {
+            // a hexagonal tile is hard to render in the terminal (ascii art gets large quickly)
+            // therefore a tile is always three chars wide, whereby the outers change depending on the neighbour
+            //char for the current tile is full or empty (black or white.)
             string result = value ? "█" : " ";
             if (x + 1 < lobby.XDim && lobby[x + 1, y])
+                //the right neighbour is active. fill, if we are active, else only the right half
                 result += value ? "█" : "▐";
             else
+                //the right neighbour is inactive. fill left half if we are active, leave empty if we are also inactive
                 result += value ? "▌" : " ";
+            //we don't need to consider letf, since it's filled as the previous ones right already.
             return result;
         }
 
         private void ToggleTile(string tile)
         {
             int x = 0, y = 0;
+
+            /* The Hexagonal grid is projected onto a normal (quadratic) grid.
+             * Straight up in quadratic is bottom left, to top right. Hence the following offsets from the center tile
+             *  / \
+             * | X |                One row in quadratic    Quadratic projection:
+             * | Y |                is projected as         +-+-+-+
+             *  \ /                 shown below             |-|0| |
+             *                                              |+|+| |
+             *   / \ / \                                    +-+-+-+
+             *  | - | 0 |                                   |-|0|+|
+             *  | + | + |             ____Top               |0|0|0|
+             * / \ / \ / \               /|                 +-+-+-+
+             *| - | 0 | + |             / |                 | |0|+|
+             *| 0 | 0 | 0 |            /  |                 | |-|-|
+             * \ / \ / \ /            /                     +-+-+-+
+             *  | 0 | + |            /              
+             *  | - | - |           /               
+             *   \ / \ /            Bottom         
+             *    
+             */
+
             for (int i = 0; i < tile.Length; ++i)
-            {
+            {//Determine the path of the tiles to find the tile to toggle
                 switch (tile[i])
                 {
                     case 'e':
@@ -81,6 +110,7 @@ namespace AdventOfCode.Days
                 }
             }
 
+            //Toggle the target tile. If it isn't in the defined area, we use the default (white) to toggle.
             bool lobbyValue = false;
             try
             {
@@ -92,11 +122,14 @@ namespace AdventOfCode.Days
 
         private void Conway()
         {
+            //increase the border to easily allow detection of border tiles (if the borders were to be realigned, mid conway, it would break)
             lobby.IncreaseX(true);
             lobby.IncreaseX(false);
             lobby.IncreaseY(true);
             lobby.IncreaseY(false);
+            //create a copy of our lobby with the lobbys dimensions
             DynamicGrid<bool> newLobby = new DynamicGrid<bool>(lobby.XDim, lobby.YDim);
+            //classic conway. determine the new state based on the counted neighbours
             for (int y = 0; y < lobby.YDim; ++y)
                 for (int x = 0; x < lobby.XDim; ++x)
                 {
@@ -108,6 +141,7 @@ namespace AdventOfCode.Days
                         tileState = neighbours == 2;
                     newLobby[x, y] = tileState;
                 }
+            //remove excess borders, to avoid excessive growth (it's pretty large as it is.)
             newLobby.CutDown();
             lobby = newLobby;
         }
@@ -118,8 +152,11 @@ namespace AdventOfCode.Days
             for (int y = -1; y <= 1; ++y)
                 for (int xOff = -1; xOff <= 0; ++xOff)
                 {
+                    //on the mid we need to shift the second to get the right neighbor and not ourself.
+                    //on the bottom row, the neighbours are generally shifted in memory.
                     int x = xOff;
                     if (y == 0 && xOff == 0 || y == 1) ++x;
+
                     try
                     {
                         if (lobby[xStart + x, yStart + y]) ++neighbours;
