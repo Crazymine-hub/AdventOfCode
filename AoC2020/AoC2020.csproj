@@ -60,6 +60,7 @@
     <Compile Include="Days\Day22.cs" />
     <Compile Include="Days\Day23.cs" />
     <Compile Include="Days\Day24.cs" />
+    <Compile Include="Days\Day25.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
     <Compile Include="Days\Day5.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Days\Tools\Day20\CameraImage.cs" />
     <Compile Include="Days\Tools\Day21\Ingredient.cs" />
     <Compile Include="Days\Tools\Day21\Meal.cs" />
+    <Compile Include="Days\Tools\Day25\RfidClient.cs" />
     <Compile Include="Days\Tools\Day7\Bag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\AsmComputer\AsmComputer.cs" />
@@ -199,6 +201,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day24.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day25.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
