@@ -108,6 +108,9 @@ namespace AdventOfCode
                 case ConsoleKey.NumPad2:
                     useSecond = 2;
                     break;
+                case ConsoleKey.D2:
+                    useSecond = 2;
+                    break;
                 case ConsoleKey.T:
                     custIn = true;
                     useSecond = 1;
