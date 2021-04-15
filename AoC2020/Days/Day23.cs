@@ -42,11 +42,11 @@ namespace AdventOfCode.Days
                 }
             }
 
+            //have the last cup loop to the first loop (kept in position 0)
+            cups[prevCup] = cups[0];
             //get the minimum and maximum value of our cups (should be 1 an 1.000.000)
             minTarget = cups.Min();
             maxTarget = cups.Max();
-            //have the last cup loop to the first loop (kept in position 0)
-            cups[prevCup] = cups[0];
 
             int activeCup = int.Parse(input[0].ToString());
             if (part2)
