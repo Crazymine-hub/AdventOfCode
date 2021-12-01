@@ -13,6 +13,8 @@ namespace AdventOfCode
         public abstract string Title { get; }
         public abstract string Solve(string input, bool part2);
 
+        protected const string Part2UnavailableMessage = "Part 2 is unavailable";
+
         protected List<string> GetLines(string input)
         {
             return input.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
