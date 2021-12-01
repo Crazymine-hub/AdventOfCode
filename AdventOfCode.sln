@@ -4,18 +4,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventOfCode", "AdventOfCode\AdventOfCode.csproj", "{4C193E19-B84E-4FD0-91A8-1FFA09D34824}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF512998-15F2-4844-A6BE-E0DE7D279274} = {AF512998-15F2-4844-A6BE-E0DE7D279274}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2019", "AoC2019\AoC2019.csproj", "{B441CA03-78AA-4FEE-9ED0-4A3A9B20CF2F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4C193E19-B84E-4FD0-91A8-1FFA09D34824} = {4C193E19-B84E-4FD0-91A8-1FFA09D34824}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventOfCommon", "AdventOfCommon\AdventOfCommon.csproj", "{4F6E4037-B01C-4C1C-B13F-BF7452FD1C37}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2020", "AoC2020\AoC2020.csproj", "{AF512998-15F2-4844-A6BE-E0DE7D279274}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4C193E19-B84E-4FD0-91A8-1FFA09D34824} = {4C193E19-B84E-4FD0-91A8-1FFA09D34824}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0755F445-721B-4258-9300-0FB002F29D64}"
 	ProjectSection(SolutionItems) = preProject
