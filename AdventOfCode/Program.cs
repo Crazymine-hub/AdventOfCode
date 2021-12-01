@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using AdventOfCode.Tools;
+using AdventOfCode.Tools.Visualization;
 
 namespace AdventOfCode
 {
@@ -160,6 +161,18 @@ namespace AdventOfCode
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Completed in " + stopwatch.Elapsed.ToString());
+            if(VisualFormHandler.Instance.Visible)
+            {
+                Console.WriteLine("Waiting for Visualization to be closed...");
+                Console.WriteLine("Press enter to force close the visualizer.");
+                while (VisualFormHandler.Instance.Visible) {
+                    if(Console.KeyAvailable && Console.ReadKey().Key == ConsoleKey.Enter)
+                    {
+                        VisualFormHandler.Instance.Hide();
+                        return false;
+                    }
+                };
+            }
             return true;
         }
 

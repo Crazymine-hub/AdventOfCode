@@ -58,6 +58,12 @@ namespace AdventOfCode.Tools
             return Math.Abs(a);
         }
 
+        public static int Clamp(int value, int minimum, int maximum)
+        {
+            if (maximum < minimum) throw new ArgumentOutOfRangeException("maximum", "Maximum cannot be smaller than minium");
+            return value < minimum ? minimum : (value > maximum ? maximum : value);
+        }
+
         public static int IntegerFactorization(ulong number)
         {
             throw new NotImplementedException();
