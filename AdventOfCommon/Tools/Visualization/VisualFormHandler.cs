@@ -12,6 +12,7 @@ namespace AdventOfCode.Tools.Visualization
     {
         private static VisualFormHandler _instance;
         public static VisualFormHandler Instance => _instance ?? (_instance = new VisualFormHandler());
+        public static bool Instantiated => _instance != null;
 
 
         private VisForm visForm = VisForm.Instance;

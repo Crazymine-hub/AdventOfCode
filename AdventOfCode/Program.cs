@@ -161,7 +161,7 @@ namespace AdventOfCode
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Completed in " + stopwatch.Elapsed.ToString());
-            if(VisualFormHandler.Instance.Visible)
+            if(VisualFormHandler.Instantiated && VisualFormHandler.Instance.Visible)
             {
                 Console.WriteLine("Waiting for Visualization to be closed...");
                 Console.WriteLine("Press enter to force close the visualizer.");
