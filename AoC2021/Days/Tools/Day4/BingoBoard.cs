@@ -46,9 +46,9 @@ namespace AdventOfCode.Days.Tools.Day4
             return columnWin.Any(x => x);
         }
 
-        public bool IsFieldFilled(int index)
+        public int GetFieldValue(int index)
         {
-            return board[index] < 0;
+            return board[index];
         }
     }
 }

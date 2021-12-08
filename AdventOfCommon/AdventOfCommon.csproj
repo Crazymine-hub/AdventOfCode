@@ -59,6 +59,7 @@
     <Compile Include="Tools\TopologicalOrder\Topological.cs" />
     <Compile Include="Tools\TraceChars.cs" />
     <Compile Include="Tools\VectorAssist.cs" />
+    <Compile Include="Tools\Visualization\BitmapExtension.cs" />
     <Compile Include="Tools\Visualization\VisForm.cs">
       <SubType>Form</SubType>
     </Compile>
