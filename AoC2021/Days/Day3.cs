@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCode.Tools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,8 +26,8 @@ namespace AdventOfCode.Days
             int gamma = 0;
             for (int i = 0; i < bitCount.Length; i++)
                 if (IsCommonSet(report.Count, bitCount[i]))
-                    gamma = Tools.Bitwise.SetBit(gamma, bitCount.Length - 1 - i, true);
-            long epsilon = ~gamma & Tools.Bitwise.GetBitMask(bitCount.Length);
+                    gamma = Bitwise.SetBit(gamma, bitCount.Length - 1 - i, true);
+            long epsilon = ~gamma & Bitwise.GetBitMask(bitCount.Length);
             return $"Gamma: {gamma} Epsilon: {epsilon} Power Level: {gamma * epsilon}";
         }
 
@@ -55,7 +56,7 @@ namespace AdventOfCode.Days
             for(int i = 0; i < resultBinary.Length; ++i)
             {
                 if (resultBinary[i] == '1')
-                    result = Tools.Bitwise.SetBit(result, resultBinary.Length - 1 - i, true);
+                    result = Bitwise.SetBit(result, resultBinary.Length - 1 - i, true);
             }
             return result;
         }

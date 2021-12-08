@@ -21,16 +21,14 @@ namespace AdventOfCode.Tools.Visualization
             visualRender.Image = null;
         }
 
-
-
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void VisForm_Click(object sender, EventArgs e)
         {
             isZoomed = !isZoomed;
             if (isZoomed)
             {
                 visualRender.Dock = DockStyle.Fill;
                 visualRender.SizeMode = PictureBoxSizeMode.Zoom;
-                visualRender.BackColor = Color.DarkGray;
+                visualRender.BackColor = Color.DimGray;
             }
             else
             {

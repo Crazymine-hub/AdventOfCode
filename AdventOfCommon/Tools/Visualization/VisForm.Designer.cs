@@ -40,7 +40,7 @@
             this.visualRender.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.visualRender.TabIndex = 0;
             this.visualRender.TabStop = false;
-            this.visualRender.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.visualRender.Click += new System.EventHandler(this.VisForm_Click);
             // 
             // VisForm
             // 
@@ -51,6 +51,7 @@
             this.Controls.Add(this.visualRender);
             this.Name = "VisForm";
             this.Text = "VisForm";
+            this.Click += new System.EventHandler(this.VisForm_Click);
             ((System.ComponentModel.ISupportInitialize)(this.visualRender)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
