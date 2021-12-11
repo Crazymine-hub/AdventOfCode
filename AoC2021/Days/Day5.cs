@@ -20,10 +20,10 @@ namespace AdventOfCode.Days
         private bool isDisposed;
         private Bitmap smokerPlan = null;
         private DynamicGrid<int> smokerGrid = new DynamicGrid<int>();
+        const int scale = 1;
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
             foreach (string vectorExpression in GetLines(input))
             {
                 var expression = Regex.Match(vectorExpression, @"^(\d+),(\d+) -> (\d+),(\d+)$");
@@ -36,20 +36,22 @@ namespace AdventOfCode.Days
             }
             int height = smokerLines.Max(x => Math.Max(x.Start.Y, x.End.Y)) + 1;
             int width = smokerLines.Max(x => Math.Max(x.Start.X, x.End.X)) + 1;
-            smokerPlan = new Bitmap(width, height);
+            smokerPlan = new Bitmap(width * scale, height * scale);
+            smokerPlan.FillRect(new Rectangle(0, 0, width * scale, height * scale), Color.Black);
             VisualFormHandler.Instance.Show((Image)smokerPlan.Clone());
             MapSmokers(part2);
-            Console.SetCursorPosition(0, height + 1);
-
+            double max = smokerGrid.Max();
             int higherCount = 0;
+            int offset = (scale - 1) / 2;
             for (int y = 0; y < height; ++y)
                 for (int x = 0; x < width; ++x)
                 {
-
+                    double relative = smokerGrid[x, y] / max;
                     if (smokerGrid[x, y] >= 2)
                     {
                         higherCount++;
-                        smokerPlan.SetPixel(x, y, Color.Red);
+                        Console.WriteLine($"Intersection at ({x}|{y}) ({higherCount})");
+                        smokerPlan.FillRect(new Rectangle(x * scale, y * scale, scale, scale), ColorHelper.ColorFromHSV(360 * relative, 1, 1));
                     }
                 }
             VisualFormHandler.Instance.Update((Image)smokerPlan.Clone());
@@ -68,13 +70,14 @@ namespace AdventOfCode.Days
 
             foreach (Line line in smokers)
             {
+                Console.WriteLine("Processing " + line.ToString());
                 var points = VectorAssist.GetPointsFromLine(line.Start, line.End);
                 foreach (Point point in points)
                 {
                     smokerGrid.MakeAvaliable(point.X, point.Y);
                     ++smokerGrid[point.X, point.Y];
                 }
-                smokerPlan.DrawPoints(points, Color.Yellow);
+                smokerPlan.DrawPoints(points.Select(x => new Point(x.X * scale, x.Y * scale)), Color.FromArgb(20, 20, 20), scale);
                 VisualFormHandler.Instance.Update((Image)smokerPlan.Clone());
             }
         }
@@ -108,4 +111,5 @@ namespace AdventOfCode.Days
             GC.SuppressFinalize(this);
         }
     }
+
 }

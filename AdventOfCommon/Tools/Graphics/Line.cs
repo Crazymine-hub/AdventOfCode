@@ -17,5 +17,10 @@ namespace AdventOfCode.Tools.Graphics
             Start = start;
             End = end;
         }
+
+        public override string ToString()
+        {
+            return $"{Start.X},{Start.Y} -> {End.X},{End.Y}";
+        }
     }
 }
