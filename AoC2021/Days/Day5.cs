@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Tools;
+using AdventOfCode.Tools.Extensions;
 using AdventOfCode.Tools.Graphics;
 using AdventOfCode.Tools.Visualization;
 using System;

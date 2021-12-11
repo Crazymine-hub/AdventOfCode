@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Days.Tools.Day4;
+using AdventOfCode.Tools.Extensions;
 using AdventOfCode.Tools.Visualization;
 using System;
 using System.Collections.Generic;
