@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools
 {
-    public class DynamicGrid<T>
+    public class DynamicGrid<T>: IEnumerable<T>
     {
         private List<List<T>> grid = new List<List<T>>();
 
@@ -130,6 +131,20 @@ namespace AdventOfCode.Tools
                 for (int x = 0; x < XDim; ++x)
                     if (checker == null || checker(this[x, y])) ++result;
             return result;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            for (int y = 0; y < YDim; ++y)
+                for (int x = 0; x < XDim; ++x)
+                {
+                    yield return this[x, y];
+                }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }
