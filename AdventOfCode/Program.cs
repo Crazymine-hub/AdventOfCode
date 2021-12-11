@@ -148,16 +148,25 @@ namespace AdventOfCode
             else
                 Console.Title += " Part 1";
 
-            if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + "_addition" + fileExtension))
-                day.AdditionalContent = File.ReadAllText(dayPath + dayNr + "_addition" + fileExtension);
-
             Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
-            stopwatch.Stop();
+            try
+            {
+                if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + "_addition" + fileExtension))
+                    day.AdditionalContent = File.ReadAllText(dayPath + dayNr + "_addition" + fileExtension);
 
-            if (day.UsesAdditionalContent && day.AdditionalContent != null)
-                File.WriteAllText(dayPath + dayNr + "_addition" + fileExtension, day.AdditionalContent);
+                stopwatch.Start();
+                Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
+                stopwatch.Stop();
+
+                if (day.UsesAdditionalContent && day.AdditionalContent != null)
+                    File.WriteAllText(dayPath + dayNr + "_addition" + fileExtension, day.AdditionalContent);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An Exception occured while running the Day.");
+                Console.WriteLine(ex.ToString());
+            }
+            (day as IDisposable)?.Dispose();
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Completed in " + stopwatch.Elapsed.ToString());
