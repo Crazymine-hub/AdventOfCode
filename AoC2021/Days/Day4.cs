@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Days
 {
-    internal class Day4 : DayBase
+    internal class Day4 : DayBase, IDisposable
     {
         public override string Title => "GIant Squid";
 
@@ -24,6 +24,7 @@ namespace AdventOfCode.Days
         private int gridWidth;
         private int gridHeight;
         private int scaling;
+        private bool isDisposed;
 
         public override string Solve(string input, bool part2)
         {
@@ -36,6 +37,7 @@ namespace AdventOfCode.Days
 
             gridWidth = Convert.ToInt32(Math.Sqrt(boards.Count));
             gridHeight = boards.Count / gridWidth;
+            if (boards.Count % gridWidth > 0) ++gridHeight;
 
             scaling = FieldLineLength * FieldSize + (FieldLineLength - 1) * FieldSpacing + (2 * BoardMargin) + DividerStrength;
 
@@ -59,14 +61,22 @@ namespace AdventOfCode.Days
             VisualFormHandler.Instance.Show((Bitmap)gameBoard.Clone());
             DrawBoards();
 
-            PlayGame(drawnNumbers);
-            return "";
+            BingoBoard winner = PlayGame(drawnNumbers, out int drawnNumber);
+            DrawBoards();
+
+            int score = winner.GetUnmarkedFieldSum() * drawnNumber;
+
+            return "Winner board score is " + score;
         }
 
         private void DrawBoards()
         {
             for (int y = 0; y < gridHeight; ++y)
                 for (int x = 0; x < gridWidth; ++x)
+                {
+                    if (y * gridWidth + x >= boards.Count) break;
+                    BingoBoard board = boards[y * gridWidth + x];
+                    bool boardWinning = board.IsBoardComplete();
                     for (int gridY = 0; gridY < 5; ++gridY)
                         for (int gridX = 0; gridX < 5; ++gridX)
                         {
@@ -75,29 +85,27 @@ namespace AdventOfCode.Days
                                 y * scaling + BoardMargin + DividerStrength + gridY * (FieldSpacing + FieldSize),
                                 FieldSize,
                                 FieldSize);
-                            gameBoard.FillRect(block, boards[y * gridWidth + x].GetFieldValue(gridY * 5 + gridX) < 0 ? Color.Green : Color.Red);
+                            int boardFieldValue = board.GetFieldValue(gridY * 5 + gridX);
+                            gameBoard.FillRect(block, boardFieldValue < 0 ? (boardWinning ? Color.Green : Color.Yellow) : Color.Red);
                         }
+                }
             VisualFormHandler.Instance.Update((Bitmap)gameBoard.Clone());
         }
 
-        private BingoBoard PlayGame(int[] drawnNumbers)
+        private BingoBoard PlayGame(int[] drawnNumbers, out int lastDrawn)
         {
-            BingoBoard winner = null;
             foreach (int number in drawnNumbers)
             {
+                lastDrawn = number;
                 Console.WriteLine("Drawn: " + number);
                 foreach (BingoBoard board in boards)
                 {
                     board.PlayNumber(number);
                     DisplayBoard(board);
                     if (board.IsBoardComplete())
-                    {
-                        winner = board;
-                        break;
-                    }
+                        return board;
                 }
                 DrawBoards();
-                if (winner != null) break;
             }
             throw new Exception("No winning board found");
         }
@@ -107,10 +115,41 @@ namespace AdventOfCode.Days
             for (int i = 0; i < 25; ++i)
             {
                 int number = board.GetFieldValue(i);
-                Console.Write(number < 0 ? 'X' : number);
-                if (i > 0 && i % 5 == 0)
+                Console.Write((number < 0 ? "X" : number.ToString()).PadRight(3));
+                if (i > 0 && i % 5 == 4)
                     Console.WriteLine();
             }
+            Console.WriteLine();
+            Console.WriteLine();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!isDisposed)
+            {
+                if (disposing)
+                {
+                    gameBoard.Dispose();
+                }
+
+                // TODO: Nicht verwaltete Ressourcen (nicht verwaltete Objekte) freigeben und Finalizer überschreiben
+                // TODO: Große Felder auf NULL setzen
+                isDisposed = true;
+            }
+        }
+
+        // // TODO: Finalizer nur überschreiben, wenn "Dispose(bool disposing)" Code für die Freigabe nicht verwalteter Ressourcen enthält
+        // ~Day4()
+        // {
+        //     // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -31,16 +31,16 @@ namespace AdventOfCode.Days.Tools.Day4
         public bool IsBoardComplete()
         {
             bool[] columnWin = new bool[5].Select(x => true).ToArray();
-            bool rowWin = false;
+            bool rowWin = true;
             for (int i = 0; i < board.Length; ++i)
             {
                 int colIndex = i % 5;
                 columnWin[colIndex] &= board[i] < 0;
                 rowWin &= board[i] < 0;
-                if(colIndex == 4)
+                if (colIndex == 4)
                 {
-                    if(rowWin) return true;
-                    rowWin = false;
+                    if (rowWin) return true;
+                    rowWin = true;
                 }
             }
             return columnWin.Any(x => x);
@@ -49,6 +49,15 @@ namespace AdventOfCode.Days.Tools.Day4
         public int GetFieldValue(int index)
         {
             return board[index];
+        }
+
+        public int GetUnmarkedFieldSum()
+        {
+            int sum = 0;
+            foreach (int field in board)
+                if (field > 0)
+                    sum += field;
+            return sum;
         }
     }
 }
