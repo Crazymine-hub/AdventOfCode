@@ -41,12 +41,14 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Days\Day1.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
+    <Compile Include="Days\Day5.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -73,6 +75,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day4.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Days\Tools\Day5\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day5.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

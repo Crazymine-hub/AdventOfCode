@@ -82,24 +82,28 @@ namespace AdventOfCode.Tools
             while (grid.All(x => isEmpty(x.Last()))) DecreaseX(false);
         }
 
+        public void MakeAvaliable(int x, int y)
+        {
+            while (x >= XDim) IncreaseX(false);
+            while (x < 0)
+            {
+                IncreaseX(true);
+                ++x;
+            }
+            while (y >= YDim) IncreaseY(false);
+            while (y < 0)
+            {
+                IncreaseY(true);
+                ++y;
+            }
+        }
+
         public T this[int x, int y]
         {
             get => grid[y][x];
             set
             {
-                while (x >= XDim) IncreaseX(false);
-                while (x < 0)
-                {
-                    IncreaseX(true);
-                    ++x;
-                }
-                while (y >= YDim) IncreaseY(false);
-                while (y < 0)
-                {
-                    IncreaseY(true);
-                    ++y;
-                }
-
+                MakeAvaliable(x, y);
                 grid[y][x] = value;
             }
         }

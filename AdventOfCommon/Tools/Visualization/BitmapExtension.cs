@@ -28,5 +28,19 @@ namespace AdventOfCode.Tools.Visualization
             System.Runtime.InteropServices.Marshal.Copy(channelArray, 0, lockInfo.Scan0, channelArray.Length);
             bmp.UnlockBits(lockInfo);
         }
+
+        public static void DrawLine(this Bitmap bmp, Point start, Point end, Color color, int size = 1)
+        {
+            DrawPoints(bmp, VectorAssist.GetPointsFromLine(start, end), color,size);
+        }
+
+        public static void DrawPoints(this Bitmap bmp, IEnumerable<Point> points, Color color, int size = 1)
+        {
+            if (size < 1) throw new ArgumentOutOfRangeException(nameof(size), "Size must be at least 1");
+            int offset = (size-1) / 2;
+
+            foreach (Point point in points)
+                FillRect(bmp, new Rectangle(point.X - offset, point.Y - offset, size, size), color);
+        }
     }
 }

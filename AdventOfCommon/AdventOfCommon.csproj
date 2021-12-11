@@ -49,6 +49,7 @@
     <Compile Include="Tools\Bitwise.cs" />
     <Compile Include="Tools\ConsoleAssist.cs" />
     <Compile Include="Tools\DynamicGrid.cs" />
+    <Compile Include="Tools\Graphics\Line.cs" />
     <Compile Include="Tools\MathHelper.cs" />
     <Compile Include="Tools\NumberLists.cs" />
     <Compile Include="Tools\Pathfinding\AStar.cs" />
