@@ -28,7 +28,6 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
             List<string> game = GetGroupedLines(input);
             boards = new List<BingoBoard>();
             foreach (string boardDefinition in game.Skip(1))
@@ -61,7 +60,7 @@ namespace AdventOfCode.Days
             VisualFormHandler.Instance.Show((Bitmap)gameBoard.Clone());
             DrawBoards();
 
-            BingoBoard winner = PlayGame(drawnNumbers, out int drawnNumber);
+            BingoBoard winner = PlayGame(drawnNumbers, part2, out int drawnNumber);
             DrawBoards();
 
             int score = winner.GetUnmarkedFieldSum() * drawnNumber;
@@ -92,21 +91,33 @@ namespace AdventOfCode.Days
             VisualFormHandler.Instance.Update((Bitmap)gameBoard.Clone());
         }
 
-        private BingoBoard PlayGame(int[] drawnNumbers, out int lastDrawn)
+        private BingoBoard PlayGame(int[] drawnNumbers, bool getLast, out int lastDrawn)
         {
+            BingoBoard lastWinner = null;
+            lastDrawn = -1;
             foreach (int number in drawnNumbers)
             {
                 lastDrawn = number;
                 Console.WriteLine("Drawn: " + number);
                 foreach (BingoBoard board in boards)
                 {
+                    if (board.IsBoardComplete())
+                    {
+                        Console.WriteLine("Board already won. Skipping");
+                        continue;
+                    }
                     board.PlayNumber(number);
                     DisplayBoard(board);
                     if (board.IsBoardComplete())
-                        return board;
+                    {
+                        if (!getLast) return board;
+                        lastWinner = board;
+                    }
                 }
                 DrawBoards();
+                if (getLast && boards.All(x => x.IsBoardComplete())) break;
             }
+            if(getLast) return lastWinner;
             throw new Exception("No winning board found");
         }
 
