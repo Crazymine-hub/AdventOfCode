@@ -55,15 +55,23 @@ namespace AdventOfCode.Tools
             List<Point> points = new List<Point>();
             Point lastPoint = start;
 
+            int direction = vector.Y > 0 ? 1 : -1;
+            int maxY = Math.Max(start.Y, end.Y);
+            int minY = Math.Min(start.Y, end.Y);
+
             for (int x = start.X; x <= end.X; ++x)
             {
-                double progress = ((double)x - start.X + 1) / (vector.X + 1);
-                int y = (int)Math.Round(Math.Abs(vector.Y) * progress) + Math.Min(start.Y, end.Y);
+                int append = Math.Max(0, points.Count - 1);
+                double progress = 1;
+                if (vector.X != 0)
+                    progress = ((double)x - start.X) / (vector.X);
+                int y = (int)Math.Round(vector.Y * progress) + (direction > 0 ? minY : maxY);
+
                 Point target = new Point(x, y);
                 if (target != lastPoint)
                     points.Add(lastPoint);
-                for (int top = Math.Min(lastPoint.Y, target.Y) + 1; top < Math.Max(lastPoint.Y, target.Y); ++top)
-                    points.Add(new Point(lastPoint.X, top));
+                for (int top = lastPoint.Y + direction; direction > 0 ? (top < target.Y) : (top > target.Y); top += direction)
+                    points.Insert(direction > 0 ? points.Count - 1 : append, new Point(lastPoint.X, top));
                 lastPoint = target;
             }
             points.Add(lastPoint);
