@@ -53,6 +53,8 @@
     <Compile Include="Days\Day7.cs" />
     <Compile Include="Days\Day8.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
+    <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
+    <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
