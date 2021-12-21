@@ -52,6 +52,7 @@
     <Compile Include="Days\Day6.cs" />
     <Compile Include="Days\Day7.cs" />
     <Compile Include="Days\Day8.cs" />
+    <Compile Include="Days\Day9.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
     <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
@@ -103,6 +104,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day8.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day9.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
