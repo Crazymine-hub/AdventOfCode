@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Days\Day1.cs" />
+    <Compile Include="Days\Day10.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="Days\Day7.cs" />
     <Compile Include="Days\Day8.cs" />
     <Compile Include="Days\Day9.cs" />
+    <Compile Include="Days\Tools\Day10\GroupDelimiter.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
     <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
@@ -109,6 +111,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day9.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day10.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
