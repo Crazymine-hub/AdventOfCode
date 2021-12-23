@@ -50,6 +50,7 @@
     <Compile Include="Days\Day12.cs" />
     <Compile Include="Days\Day13.cs" />
     <Compile Include="Days\Day14.cs" />
+    <Compile Include="Days\Day15.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
@@ -91,7 +92,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Days\Tools\Day14\" />
+    <Folder Include="Days\Tools\Day15\" />
     <Folder Include="Days\Tools\Day5\" />
   </ItemGroup>
   <ItemGroup>
