@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCode.Tools.Pathfinding.Internals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,72 +10,87 @@ namespace AdventOfCode.Tools.Pathfinding
     public class AStar
     {
         readonly List<BaseNodeConnection> connections;
-        List<BaseNode> path;
-        List<BaseNode> ignored;
+        List<AStarNode> nodes;
+
+        public double DistanceHeatWeigh { get; set; } = 0.5;
 
 
         public AStar(List<BaseNodeConnection> connectionList)
         {
             connections = connectionList;
+            nodes = connections
+                .SelectMany(x => new BaseNode[] { x.NodeA, x.NodeB })
+                .Distinct()
+                .Select(x => new AStarNode(x))
+                .ToList();
         }
 
-        public BaseNode[] GetPath(BaseNode start, BaseNode finish)
+        public BaseNode[] GetPath(BaseNode start, BaseNode finish, Func<AStarNode, double> heuristicAnalyzer = null)
         {
-            return GetPath(start, finish, out List<BaseNodeConnection> cons, out double cost);
+            return GetPath(start, finish, out _, out _, heuristicAnalyzer);
         }
 
-        public BaseNode[] GetPath(BaseNode start, BaseNode finish, out double cost)
+        public BaseNode[] GetPath(BaseNode start, BaseNode finish, out double cost, Func<AStarNode, double> heuristicAnalyzer = null)
         {
-            return GetPath(start, finish, out List<BaseNodeConnection> cons, out cost);
+            return GetPath(start, finish, out _, out cost, heuristicAnalyzer);
         }
 
-        public BaseNode[] GetPath(BaseNode start, BaseNode finish, out List<BaseNodeConnection> connectionList, out double pathCost)
+        public BaseNode[] GetPath(BaseNode start,
+                                  BaseNode finish,
+                                  out List<BaseNodeConnection> connectionList,
+                                  out double pathCost,
+                                  Func<AStarNode, double> heuristicAnalyzer = null)
         {
-            path = new List<BaseNode>();
-            ignored = new List<BaseNode>();
-            path.Add(start);
-            var active = start;
+            var processingNodes = new List<AStarNode>();
+            processingNodes.AddRange(nodes);
+
+            var active = processingNodes.Single(x => x.Node == start);
+            var endNode = processingNodes.Single(x => x.Node == finish);
+            active.PathCost = 0;
             pathCost = 0;
             connectionList = new List<BaseNodeConnection>();
 
-            while (active != finish)
+            foreach (var node in processingNodes)
+                node.DistanceToTarget = node.Node.GetDistanceTo(finish);
+
+            while (active != endNode)
             {
-                var neighbours = GetUntracedConnections(active);
+                processingNodes.Remove(active);
+                var neighbours = GetNeighbours(active.Node);
+                pathCost = active.PathCost;
 
-                foreach (var currConn in neighbours)
+                foreach (var connection in neighbours)
                 {
-                    var connTarget = currConn.GetOtherNode(active);
-                    currConn.Rating = pathCost + currConn.Distance + connTarget.DistanceToTarget;
-                    if (currConn.Distance < 0)
-                        currConn.Rating = -1;
+                    if (connection.Distance < 0) continue;
+                    var connTarget = connection.GetOtherNode(active.Node);
+                    var targetDetails = processingNodes.SingleOrDefault(x => x.Node == connTarget);
+                    if (targetDetails == null || targetDetails.PathCost <= pathCost) continue;
+                    targetDetails.PathCost = pathCost + connection.Distance;
+                    targetDetails.PreviousNode = active;
+                    targetDetails.FullCost = heuristicAnalyzer?.Invoke(targetDetails) ?? DefaultHeuristic(targetDetails);
                 }
-
-                var chosen = neighbours.OrderBy(conn => conn.Rating).FirstOrDefault(conn => conn.Rating >= 0);
-                if (chosen == null)
-                {
-                    if (active == start) break;
-                    ignored.Add(active);
-                    path.Remove(active);
-                    pathCost -= connectionList.Last().Distance;
-                    connectionList.Remove(connectionList.Last());
-                }
-                else
-                {
-                    path.Add(chosen.GetOtherNode(active));
-                    pathCost += chosen.Distance;
-                    connectionList.Add(chosen);
-                }
-                active = path.Last();
+                active = processingNodes.OrderBy(x => x.FullCost).First();
             }
-            return path.ToArray();
+            var finalPath = GetPathToNode(active);
+            pathCost = active.PathCost;
+            for (int i = 0; i < finalPath.Count - 1; ++i)
+                connectionList.Add(connections.Single(x => x.HasConnectionTo(finalPath[i].Node) && x.HasConnectionTo(finalPath[i + 1].Node)));
+            return finalPath.Select(x => x.Node).ToArray();
         }
 
-        private List<BaseNodeConnection> GetUntracedConnections(BaseNode targetNode)
+        private double DefaultHeuristic(AStarNode arg) => arg.DistanceToTarget + arg.PathCost;
+
+        private List<BaseNodeConnection> GetNeighbours(BaseNode targetNode) =>
+            connections.Where(conn => conn.HasConnectionTo(targetNode)).ToList();
+
+        private List<AStarNode> GetPathToNode(AStarNode targetNode)
         {
-            var cons = connections.Where(conn => conn.HasConnectionTo(targetNode)).ToList();
-            foreach (var usedNode in path.Concat(ignored))
-                cons = cons.Where(conn => conn.GetOtherNode(targetNode) != usedNode).ToList();
-            return cons;
+            var path = new List<AStarNode>();
+            if (targetNode == null) return path;
+
+            path.AddRange(GetPathToNode(targetNode.PreviousNode));
+            path.Add(targetNode);
+            return path;
         }
     }
 }
