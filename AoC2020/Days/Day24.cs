@@ -1,4 +1,4 @@
-﻿using AdventOfCode.Tools;
+﻿using AdventOfCode.Tools.DynamicGrid;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

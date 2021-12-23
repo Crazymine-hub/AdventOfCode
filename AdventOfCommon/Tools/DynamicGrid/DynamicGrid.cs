@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdventOfCode.Tools
+namespace AdventOfCode.Tools.DynamicGrid
 {
-    public class DynamicGrid<T>: IEnumerable<T>
+    public class DynamicGrid<T> : IEnumerable<DynamicGridValue<T>>
     {
-        private List<List<T>> grid = new List<List<T>>();
+        private readonly List<List<T>> grid;
 
         public int XDim { get; private set; }
         public int YDim { get; private set; }
@@ -124,18 +124,18 @@ namespace AdventOfCode.Tools
             return result.ToString().Remove(result.Length - Environment.NewLine.Length);
         }
 
-        public IEnumerator<T> GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<DynamicGridValue<T>> GetEnumerator()
         {
             for (int y = 0; y < YDim; ++y)
                 for (int x = 0; x < XDim; ++x)
                 {
-                    yield return this[x, y];
+                    yield return new DynamicGridValue<T>(x, y, this[x, y]);
                 }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
         }
     }
 }
