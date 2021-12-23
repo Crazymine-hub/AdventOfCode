@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Tools.DynamicGrid;
+using AdventOfCode.Tools.Extensions;
 using AdventOfCode.Tools.Visualization;
 using System;
 using System.Collections.Generic;
@@ -17,25 +18,49 @@ namespace AdventOfCode.Days
         private bool disposedValue;
 
         Bitmap paperPunches;
+        const int scale = 5;
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
             List<string> instructions = GetGroupedLines(input);
             foreach (string dot in GetLines(instructions[0]))
             {
                 string[] coords = dot.Split(',');
                 paper.SetRelative(int.Parse(coords[0]), int.Parse(coords[1]), true);
             }
-            paperPunches = new Bitmap(paper.XDim, paper.YDim);
+            paperPunches = new Bitmap(paper.XDim * scale, paper.YDim * scale);
             VisualFormHandler.Instance.Show(paperPunches);
-            
+            RefreshView();
+
+
             foreach (string foldInstruction in GetLines(instructions[1]))
             {
                 Fold(foldInstruction);
+                RefreshView();
                 if (!part2) break;
             }
+
+            Console.SetCursorPosition(0, paper.YDim + 1);
             return "Holes: " + paper.Count(x => x);
+        }
+
+        private void RefreshView()
+        {
+            paperPunches.Dispose();
+            paperPunches = new Bitmap(paper.XDim * scale, paper.YDim * scale);
+            Console.Clear();
+            foreach(DynamicGridValue<bool> value in paper)
+            {
+                if (!value) continue;
+                try
+                {
+                    Console.SetCursorPosition(value.X, value.Y);
+                    Console.Write('█');
+                }
+                catch(ArgumentOutOfRangeException) {/* Out of range pixels will not be drawn. simple as that*/ }
+                paperPunches.FillRect(new Rectangle(value.X * scale, value.Y * scale, scale, scale), Color.White);
+            }
+            VisualFormHandler.Instance.Update(paperPunches);
         }
 
         private void Fold(string foldInstruction)
