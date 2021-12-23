@@ -124,15 +124,6 @@ namespace AdventOfCode.Tools
             return result.ToString().Remove(result.Length - Environment.NewLine.Length);
         }
 
-        public long Count(Predicate<T> checker = null)
-        {
-            long result = 0;
-            for (int y = 0; y < YDim; ++y)
-                for (int x = 0; x < XDim; ++x)
-                    if (checker == null || checker(this[x, y])) ++result;
-            return result;
-        }
-
         public IEnumerator<T> GetEnumerator()
         {
             for (int y = 0; y < YDim; ++y)
