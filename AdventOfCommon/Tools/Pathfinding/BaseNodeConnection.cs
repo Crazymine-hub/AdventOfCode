@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.Pathfinding
 {
-    public class BaseNodeConnection
+    public class BaseNodeConnection: IEquatable<BaseNodeConnection>
     {
         public virtual BaseNode NodeA { get; protected set; }
         public virtual BaseNode NodeB { get; protected set; }
@@ -50,7 +50,26 @@ namespace AdventOfCode.Tools.Pathfinding
 
         public virtual bool IsSameConnection(BaseNodeConnection other)
         {
-            return other.NodeA == NodeA && other.NodeB == NodeB || other.NodeA == NodeB && other.NodeB == NodeA;
+            return other != null && (other.NodeA == NodeA && other.NodeB == NodeB || other.NodeA == NodeB && other.NodeB == NodeA);
+        }
+
+        public virtual bool Equals(BaseNodeConnection other)
+        {
+            return IsSameConnection(other);
+        }
+
+
+        public static string GetPathString(IEnumerable<BaseNodeConnection> connections, BaseNode start)
+        {
+            StringBuilder path = new StringBuilder();
+            foreach (BaseNodeConnection connection in connections)
+            {
+                path.Append(start.ToString());
+                path.Append("->");
+                start = connection.GetOtherNode(start);
+            }
+            path.Append(start.ToString());
+            return path.ToString();
         }
 
         public static void PrintConnections(List<BaseNodeConnection> connections, int vOffset, bool bold = false)

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.Pathfinding
 {
-    public class BaseNode
+    public class BaseNode: IEquatable<BaseNode>
     {
         public int X { get; protected set; }
         public int Y { get; protected set; }
@@ -29,6 +29,11 @@ namespace AdventOfCode.Tools.Pathfinding
         public void UpdateTargetDistance(BaseNode target)
         {
             DistanceToTarget = Math.Sqrt(Math.Pow(target.X - X, 2) + Math.Pow(target.Y - Y, 2));
+        }
+
+        public virtual bool Equals(BaseNode other)
+        {
+            return other != null && other.X == X && other.Y == Y;
         }
     }
 }
