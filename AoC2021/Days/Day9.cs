@@ -55,7 +55,7 @@ namespace AdventOfCode.Days
                             Console.Write(gradient[brightness]);
                         }
                     }
-                    VisualFormHandler.Instance.Update((Image)map.Clone());
+                    VisualFormHandler.Instance.Update(map);
                     Console.WriteLine();
                 }
                 if (!part2)
@@ -78,7 +78,7 @@ namespace AdventOfCode.Days
                         int brightness = Convert.ToInt32(progress * 0xFF);
                         map.FillRect(new Rectangle(point.X * scale, point.Y * scale, scale, scale), Color.FromArgb(0, brightness, 0));
                     }
-                    VisualFormHandler.Instance.Update((Image)map.Clone());
+                    VisualFormHandler.Instance.Update(map);
                 }
 
 

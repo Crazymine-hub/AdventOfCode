@@ -20,15 +20,15 @@ namespace AdventOfCode.Tools.Visualization
 
         public bool Visible => GetVisibility();
 
-        public void Show(Image visualBmp)
+        public void Show(Image visualBmp, bool createCopy = true)
         {
             if (visForm.InvokeRequired)
             {
-                visForm.Invoke(new Action<Image>(Show), visualBmp);
+                visForm.Invoke(new Action<Image, bool>(Show), visualBmp, createCopy);
                 return;
             }
             Reset();
-            Update(visualBmp);
+            Update(visualBmp, createCopy);
             visForm.Show();
         }
 
@@ -66,15 +66,15 @@ namespace AdventOfCode.Tools.Visualization
             catch { }
         }
 
-        public void Update(Image visualImage)
+        public void Update(Image visualImage, bool createCopy = true)
         {
             if (visForm.InvokeRequired)
             {
-                visForm.Invoke(new Action<Image>(Update), visualImage);
+                visForm.Invoke(new Action<Image, bool>(Update), visualImage, createCopy);
                 return;
             }
             visForm.visualRender.Image?.Dispose();
-            visForm.visualRender.Image = visualImage;
+            visForm.visualRender.Image = createCopy ? (Image)visualImage.Clone() : visualImage;
             Invalidate();
         }
 

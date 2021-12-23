@@ -84,7 +84,7 @@ namespace AdventOfCode.Days
             }
             System.Runtime.InteropServices.Marshal.Copy(pixelData, 0, bmpPixels.Scan0, length);
             bmp.UnlockBits(bmpPixels);
-            VisualFormHandler.Instance.Update((Bitmap)bmp.Clone());
+            VisualFormHandler.Instance.Update(bmp);
             VisualFormHandler.Instance.SetFocusTo(pixelArea.X, pixelArea.Y);
         }
     }

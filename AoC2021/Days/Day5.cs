@@ -54,7 +54,7 @@ namespace AdventOfCode.Days
                         smokerPlan.FillRect(new Rectangle(x * scale, y * scale, scale, scale), ColorHelper.ColorFromHSV(360 * relative, 1, 1));
                     }
                 }
-            VisualFormHandler.Instance.Update((Image)smokerPlan.Clone());
+            VisualFormHandler.Instance.Update(smokerPlan);
             return $"Found {higherCount} dangerous areas";
         }
 
@@ -78,7 +78,7 @@ namespace AdventOfCode.Days
                     ++smokerGrid[point.X, point.Y];
                 }
                 smokerPlan.DrawPoints(points.Select(x => new Point(x.X * scale, x.Y * scale)), Color.FromArgb(20, 20, 20), scale);
-                VisualFormHandler.Instance.Update((Image)smokerPlan.Clone());
+                VisualFormHandler.Instance.Update(smokerPlan);
             }
         }
 

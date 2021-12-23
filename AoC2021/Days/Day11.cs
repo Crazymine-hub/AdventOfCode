@@ -88,7 +88,7 @@ namespace AdventOfCode.Days
                 int brightness = Convert.ToInt32(value * 0xFF);
                 rave.FillRect(new Rectangle(squid.X * scale, squid.Y * scale, scale, scale), Color.FromArgb(brightness, brightness, brightness));
             }
-            VisualFormHandler.Instance.Update((Image)rave.Clone());
+            VisualFormHandler.Instance.Update(rave);
             return flashCount;
         }
 

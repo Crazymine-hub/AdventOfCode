@@ -89,7 +89,7 @@ namespace AdventOfCode.Days
                             gameBoard.FillRect(block, boardFieldValue < 0 ? (boardWinning ? Color.Green : Color.Yellow) : Color.Red);
                         }
                 }
-            VisualFormHandler.Instance.Update((Bitmap)gameBoard.Clone());
+            VisualFormHandler.Instance.Update(gameBoard);
         }
 
         private BingoBoard PlayGame(int[] drawnNumbers, bool getLast, out int lastDrawn)
