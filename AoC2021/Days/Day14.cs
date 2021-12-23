@@ -89,5 +89,22 @@ namespace AdventOfCode.Days
 
             return $"{mostCommonCount}(mc) - {leastCommonCount}(lc) = {mostCommonCount - leastCommonCount}";
         }
+
+        private string ProcessPolymer(string polymer, int depth)
+        {
+            if (depth > iterationCount - 1) return polymer;
+            StringBuilder newPolymer = new StringBuilder();
+            for (int i = polymer.Length - 2; i >= 0 ; --i)
+            {
+                string polymerPart = polymer.Substring(i, 2);
+                newPolymer.Insert(0, polymerPart[1]);
+                if (insertionRules.ContainsKey(polymerPart))
+                {
+                    newPolymer.Insert(0, insertionRules[polymerPart]);
+                }
+            }
+            newPolymer.Insert(0, polymer.First());
+            return ProcessPolymer(newPolymer.ToString(), depth + 1);
+        }
     }
 }
