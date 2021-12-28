@@ -8,11 +8,10 @@ namespace AdventOfCode.Tools.Pathfinding
 {
     public class BaseNode: IEquatable<BaseNode>
     {
-        public int X { get; protected set; }
-        public int Y { get; protected set; }
-        public double DistanceToTarget { get; set; }
-        public int PathIndex { get; set; }
-        public virtual char CharRepresentation => '\0';
+        public virtual int X { get; protected set; }
+        public virtual int Y { get; protected set; }
+        public virtual double Heat { get; set; }
+        public virtual double ClientHeat { get; set; }
 
         public BaseNode(int x, int y)
         {
@@ -20,15 +19,16 @@ namespace AdventOfCode.Tools.Pathfinding
             Y = y;
         }
 
-        public override string ToString()
+        public override string ToString() => $"@{X}/{Y}";
+
+        public virtual bool Equals(BaseNode other)
         {
-            string koords = $" @{X}/{Y}";
-            return (CharRepresentation == '\0' ? '+' : CharRepresentation) + koords;
+            return other != null && other.X == X && other.Y == Y;
         }
 
-        public void UpdateTargetDistance(BaseNode target)
+        public virtual double GetDistanceTo(BaseNode target)
         {
-            DistanceToTarget = Math.Sqrt(Math.Pow(target.X - X, 2) + Math.Pow(target.Y - Y, 2));
+            return Math.Sqrt(Math.Pow(target.X - X, 2) + Math.Pow(target.Y - Y, 2));
         }
 
         public virtual bool Equals(BaseNode other)

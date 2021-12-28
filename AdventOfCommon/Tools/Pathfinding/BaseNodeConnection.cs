@@ -12,15 +12,12 @@ namespace AdventOfCode.Tools.Pathfinding
         public virtual BaseNode NodeB { get; protected set; }
         protected double distance;
         public virtual double Distance => distance;
-        public bool IsHorizontal { get; protected set; }
-        public double Rating { get; set; }
 
         public BaseNodeConnection(BaseNode a, BaseNode b)
         {
             NodeA = a;
             NodeB = b;
             RefreshDistance();
-            IsHorizontal = NodeA.X != NodeB.X;
         }
 
         public void RefreshDistance()
@@ -72,41 +69,41 @@ namespace AdventOfCode.Tools.Pathfinding
             return path.ToString();
         }
 
-        public static void PrintConnections(List<BaseNodeConnection> connections, int vOffset, bool bold = false)
-        {
-            foreach (BaseNodeConnection con in connections)
-            {
-                Console.SetCursorPosition(con.NodeA.X, con.NodeA.Y + vOffset);
-                if (con.NodeA.CharRepresentation != '\0')
-                    Console.Write(con.NodeA.CharRepresentation);
-                else
-                    Console.Write(TraceChars.paths[con.NodeA.PathIndex | (bold ? 16 : 0)]);
+        //public static void PrintConnections(List<BaseNodeConnection> connections, int vOffset, bool bold = false)
+        //{
+        //    foreach (BaseNodeConnection con in connections)
+        //    {
+        //        Console.SetCursorPosition(con.NodeA.X, con.NodeA.Y + vOffset);
+        //        if (con.NodeA.CharRepresentation != '\0')
+        //            Console.Write(con.NodeA.CharRepresentation);
+        //        else
+        //            Console.Write(TraceChars.paths[con.NodeA.PathIndex | (bold ? 16 : 0)]);
 
 
-                if (con.IsHorizontal)
-                {
-                    for (int i = Math.Min(con.NodeA.X, con.NodeB.X) + 1; i < Math.Max(con.NodeA.X, con.NodeB.X); i++)
-                    {
-                        Console.CursorLeft = i;
-                        Console.Write(TraceChars.GetPathChar(false, false, true, true, bold));
-                    }
-                }
-                else
-                {
-                    for (int i = Math.Min(con.NodeA.Y, con.NodeB.Y) + 1; i < Math.Max(con.NodeA.Y, con.NodeB.Y); i++)
-                    {
-                        Console.CursorLeft--;
-                        Console.CursorTop = i + vOffset;
-                        Console.Write(TraceChars.GetPathChar(true, true, false, false, bold));
-                    }
-                }
+        //        if (con.IsHorizontal)
+        //        {
+        //            for (int i = Math.Min(con.NodeA.X, con.NodeB.X) + 1; i < Math.Max(con.NodeA.X, con.NodeB.X); i++)
+        //            {
+        //                Console.CursorLeft = i;
+        //                Console.Write(TraceChars.GetPathChar(false, false, true, true, bold));
+        //            }
+        //        }
+        //        else
+        //        {
+        //            for (int i = Math.Min(con.NodeA.Y, con.NodeB.Y) + 1; i < Math.Max(con.NodeA.Y, con.NodeB.Y); i++)
+        //            {
+        //                Console.CursorLeft--;
+        //                Console.CursorTop = i + vOffset;
+        //                Console.Write(TraceChars.GetPathChar(true, true, false, false, bold));
+        //            }
+        //        }
 
-                Console.SetCursorPosition(con.NodeB.X, con.NodeB.Y + vOffset);
-                if (con.NodeB.CharRepresentation != '\0')
-                    Console.Write(con.NodeB.CharRepresentation);
-                else
-                    Console.Write(TraceChars.paths[con.NodeB.PathIndex | (bold ? 16 : 0)]);
-            }
-        }
+        //        Console.SetCursorPosition(con.NodeB.X, con.NodeB.Y + vOffset);
+        //        if (con.NodeB.CharRepresentation != '\0')
+        //            Console.Write(con.NodeB.CharRepresentation);
+        //        else
+        //            Console.Write(TraceChars.paths[con.NodeB.PathIndex | (bold ? 16 : 0)]);
+        //    }
+        //}
     }
 }
