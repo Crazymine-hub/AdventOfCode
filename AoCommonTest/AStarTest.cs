@@ -77,7 +77,7 @@ namespace AoCommonTest
                             nodes.Add(node);
                             if (pathColors.Contains(pixelColor.ToArgb())) solution.Add(node);
                             BaseNode left = nodes.SingleOrDefault(testNode => testNode.Y == y && testNode.X == x - 1);
-                            BaseNode top = nodes.SingleOrDefault(testNode => testNode.Y - 1 == y && testNode.X == x);
+                            BaseNode top = nodes.SingleOrDefault(testNode => testNode.Y == y - 1 && testNode.X == x);
                             if (left != null)
                                 connections.Add(new BaseNodeConnection(left, node));
                             if (top != null)

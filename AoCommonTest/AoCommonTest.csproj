@@ -56,16 +56,15 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Data\Mazes\non-perfect\maze1.bmp" />
+    <Content Include="Data\Mazes\non-perfect\maze2.bmp" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AdventOfCommon\AdventOfCommon.csproj">
       <Project>{4F6E4037-B01C-4C1C-B13F-BF7452FD1C37}</Project>
       <Name>AdventOfCommon</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Data\Mazes\Inperfect\maze1.bmp" />
-    <None Include="Data\Mazes\Inperfect\maze2.bmp" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
