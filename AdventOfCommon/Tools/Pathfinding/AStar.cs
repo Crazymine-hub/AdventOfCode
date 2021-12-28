@@ -41,11 +41,11 @@ namespace AdventOfCode.Tools.Pathfinding
                                   out double pathCost,
                                   Func<AStarNode, double> heuristicAnalyzer = null)
         {
-            var processingNodes = new List<AStarNode>();
+            List<AStarNode> processingNodes = new List<AStarNode>();
             processingNodes.AddRange(nodes);
 
-            var active = processingNodes.Single(x => x.Node == start);
-            var endNode = processingNodes.Single(x => x.Node == finish);
+            AStarNode active = processingNodes.Single(x => x.Node == start);
+            AStarNode endNode = processingNodes.Single(x => x.Node == finish);
             active.PathCost = 0;
             pathCost = 0;
             connectionList = new List<BaseNodeConnection>();
@@ -56,14 +56,14 @@ namespace AdventOfCode.Tools.Pathfinding
             while (active != endNode)
             {
                 processingNodes.Remove(active);
-                var neighbours = GetNeighbours(active.Node);
+                List<BaseNodeConnection> neighbours = GetNeighbours(active.Node);
                 pathCost = active.PathCost;
 
                 foreach (var connection in neighbours)
                 {
                     if (connection.Distance < 0) continue;
-                    var connTarget = connection.GetOtherNode(active.Node);
-                    var targetDetails = processingNodes.SingleOrDefault(x => x.Node == connTarget);
+                    BaseNode connTarget = connection.GetOtherNode(active.Node);
+                    AStarNode targetDetails = processingNodes.SingleOrDefault(x => x.Node == connTarget);
                     if (targetDetails == null || targetDetails.PathCost <= pathCost) continue;
                     targetDetails.PathCost = pathCost + connection.Distance;
                     targetDetails.PreviousNode = active;
@@ -71,7 +71,7 @@ namespace AdventOfCode.Tools.Pathfinding
                 }
                 active = processingNodes.OrderBy(x => x.FullCost).First();
             }
-            var finalPath = GetPathToNode(active);
+            List<AStarNode> finalPath = GetPathToNode(active);
             pathCost = active.PathCost;
             for (int i = 0; i < finalPath.Count - 1; ++i)
                 connectionList.Add(connections.Single(x => x.HasConnectionTo(finalPath[i].Node) && x.HasConnectionTo(finalPath[i + 1].Node)));
@@ -86,11 +86,22 @@ namespace AdventOfCode.Tools.Pathfinding
         private List<AStarNode> GetPathToNode(AStarNode targetNode)
         {
             var path = new List<AStarNode>();
-            if (targetNode == null) return path;
-
-            path.AddRange(GetPathToNode(targetNode.PreviousNode));
-            path.Add(targetNode);
+            while (targetNode != null)
+            {
+                path.Insert(0, targetNode);
+                targetNode = targetNode.PreviousNode;
+            }
             return path;
         }
+
+        //private List<AStarNode> GetPathToNode(AStarNode targetNode)
+        //{
+        //    var path = new List<AStarNode>();
+        //    if (targetNode == null) return path;
+
+        //    path.AddRange(GetPathToNode(targetNode.PreviousNode));
+        //    path.Add(targetNode);
+        //    return path;
+        //}
     }
 }

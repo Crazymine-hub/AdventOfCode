@@ -59,6 +59,8 @@
   <ItemGroup>
     <Content Include="Data\Mazes\non-perfect\maze1.bmp" />
     <Content Include="Data\Mazes\non-perfect\maze2.bmp" />
+    <Content Include="Data\Mazes\non-perfect\maze3.bmp" />
+    <Content Include="Data\Mazes\non-perfect\maze4.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AdventOfCommon\AdventOfCommon.csproj">
