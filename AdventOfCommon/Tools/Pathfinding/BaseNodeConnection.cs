@@ -25,12 +25,12 @@ namespace AdventOfCode.Tools.Pathfinding
             distance = Math.Sqrt(Math.Pow(NodeB.X - NodeA.X, 2) + Math.Pow(NodeB.Y - NodeA.Y, 2));
         }
 
-        public bool HasConnectionTo(BaseNode target)
+        public virtual bool HasConnectionTo(BaseNode target)
         {
             return (NodeA == target || NodeB == target);
         }
 
-        public BaseNode GetOtherNode(BaseNode target)
+        public virtual BaseNode GetOtherNode(BaseNode target)
         {
             if (NodeA == target)
                 return NodeB;
@@ -40,7 +40,7 @@ namespace AdventOfCode.Tools.Pathfinding
                 throw new ArgumentException("Node not in this connection");
         }
 
-        public new string ToString()
+        public override string ToString()
         {
             return NodeA.ToString().PadRight(10) + "<-> " + NodeB.ToString().PadRight(10) + "@".PadLeft(5) + distance.ToString("0.00");
         }

@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.Pathfinding
 {
+    public delegate void ExpansionDelegate(IReadOnlyList<AStarNode> expanded, IReadOnlyList<AStarNode> considered, AStarNode active);
+
     public class AStarPathfinder
     {
         readonly List<AStarNodeConnection> connections;
         readonly List<AStarNode> nodes;
         List<AStarNode> expandedNodes;
+        public event ExpansionDelegate OnExpanded;
 
         public double DistanceHeatWeigh { get; set; } = 0.5;
 
@@ -47,19 +50,25 @@ namespace AdventOfCode.Tools.Pathfinding
             active.PathLength = 0;
             totalDistance = 0;
             connectionList = new List<AStarNodeConnection>();
-            AStarNode previous = null;
 
             while (active != endNode)
             {
+                OnExpanded?.Invoke(
+                    expandedNodes.AsReadOnly(),
+                    nodes.Where(x => x.ExpansionPriority < double.PositiveInfinity)
+                         .Except(expandedNodes)
+                         .ToList()
+                         .AsReadOnly(),
+                    active);
+
                 ExpandNode(active);
                 var inUseNodes = GetPathToNode(active);
                 var nextActive = nodes
                     .Except(inUseNodes)
                     .Except(expandedNodes)
                     .OrderBy(x => x.ExpansionPriority)
-                    .First(x => x != previous);
+                    .First();
                 if (nextActive == active) return new AStarNode[0];
-                previous = active;
                 active = nextActive;
 
             }
@@ -94,10 +103,10 @@ namespace AdventOfCode.Tools.Pathfinding
 
         private List<AStarNode> GetPathToNode(AStarNode targetNode)
         {
-            var path = new Queue<AStarNode>();
+            var path = new Stack<AStarNode>();
             while (targetNode != null)
             {
-                path.Enqueue(targetNode);
+                path.Push(targetNode);
                 targetNode = targetNode.PreviousNode;
             }
             return path.ToList();
