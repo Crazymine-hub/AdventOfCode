@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Tools.Pathfinding;
+using AdventOfCode.Tools.Pathfinding.AStar;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -37,12 +38,16 @@ namespace AoCommonTest
         /// <remarks>The node order in the solution is not accounted for.</remarks>
         [TestMethod]
         [DynamicData(nameof(GetTestMazes), DynamicDataSourceType.Method)]
-        public void MazeSolveTest(List<BaseNode> nodes, List<BaseNodeConnection> connections, List<BaseNode> solution, string fileName)
+        public void MazeSolveTest(List<AStarNode> nodes, List<AStarNodeConnection> connections, List<AStarNode> solution, string fileName)
         {
-            AStar aStar = new AStar(connections);
-            BaseNode start = nodes.First();
-            BaseNode last = nodes.Last();
-            BaseNode[] path = aStar.GetPath(start, last, out double cost);
+            AStarPathfinder aStar = new AStarPathfinder(connections);
+            AStarNode start = nodes.First();
+            AStarNode end = nodes.Last();
+
+            foreach(AStarNode node in nodes)
+                node.NodeHeuristic = node.GetDistanceTo(end);
+
+            AStarNode[] path = aStar.GetPath(start, end, out double cost);
 
             var difference1 = path.Except(solution);
             var difference2 = solution.Except(path);
@@ -78,9 +83,9 @@ namespace AoCommonTest
         {
             foreach (string maze in Directory.GetFiles(@"..\..\Data\Mazes\non-perfect", "*.bmp"))
             {
-                List<BaseNode> nodes = new List<BaseNode>();
-                List<BaseNode> solution = new List<BaseNode>();
-                List<BaseNodeConnection> connections = new List<BaseNodeConnection>();
+                List<AStarNode> nodes = new List<AStarNode>();
+                List<AStarNode> solution = new List<AStarNode>();
+                List<AStarNodeConnection> connections = new List<AStarNodeConnection>();
                 using (Bitmap mazeMap = new Bitmap(maze))
                 {
                     for (int y = 0; y < mazeMap.Height; ++y)
@@ -88,15 +93,15 @@ namespace AoCommonTest
                         {
                             Color pixelColor = mazeMap.GetPixel(x, y);
                             if (pixelColor.ToArgb() == Color.Black.ToArgb()) continue;
-                            BaseNode node = new BaseNode(x, y);
+                            AStarNode node = new AStarNode(x, y);
                             nodes.Add(node);
                             if (pathColors.Contains(pixelColor.ToArgb())) solution.Add(node);
-                            BaseNode left = nodes.SingleOrDefault(testNode => testNode.Y == y && testNode.X == x - 1);
-                            BaseNode top = nodes.SingleOrDefault(testNode => testNode.Y == y - 1 && testNode.X == x);
+                            AStarNode left = nodes.SingleOrDefault(testNode => testNode.Y == y && testNode.X == x - 1);
+                            AStarNode top = nodes.SingleOrDefault(testNode => testNode.Y == y - 1 && testNode.X == x);
                             if (left != null)
-                                connections.Add(new BaseNodeConnection(left, node));
+                                connections.Add(new AStarNodeConnection(left, node));
                             if (top != null)
-                                connections.Add(new BaseNodeConnection(top, node));
+                                connections.Add(new AStarNodeConnection(top, node));
                         }
                 }
 
@@ -104,26 +109,29 @@ namespace AoCommonTest
             }
         }
 
-        private Bitmap DrawMaze(List<BaseNode> nodes, IEnumerable<BaseNode> path)
+        private Bitmap DrawMaze(List<AStarNode> nodes, IEnumerable<AStarNode> path)
         {
             int width = nodes.Max(x => x.X) + 1;
             int height = nodes.Max(x => x.Y) + 1;
+            double maxHeuristic = nodes.Max(x => x.NodeHeuristic);
+
             Bitmap bitmap = new Bitmap(width, height);
             for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
                 {
-                    BaseNode node = nodes.SingleOrDefault(tNode => tNode.X == x && tNode.Y == y);
+                    AStarNode node = nodes.SingleOrDefault(tNode => tNode.X == x && tNode.Y == y);
                     if (node == null)
                     {
                         bitmap.SetPixel(x, y, Color.Black);
                         continue;
                     }
+                    int brightness = Convert.ToInt32(node.NodeHeuristic / maxHeuristic * 0xFF);
                     if (path.Contains(node))
                     {
-                        bitmap.SetPixel(x, y, Color.Red);
+                        bitmap.SetPixel(x, y, Color.FromArgb(0xFF, brightness, 0xFF));
                         continue;
                     }
-                    bitmap.SetPixel(x, y, Color.White);
+                    bitmap.SetPixel(x, y, Color.FromArgb(0, brightness, 0xFF));
                 }
             return bitmap;
         }
