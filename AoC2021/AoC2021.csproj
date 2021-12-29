@@ -60,6 +60,7 @@
     <Compile Include="Days\Day8.cs" />
     <Compile Include="Days\Day9.cs" />
     <Compile Include="Days\Tools\Day12\CaveNode.cs" />
+    <Compile Include="Days\Tools\Day15\RiskyNode.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
     <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
@@ -92,7 +93,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Days\Tools\Day15\" />
     <Folder Include="Days\Tools\Day5\" />
   </ItemGroup>
   <ItemGroup>

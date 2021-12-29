@@ -10,8 +10,6 @@ namespace AdventOfCode.Tools.Pathfinding
     {
         public virtual int X { get; protected set; }
         public virtual int Y { get; protected set; }
-        public virtual double Heat { get; set; }
-        public virtual double ClientHeat { get; set; }
 
         public BaseNode(int x, int y)
         {
@@ -20,11 +18,6 @@ namespace AdventOfCode.Tools.Pathfinding
         }
 
         public override string ToString() => $"@{X}/{Y}";
-
-        public virtual bool Equals(BaseNode other)
-        {
-            return other != null && other.X == X && other.Y == Y;
-        }
 
         public virtual double GetDistanceTo(BaseNode target)
         {

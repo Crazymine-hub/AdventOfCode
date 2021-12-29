@@ -1,6 +1,8 @@
-﻿using AdventOfCode.Tools.DynamicGrid;
+﻿using AdventOfCode.Days.Tools.Day15;
+using AdventOfCode.Tools.DynamicGrid;
 using AdventOfCode.Tools.Extensions;
 using AdventOfCode.Tools.Pathfinding;
+using AdventOfCode.Tools.Pathfinding.Internals;
 using AdventOfCode.Tools.Visualization;
 using System;
 using System.Collections.Generic;
@@ -15,7 +17,7 @@ namespace AdventOfCode.Days
     {
         public override string Title => "Chiton";
 
-        DynamicGrid<BaseNode> riskMap = new DynamicGrid<BaseNode>();
+        DynamicGrid<RiskyNode> riskMap = new DynamicGrid<RiskyNode>();
         private bool disposedValue;
         Bitmap map;
         const int scale = 5;
@@ -29,70 +31,73 @@ namespace AdventOfCode.Days
             {
                 string row = rows[y];
                 for (int x = 0; x < row.Length; ++x)
-                    riskMap.SetRelative(x, y, new BaseNode(x, y) { ClientHeat = int.Parse(row[x].ToString())} );
+                    riskMap.SetRelative(x, y, new RiskyNode(x, y, int.Parse(row[x].ToString())) );
             }
 
             map = new Bitmap(riskMap.XDim * scale, riskMap.YDim* scale);
 
             List<BaseNodeConnection> connections = new List<BaseNodeConnection>();
-            BaseNode start = riskMap.First();
-            BaseNode end = riskMap.Last();
+            RiskyNode start = riskMap.First();
+            RiskyNode end = riskMap.Last();
 
-            foreach(DynamicGridValue<BaseNode> riskNode in riskMap)
+            foreach(DynamicGridValue<RiskyNode> riskNode in riskMap)
             {
-                List<double> areaHeat = new List<double>() { riskNode.Value.ClientHeat};
+                List<double> areaHeat = new List<double>() { riskNode.Value.Risk};
                 if (riskNode.X > 0)
                 {
                     var neighbour = riskMap[riskNode.X - 1, riskNode.Y];
                     connections.Add(new BaseNodeConnection(riskNode, neighbour));
-                    areaHeat.Add(neighbour.ClientHeat);
+                    areaHeat.Add(neighbour.Risk);
                 }
                 if (riskNode.Y > 0)
                 {
                     var neighbour = riskMap[riskNode.X, riskNode.Y - 1];
                     connections.Add(new BaseNodeConnection(riskNode, neighbour));
-                    areaHeat.Add(neighbour.ClientHeat);
+                    areaHeat.Add(neighbour.Risk);
                 }
                 if (riskNode.X < riskMap.XDim - 1)
-                    areaHeat.Add(riskMap[riskNode.X + 1, riskNode.Y].ClientHeat);
+                    areaHeat.Add(riskMap[riskNode.X + 1, riskNode.Y].Risk);
                 if (riskNode.Y < riskMap.YDim - 1)
-                    areaHeat.Add(riskMap[riskNode.X, riskNode.Y + 1].ClientHeat);
-
-                riskNode.Value.Heat = riskNode.Value.ClientHeat / 9; // areaHeat.Aggregate((double accumulator, double next) => accumulator + next) / 45.0;
+                    areaHeat.Add(riskMap[riskNode.X, riskNode.Y + 1].Risk);
 
 
-                int risk = Convert.ToInt32(riskNode.Value.Heat * 0xFF);
+                int risk = Convert.ToInt32(riskNode.Value.Risk / 9.0 * 0xFF);
                 map.FillRect(new Rectangle(riskNode.X * scale, riskNode.Y * scale, scale, scale), Color.FromArgb(risk, risk, risk));
                 try
                 {
                     Console.SetCursorPosition(riskNode.X, riskNode.Y);
-                    Console.Write(riskNode.Value.ClientHeat);
+                    Console.Write(riskNode.Value.Risk);
                 }
                 catch { /*Out of bounds will not be rendered in the console window. too bad*/}
             }
             VisualFormHandler.Instance.Show(map);
 
             AStar aStar = new AStar(connections);
-            BaseNode[] path = aStar.GetPath(start, end);
+            RiskyNode[] path = aStar.GetPath(start, end, GetNodeHeuristic).Select(x => (RiskyNode)x).ToArray();
             double totalRisk = 0;
             for(int i = 0; i < path.Length; ++i)
             {
                 var node = path[i];
-                int risk = Convert.ToInt32(node.Heat * 0xFF);
-                int progress = Convert.ToInt32((double)i / path.Length * 0x7F);
-                map.FillRect(new Rectangle(node.X * scale, node.Y * scale, scale, scale), Color.FromArgb(risk, progress, 0));
-                //try
-                //{
-                //    Console.SetCursorPosition(node.X, node.Y);
-                //    Console.Write('█');
-                //}
-                //catch { /*Out of bounds will not be rendered in the console window. too bad*/}
+                int progress = Convert.ToInt32((double)i / path.Length * 0xFF);
+                map.FillRect(new Rectangle(node.X * scale, node.Y * scale, scale, scale), Color.FromArgb(255 - progress, progress, 0));
+                try
+                {
+                    Console.SetCursorPosition(node.X, node.Y);
+                    Console.Write('█');
+                }
+                catch { /*Out of bounds will not be rendered in the console window. too bad*/}
                 if (node == path.First()) continue;
-                totalRisk += node.ClientHeat;
+                totalRisk += node.Risk;
             }
             VisualFormHandler.Instance.Update(map);
 
             return "Total Risk: " + Convert.ToInt32(totalRisk).ToString();
+        }
+
+        private double GetNodeHeuristic(AStarNode arg)
+        {
+            RiskyNode riskyNode = (RiskyNode)arg.Node;
+            return (arg.PreviousNode?.FullCost ?? 0)+ riskyNode.Risk;
         }
 
         protected virtual void Dispose(bool disposing)
