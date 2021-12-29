@@ -23,7 +23,7 @@ namespace AdventOfCode.Days
         //KEY Connection between portals, VALUE(Nodes on Path, Path length)
         Dictionary<BaseNodeConnection, Tuple<List<Node>, double>> portalAccess = null;
         ConsoleAssist assis = new ConsoleAssist();
-        AStar pathfind = null;
+        AStarPathfinder pathfind = null;
 
         public override string Solve(string input, bool part2)
         {
