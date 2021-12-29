@@ -50,15 +50,17 @@
     <Compile Include="Tools\DynamicGrid.cs" />
     <Compile Include="Tools\MathHelper.cs" />
     <Compile Include="Tools\NumberLists.cs" />
-    <Compile Include="Tools\Pathfinding\AStar.cs" />
+    <Compile Include="Tools\Pathfinding\AStarPathfinder.cs" />
+    <Compile Include="Tools\Pathfinding\AStar\AStarNode.cs" />
+    <Compile Include="Tools\Pathfinding\AStar\AStarNodeConnection.cs" />
     <Compile Include="Tools\Pathfinding\BaseNode.cs" />
     <Compile Include="Tools\Pathfinding\BaseNodeConnection.cs" />
     <Compile Include="Tools\Pathfinding\Direction.cs" />
-    <Compile Include="Tools\Pathfinding\Internals\PathfindingNode.cs" />
     <Compile Include="Tools\TopologicalOrder\TopoItem.cs" />
     <Compile Include="Tools\TopologicalOrder\Topological.cs" />
     <Compile Include="Tools\TraceChars.cs" />
     <Compile Include="Tools\VectorAssist.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

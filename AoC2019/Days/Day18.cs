@@ -20,7 +20,7 @@ namespace AdventOfCode.Days
         int maxHeight = 0;
         int singleHeight = 0;
         int printouts = 0;
-        AStar pathfind;
+        AStarPathfinder pathfind;
         ConsoleAssist outAssis = new ConsoleAssist();
         List<Node> pois = null;
         Dictionary<long, Tuple<double, List<Node>>> knownPaths = new Dictionary<long, Tuple<double, List<Node>>>();
@@ -60,7 +60,7 @@ namespace AdventOfCode.Days
 
         private List<Node> Prioritize()
         {
-            AStar pathfind = new AStar(connections);
+            AStarPathfinder pathfind = new AStar(connections);
             List<List<Node>> unlockedPaths = new List<List<Node>>();
             List<Node> pois = keys.Concat(doors).ToList();
 
