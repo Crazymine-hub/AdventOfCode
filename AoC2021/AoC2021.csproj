@@ -60,7 +60,7 @@
     <Compile Include="Days\Day8.cs" />
     <Compile Include="Days\Day9.cs" />
     <Compile Include="Days\Tools\Day12\CaveNode.cs" />
-    <Compile Include="Days\Tools\Day15\RiskyNode.cs" />
+    <Compile Include="Days\Tools\Day15\TwoWayNodeConnection.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
     <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
@@ -142,6 +142,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day14.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day15.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
