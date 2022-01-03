@@ -18,6 +18,7 @@ namespace AdventOfCode.Days
         private bool disposedValue;
 
         Bitmap paperPunches;
+        private VisualFormHandler formHandler = VisualFormHandler.GetInstance();
         const int scale = 5;
 
         public override string Solve(string input, bool part2)
@@ -29,7 +30,7 @@ namespace AdventOfCode.Days
                 paper.SetRelative(int.Parse(coords[0]), int.Parse(coords[1]), true);
             }
             paperPunches = new Bitmap(paper.XDim * scale, paper.YDim * scale);
-            VisualFormHandler.Instance.Show(paperPunches);
+            formHandler.Show(paperPunches);
             RefreshView();
 
 
@@ -60,7 +61,7 @@ namespace AdventOfCode.Days
                 catch(ArgumentOutOfRangeException) {/* Out of range pixels will not be drawn. simple as that*/ }
                 paperPunches.FillRect(new Rectangle(value.X * scale, value.Y * scale, scale, scale), Color.White);
             }
-            VisualFormHandler.Instance.Update(paperPunches);
+            formHandler.Update(paperPunches);
         }
 
         private void Fold(string foldInstruction)
@@ -91,21 +92,11 @@ namespace AdventOfCode.Days
             {
                 if (disposing)
                 {
-                    paperPunches.Dispose();
+                    paperPunches?.Dispose();
                 }
-
-                // TODO: Nicht verwaltete Ressourcen (nicht verwaltete Objekte) freigeben und Finalizer überschreiben
-                // TODO: Große Felder auf NULL setzen
                 disposedValue = true;
             }
         }
-
-        // // TODO: Finalizer nur überschreiben, wenn "Dispose(bool disposing)" Code für die Freigabe nicht verwalteter Ressourcen enthält
-        // ~Day13()
-        // {
-        //     // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

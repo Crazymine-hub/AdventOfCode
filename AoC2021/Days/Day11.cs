@@ -18,12 +18,13 @@ namespace AdventOfCode.Days
         const int scale = 10;
         private const int squidFlashEnergy = 10;
         private bool wasDisposed;
+        private VisualFormHandler formHandler = VisualFormHandler.GetInstance();
 
         public override string Solve(string input, bool part2)
         {
             raveGrid = GetLines(input).Select(x => x.Select(y => int.Parse(y.ToString())).ToArray()).ToArray();
             rave = new Bitmap(raveGrid[0].Length * scale, raveGrid.Length * scale);
-            VisualFormHandler.Instance.Show((Image)rave.Clone());
+            formHandler.Show(rave);
 
             int flashCount = 0;
             int i = 0;
@@ -88,7 +89,7 @@ namespace AdventOfCode.Days
                 int brightness = Convert.ToInt32(value * 0xFF);
                 rave.FillRect(new Rectangle(squid.X * scale, squid.Y * scale, scale, scale), Color.FromArgb(brightness, brightness, brightness));
             }
-            VisualFormHandler.Instance.Update(rave);
+            formHandler.Update(rave);
             return flashCount;
         }
 
@@ -119,18 +120,11 @@ namespace AdventOfCode.Days
             {
                 if (disposing)
                 {
-                    rave.Dispose();
+                    rave?.Dispose();
                 }
                 wasDisposed = true;
             }
         }
-
-        // // TODO: Finalizer nur überschreiben, wenn "Dispose(bool disposing)" Code für die Freigabe nicht verwalteter Ressourcen enthält
-        // ~Day11()
-        // {
-        //     // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

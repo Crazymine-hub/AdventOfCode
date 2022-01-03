@@ -12,7 +12,7 @@ namespace AdventOfCode.Days
 {
     internal class Day4 : DayBase, IDisposable
     {
-        public override string Title => "GIant Squid";
+        public override string Title => "Giant Squid";
 
         private const int FieldSize = 4;
         private const int FieldSpacing = 2;
@@ -26,6 +26,7 @@ namespace AdventOfCode.Days
         private int gridHeight;
         private int scaling;
         private bool isDisposed;
+        private VisualFormHandler formHandler = VisualFormHandler.GetInstance();
 
         public override string Solve(string input, bool part2)
         {
@@ -58,7 +59,7 @@ namespace AdventOfCode.Days
                 gameBoard.FillRect(line, Color.White);
             }
 
-            VisualFormHandler.Instance.Show((Bitmap)gameBoard.Clone());
+            formHandler.Show((Bitmap)gameBoard.Clone());
             DrawBoards();
 
             BingoBoard winner = PlayGame(drawnNumbers, part2, out int drawnNumber);
@@ -89,7 +90,7 @@ namespace AdventOfCode.Days
                             gameBoard.FillRect(block, boardFieldValue < 0 ? (boardWinning ? Color.Green : Color.Yellow) : Color.Red);
                         }
                 }
-            VisualFormHandler.Instance.Update(gameBoard);
+            formHandler.Update(gameBoard);
         }
 
         private BingoBoard PlayGame(int[] drawnNumbers, bool getLast, out int lastDrawn)
@@ -141,21 +142,11 @@ namespace AdventOfCode.Days
             {
                 if (disposing)
                 {
-                    gameBoard.Dispose();
+                    gameBoard?.Dispose();
                 }
-
-                // TODO: Nicht verwaltete Ressourcen (nicht verwaltete Objekte) freigeben und Finalizer überschreiben
-                // TODO: Große Felder auf NULL setzen
                 isDisposed = true;
             }
         }
-
-        // // TODO: Finalizer nur überschreiben, wenn "Dispose(bool disposing)" Code für die Freigabe nicht verwalteter Ressourcen enthält
-        // ~Day4()
-        // {
-        //     // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

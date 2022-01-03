@@ -19,17 +19,7 @@ namespace AdventOfCode
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            Console.Title = "Advent of Code - Initializing";
-            if (args.Length <= 0 || !TryGetLibrary(args[0]))
-            {
-                Console.Title = "Advent of Code - Set Year";
-                while (true)
-                {
-                    int userYear = ConsoleAssist.GetUserInput("No year library specified. Enter a year number:");
-                    if (TryGetLibrary(Directory.GetCurrentDirectory() + "\\" + userYear)) break;
-                }
-            }
-
+            Initialize(args);
 
             while (true)
             {
@@ -43,34 +33,17 @@ namespace AdventOfCode
                 message = "";
 
                 if (dayNr <= 0) return;
-
-                if (!RunDay(dayNr, out message)) continue;
-
-                Console.WriteLine("Done! Press enter to return to start.");
-                while (Console.ReadKey(true).Key != ConsoleKey.Enter) { /*that is not the key i want*/}
+                DayBase day = GetDay(dayNr, out message);
+                if (day != null && RunDay(day, dayNr, out message))
+                {
+                    Console.WriteLine("Done! Press enter to return to start.");
+                    while (Console.ReadKey(true).Key != ConsoleKey.Enter) { /*that is not the key i want*/}
+                }
+                (day as IDisposable)?.Dispose();
             }
         }
 
-        private static bool TryGetLibrary(string directory)
-        {
-            if (!Directory.Exists(directory)) return false;
-            var files = Directory.GetFiles(directory);
-            foreach (var file in files)
-            {
-                var dllMatch = Regex.Match(file, @"AoC(\d{4})\.dll$");
-                if (!dllMatch.Success) continue;
-                var asm = Assembly.LoadFrom(file);
-                foreach (var dllType in asm.GetExportedTypes())
-                    if (!dllType.FullName.StartsWith("AdventOfCode")) return false;
-                lib = asm;
-                year = dllMatch.Groups[1].Value;
-                dayPath = directory + "\\Inputs\\Day";
-                return true;
-            }
-            return false;
-        }
-
-        private static bool RunDay(int dayNr, out string message)
+        private static DayBase GetDay(int dayNr, out string message)
         {
             message = "";
             Type DayType = lib.GetType("AdventOfCode.Days.Day" + dayNr);
@@ -79,8 +52,9 @@ namespace AdventOfCode
                 message = "=================\r\n";
                 message += "DAY DOESN'T EXIST\r\n";
                 message += "=================\r\n";
-                return false;
+                return null;
             }
+
             var day = (DayBase)Activator.CreateInstance(DayType);
 
             Console.Clear();
@@ -89,7 +63,12 @@ namespace AdventOfCode
             if (!string.IsNullOrWhiteSpace(day.Title))
                 Console.WriteLine(": " + day.Title);
             else Console.WriteLine();
+            return day;
+        }
 
+        private static bool RunDay(DayBase day, int dayNr, out string message)
+        {
+            message = "";
             Console.WriteLine("Select a Mode by pressing the Key in ():");
             Console.WriteLine("Part (1)");
             Console.WriteLine("Part (2)");
@@ -121,9 +100,9 @@ namespace AdventOfCode
                     useSecond = 2;
                     break;
 
+                default:
+                    return false;
             }
-
-            if (useSecond == 0) return false;
 
             Console.Clear();
 
@@ -166,22 +145,24 @@ namespace AdventOfCode
                 Console.WriteLine("An Exception occured while running the Day.");
                 Console.WriteLine(ex.ToString());
             }
-            (day as IDisposable)?.Dispose();
+
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Completed in " + stopwatch.Elapsed.ToString());
-            if(VisualFormHandler.Instantiated && VisualFormHandler.Instance.Visible)
+            if (VisualFormHandler.ValidInstanceCount > 0)
             {
                 Console.WriteLine("Waiting for Visualization to be closed...");
                 Console.WriteLine("Press enter to force close the visualizer.");
-                while (VisualFormHandler.Instance.Visible) {
-                    if(Console.KeyAvailable && Console.ReadKey().Key == ConsoleKey.Enter)
+                while (VisualFormHandler.ValidInstanceCount > 0)
+                {
+                    if (Console.KeyAvailable && Console.ReadKey().Key == ConsoleKey.Enter)
                     {
-                        VisualFormHandler.Instance.Hide();
+                        VisualFormHandler.ClearAll();
                         return false;
                     }
-                };
+                }
             }
+            VisualFormHandler.ClearAll();
             return true;
         }
 
@@ -200,6 +181,41 @@ namespace AdventOfCode
             {
                 return File.ReadAllText(fileName);
             }
+        }
+
+
+
+        private static void Initialize(string[] args)
+        {
+            Console.Title = "Advent of Code - Initializing";
+            if (args.Length <= 0 || !TryGetLibrary(args[0]))
+            {
+                Console.Title = "Advent of Code - Set Year";
+                while (true)
+                {
+                    int userYear = ConsoleAssist.GetUserInput("No year library specified. Enter a year number:");
+                    if (TryGetLibrary(Directory.GetCurrentDirectory() + "\\" + userYear)) break;
+                }
+            }
+        }
+
+        private static bool TryGetLibrary(string directory)
+        {
+            if (!Directory.Exists(directory)) return false;
+            var files = Directory.GetFiles(directory);
+            foreach (var file in files)
+            {
+                var dllMatch = Regex.Match(file, @"AoC(\d{4})\.dll$");
+                if (!dllMatch.Success) continue;
+                var asm = Assembly.LoadFrom(file);
+                foreach (var dllType in asm.GetExportedTypes())
+                    if (!dllType.FullName.StartsWith("AdventOfCode")) return false;
+                lib = asm;
+                year = dllMatch.Groups[1].Value;
+                dayPath = directory + "\\Inputs\\Day";
+                return true;
+            }
+            return false;
         }
     }
 }

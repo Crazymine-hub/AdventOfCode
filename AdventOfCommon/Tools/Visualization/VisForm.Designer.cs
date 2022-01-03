@@ -38,9 +38,8 @@
             this.visualRender.Name = "visualRender";
             this.visualRender.Size = new System.Drawing.Size(100, 50);
             this.visualRender.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.visualRender.TabIndex = 0;
+            this.visualRender.TabIndex = 2;
             this.visualRender.TabStop = false;
-            this.visualRender.Click += new System.EventHandler(this.VisForm_Click);
             // 
             // VisForm
             // 
@@ -50,7 +49,6 @@
             this.ClientSize = new System.Drawing.Size(284, 239);
             this.Controls.Add(this.visualRender);
             this.Name = "VisForm";
-            this.Text = "VisForm";
             this.Click += new System.EventHandler(this.VisForm_Click);
             ((System.ComponentModel.ISupportInitialize)(this.visualRender)).EndInit();
             this.ResumeLayout(false);
@@ -60,6 +58,6 @@
 
         #endregion
 
-        internal System.Windows.Forms.PictureBox visualRender;
+        private System.Windows.Forms.PictureBox visualRender;
     }
 }

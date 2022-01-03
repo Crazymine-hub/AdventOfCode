@@ -13,6 +13,8 @@ namespace AdventOfCode.Days
     public class Day1 : DayBase
     {
         public override string Title => "Sonar Sweep";
+        VisualFormHandler formHandler = VisualFormHandler.GetInstance();
+
 
         public override string Solve(string input, bool part2)
         {
@@ -36,19 +38,21 @@ namespace AdventOfCode.Days
             int minDepth = depths.Min();
             const int scale = 1;
 
-            Bitmap bmp = new Bitmap(depths.Length * scale + 10, (depths.Max() - minDepth) * scale + 10);
-            VisualFormHandler.Instance.Show((Bitmap)bmp.Clone());
+            using (Bitmap bmp = new Bitmap(depths.Length * scale + 10, (depths.Max() - minDepth) * scale + 10))
+            {
+                formHandler.Show(bmp);
 
-            int previous = depths.First();
-            int increase = 0;
-            Console.CursorTop = depths[0] - minDepth;
-            for (int i = 0; i < depths.Length; ++i)
-                CheckDepth(depths[i], minDepth, scale, bmp, ref previous, ref increase, i);
-            Console.WriteLine();
-            return $"Depth Increasing Rate: {increase}";
+                int previous = depths.First();
+                int increase = 0;
+                Console.CursorTop = depths[0] - minDepth;
+                for (int i = 0; i < depths.Length; ++i)
+                    CheckDepth(depths[i], minDepth, scale, bmp, ref previous, ref increase, i);
+                Console.WriteLine();
+                return $"Depth Increasing Rate: {increase}";
+            }
         }
 
-        private static void CheckDepth(int depth, int minDepth, int scale, Bitmap bmp, ref int previous, ref int increase, int left)
+        private void CheckDepth(int depth, int minDepth, int scale, Bitmap bmp, ref int previous, ref int increase, int left)
         {
             if (depth > previous)
             {
@@ -68,7 +72,7 @@ namespace AdventOfCode.Days
             previous = depth;
         }
 
-        private static void DrawVisualization(int depth, int minDepth, int scale, Bitmap bmp, int previous, int left)
+        private void DrawVisualization(int depth, int minDepth, int scale, Bitmap bmp, int previous, int left)
         {
             Rectangle pixelArea = new Rectangle(left * scale + 5, (depth - minDepth) * scale + 5, scale, scale);
             var bmpPixels = bmp.LockBits(pixelArea, System.Drawing.Imaging.ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -84,8 +88,8 @@ namespace AdventOfCode.Days
             }
             System.Runtime.InteropServices.Marshal.Copy(pixelData, 0, bmpPixels.Scan0, length);
             bmp.UnlockBits(bmpPixels);
-            VisualFormHandler.Instance.Update(bmp);
-            VisualFormHandler.Instance.SetFocusTo(pixelArea.X, pixelArea.Y);
+            formHandler.Update(bmp);
+            formHandler.SetFocusTo(pixelArea.X, pixelArea.Y);
         }
     }
 }

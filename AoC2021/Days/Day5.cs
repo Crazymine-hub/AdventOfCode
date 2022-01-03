@@ -21,6 +21,7 @@ namespace AdventOfCode.Days
         private bool isDisposed;
         private Bitmap smokerPlan = null;
         private DynamicGrid<int> smokerGrid = new DynamicGrid<int>();
+        private VisualFormHandler formHandler = VisualFormHandler.GetInstance();
         const int scale = 1;
 
         public override string Solve(string input, bool part2)
@@ -39,11 +40,10 @@ namespace AdventOfCode.Days
             int width = smokerLines.Max(x => Math.Max(x.Start.X, x.End.X)) + 1;
             smokerPlan = new Bitmap(width * scale, height * scale);
             smokerPlan.FillRect(new Rectangle(0, 0, width * scale, height * scale), Color.Black);
-            VisualFormHandler.Instance.Show((Image)smokerPlan.Clone());
+            formHandler.Show((Image)smokerPlan.Clone());
             MapSmokers(part2);
             double max = smokerGrid.Max();
             int higherCount = 0;
-            int offset = (scale - 1) / 2;
             for (int y = 0; y < height; ++y)
                 for (int x = 0; x < width; ++x)
                 {
@@ -55,7 +55,7 @@ namespace AdventOfCode.Days
                         smokerPlan.FillRect(new Rectangle(x * scale, y * scale, scale, scale), ColorHelper.ColorFromHSV(360 * relative, 1, 1));
                     }
                 }
-            VisualFormHandler.Instance.Update(smokerPlan);
+            formHandler.Update(smokerPlan);
             return $"Found {higherCount} dangerous areas";
         }
 
@@ -79,7 +79,7 @@ namespace AdventOfCode.Days
                     ++smokerGrid[point.X, point.Y];
                 }
                 smokerPlan.DrawPoints(points.Select(x => new Point(x.X * scale, x.Y * scale)), Color.FromArgb(20, 20, 20), scale);
-                VisualFormHandler.Instance.Update(smokerPlan);
+                formHandler.Update(smokerPlan);
             }
         }
 
@@ -91,19 +91,9 @@ namespace AdventOfCode.Days
                 {
                     smokerPlan?.Dispose();
                 }
-
-                // TODO: Nicht verwaltete Ressourcen (nicht verwaltete Objekte) freigeben und Finalizer überschreiben
-                // TODO: Große Felder auf NULL setzen
                 isDisposed = true;
             }
         }
-
-        // // TODO: Finalizer nur überschreiben, wenn "Dispose(bool disposing)" Code für die Freigabe nicht verwalteter Ressourcen enthält
-        // ~Day5()
-        // {
-        //     // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

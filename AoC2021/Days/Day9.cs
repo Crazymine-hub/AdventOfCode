@@ -19,11 +19,12 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
+            VisualFormHandler formHandler = VisualFormHandler.GetInstance();
             grid = GetLines(input).Select(line => line.Select(pos => int.Parse(pos.ToString())).ToArray()).ToArray();
 
             using (Bitmap map = new Bitmap(grid[0].Length * scale, grid.Length * scale))
             {
-                VisualFormHandler.Instance.Show((Image)map.Clone());
+                formHandler.Show((Image)map.Clone());
 
                 int lowSum = 0;
                 Dictionary<Point, List<Point>> basins = new Dictionary<Point, List<Point>>();
@@ -55,7 +56,7 @@ namespace AdventOfCode.Days
                             Console.Write(gradient[brightness]);
                         }
                     }
-                    VisualFormHandler.Instance.Update(map);
+                    formHandler.Update(map);
                     Console.WriteLine();
                 }
                 if (!part2)
@@ -78,7 +79,7 @@ namespace AdventOfCode.Days
                         int brightness = Convert.ToInt32(progress * 0xFF);
                         map.FillRect(new Rectangle(point.X * scale, point.Y * scale, scale, scale), Color.FromArgb(0, brightness, 0));
                     }
-                    VisualFormHandler.Instance.Update(map);
+                    formHandler.Update(map);
                 }
 
 

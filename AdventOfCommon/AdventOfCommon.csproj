@@ -75,11 +75,8 @@
     <Compile Include="Tools\Visualization\VisForm.Designer.cs">
       <DependentUpon>VisForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Tools\Visualization\VisForm.Singleton.cs">
-      <DependentUpon>VisForm.cs</DependentUpon>
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Tools\Visualization\VisualFormHandler.cs" />
+    <Compile Include="Tools\Visualization\VisualState.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Tools\Visualization\VisForm.resx">

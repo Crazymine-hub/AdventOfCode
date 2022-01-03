@@ -10,94 +10,123 @@ namespace AdventOfCode.Tools.Visualization
 {
     public class VisualFormHandler : IDisposable
     {
-        private static VisualFormHandler _instance;
-        public static VisualFormHandler Instance => _instance ?? (_instance = new VisualFormHandler());
-        public static bool Instantiated => _instance != null;
+
+        private static List<VisualFormHandler> instances = new List<VisualFormHandler>();
+        public static int ValidInstanceCount => instances.Count();
+
+        public static VisualFormHandler GetInstance()
+        {
+            VisualFormHandler handler = new VisualFormHandler();
+            instances.Add(handler);
+            return handler;
+        }
+
+        public static void ClearAll()
+        {
+            foreach (VisualFormHandler handler in instances.ToArray())
+                handler.Dispose();
+            instances.Clear();
+        }
 
 
-        private VisForm visForm = VisForm.Instance;
+        private VisForm visForm;
+        private VisForm VisualForm
+        {
+            get
+            {
+                if (visForm != null) return visForm;
+                visForm = VisForm.CreateInstance();
+                VisualForm.Disposed += HandleDisposedWindow;
+                return visForm;
+            }
+        }
+
         private bool isDisposed;
 
-        public bool Visible => GetVisibility();
+        public string Title { get => VisualForm.Title; set => VisualForm.Title = value; }
 
         public void Show(Image visualBmp, bool createCopy = true)
         {
-            if (visForm.InvokeRequired)
+            if (VisualForm.InvokeRequired)
             {
-                visForm.Invoke(new Action<Image, bool>(Show), visualBmp, createCopy);
+                VisualForm.Invoke(new Action<Image, bool>(Show), visualBmp, createCopy);
                 return;
             }
             Reset();
             Update(visualBmp, createCopy);
-            visForm.Show();
+            VisualForm.Show();
         }
 
         public void Hide()
         {
-            if (visForm.InvokeRequired)
+            if (VisualForm.InvokeRequired)
             {
-                visForm.Invoke(new MethodInvoker(Hide));
+                VisualForm.Invoke(new MethodInvoker(Hide));
                 return;
             }
-            visForm.Hide();
+            VisualForm.Hide();
         }
 
         public void Reset()
         {
-            if (visForm.InvokeRequired)
+            if (VisualForm.InvokeRequired)
             {
-                visForm.Invoke(new MethodInvoker(Reset));
+                VisualForm.Invoke(new MethodInvoker(Reset));
                 return;
             }
-            visForm.Reset();
+            VisualForm.Reset();
         }
 
         public void Invalidate()
         {
-            if (visForm.InvokeRequired)
+            if (VisualForm.InvokeRequired)
             {
-                visForm.Invoke(new MethodInvoker(Invalidate));
+                VisualForm.Invoke(new MethodInvoker(Invalidate));
                 return;
             }
             try
             {
-                visForm.visualRender.Invalidate();
+                VisualForm.Invalidate();
             }
             catch { }
         }
 
         public void Update(Image visualImage, bool createCopy = true)
         {
-            if (visForm.InvokeRequired)
+            if (VisualForm.InvokeRequired)
             {
-                visForm.Invoke(new Action<Image, bool>(Update), visualImage, createCopy);
+                VisualForm.Invoke(new Action<Image, bool>(Update), visualImage, createCopy);
                 return;
             }
-            visForm.visualRender.Image?.Dispose();
-            visForm.visualRender.Image = createCopy ? (Image)visualImage.Clone() : visualImage;
+            VisualForm.DisplayImage?.Dispose();
+            VisualForm.DisplayImage = createCopy ? (Image)visualImage.Clone() : visualImage;
             Invalidate();
         }
 
         public void SetFocusTo(double x, double y)
         {
-            if (visForm.InvokeRequired)
+            if (VisualForm.InvokeRequired)
             {
-                visForm.Invoke(new Action<double, double>(SetFocusTo), x, y);
+                VisualForm.Invoke(new Action<double, double>(SetFocusTo), x, y);
                 return;
             }
-            visForm.HorizontalScroll.Value = MathHelper.Clamp((int)((x - visForm.Width / 2) / visForm.visualRender.Width * visForm.HorizontalScroll.Maximum), visForm.HorizontalScroll.Minimum, visForm.HorizontalScroll.Maximum);
-            visForm.VerticalScroll.Value = MathHelper.Clamp((int)((y - visForm.Height / 2)/ visForm.visualRender.Height * visForm.VerticalScroll.Maximum), visForm.VerticalScroll.Minimum, visForm.VerticalScroll.Maximum);
+            VisualForm.FocusOnImage(x, y);
         }
 
         private bool GetVisibility()
         {
-            if (visForm.InvokeRequired)
+            if (VisualForm.InvokeRequired)
             {
-                return (bool)visForm.Invoke(new Func<bool>(GetVisibility));
+                return (bool)VisualForm.Invoke(new Func<bool>(GetVisibility));
             }
-            return visForm.Visible;
+            return VisualForm.Visible;
         }
 
+        private void HandleDisposedWindow(object sender, EventArgs e)
+        {
+            if (sender != VisualForm) return;
+            this.Dispose();
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -105,21 +134,20 @@ namespace AdventOfCode.Tools.Visualization
             {
                 if (disposing)
                 {
-                    visForm.Dispose();
+                    if (VisualForm.InvokeRequired)
+                        VisualForm.Invoke(new Action(VisualForm.Dispose));
+                    else
+                        VisualForm.Dispose();
                 }
-
-                // TODO: Nicht verwaltete Ressourcen (nicht verwaltete Objekte) freigeben und Finalizer überschreiben
-                // TODO: Große Felder auf NULL setzen
                 isDisposed = true;
+                instances.Remove(this);
             }
         }
 
-        // // TODO: Finalizer nur überschreiben, wenn "Dispose(bool disposing)" Code für die Freigabe nicht verwalteter Ressourcen enthält
-        // ~VisualFormHandler()
-        // {
-        //     // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
-        //     Dispose(disposing: false);
-        // }
+        ~VisualFormHandler()
+        {
+            Dispose(disposing: false);
+        }
 
         public void Dispose()
         {
