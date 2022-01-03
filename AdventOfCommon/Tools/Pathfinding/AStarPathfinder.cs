@@ -53,6 +53,7 @@ namespace AdventOfCode.Tools.Pathfinding
 
             while (active != endNode)
             {
+                ExpandNode(active);
                 OnExpanded?.Invoke(
                     expandedNodes.AsReadOnly(),
                     nodes.Where(x => x.ExpansionPriority < double.PositiveInfinity)
@@ -61,7 +62,6 @@ namespace AdventOfCode.Tools.Pathfinding
                          .AsReadOnly(),
                     active);
 
-                ExpandNode(active);
                 var inUseNodes = GetPathToNode(active);
                 var nextActive = nodes
                     .Except(inUseNodes)
@@ -101,7 +101,7 @@ namespace AdventOfCode.Tools.Pathfinding
         private List<AStarNodeConnection> GetNeighbours(AStarNode targetNode) =>
             connections.Where(conn => conn.HasConnectionTo(targetNode)).ToList();
 
-        private List<AStarNode> GetPathToNode(AStarNode targetNode)
+        public static List<AStarNode> GetPathToNode(AStarNode targetNode)
         {
             var path = new Stack<AStarNode>();
             while (targetNode != null)

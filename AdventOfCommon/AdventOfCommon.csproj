@@ -69,6 +69,12 @@
     <Compile Include="Tools\TopologicalOrder\Topological.cs" />
     <Compile Include="Tools\TraceChars.cs" />
     <Compile Include="Tools\VectorAssist.cs" />
+    <Compile Include="Tools\Visualization\DebugForms\AStarDebugForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\Visualization\DebugForms\AStarDebugForm.Designer.cs">
+      <DependentUpon>AStarDebugForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\Visualization\VisForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -79,6 +85,9 @@
     <Compile Include="Tools\Visualization\VisualState.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Tools\Visualization\DebugForms\AStarDebugForm.resx">
+      <DependentUpon>AStarDebugForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Tools\Visualization\VisForm.resx">
       <DependentUpon>VisForm.cs</DependentUpon>
     </EmbeddedResource>
