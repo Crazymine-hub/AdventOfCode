@@ -4,6 +4,7 @@ using AdventOfCode.Tools.Extensions;
 using AdventOfCode.Tools.Pathfinding;
 using AdventOfCode.Tools.Pathfinding.AStar;
 using AdventOfCode.Tools.Visualization;
+using AdventOfCode.Tools.Visualization.DebugForm;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -21,12 +22,12 @@ namespace AdventOfCode.Days
         private bool disposedValue;
         Bitmap map;
         const int scale = 5;
+        VisualFormHandler formHandler = VisualFormHandler.GetInstance();
 
         //let's mangle my aStar implementation
         //FIXME: THAT'S A MESS
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
             List<string> rows = GetLines(input);
             for (int y = 0; y < rows.Count; ++y)
             {
@@ -35,53 +36,17 @@ namespace AdventOfCode.Days
                     riskMap.SetRelative(x, y, new AStarNode(x, y, int.Parse(row[x].ToString())));
             }
 
+            if (part2) AppendMap();
+
             map = new Bitmap(riskMap.XDim * scale, riskMap.YDim * scale);
+            AStarNode[] path = Pathfind();
 
-            List<AStarNodeConnection> connections = new List<AStarNodeConnection>();
-            AStarNode start = riskMap.First();
-            AStarNode end = riskMap.Last();
-
-            foreach (DynamicGridValue<AStarNode> riskNode in riskMap)
-            {
-                List<double> areaHeat = new List<double>() { riskNode.Value.NodeHeuristic };
-                if (riskNode.X > 0)
-                {
-                    var neighbour = riskMap[riskNode.X - 1, riskNode.Y];
-                    connections.Add(new TwoWayNodeConnection(riskNode, neighbour));
-                    areaHeat.Add(neighbour.NodeHeuristic);
-                }
-                if (riskNode.Y > 0)
-                {
-                    var neighbour = riskMap[riskNode.X, riskNode.Y - 1];
-                    connections.Add(new TwoWayNodeConnection(riskNode, neighbour));
-                    areaHeat.Add(neighbour.NodeHeuristic);
-                }
-                if (riskNode.X < riskMap.XDim - 1)
-                    areaHeat.Add(riskMap[riskNode.X + 1, riskNode.Y].NodeHeuristic);
-                if (riskNode.Y < riskMap.YDim - 1)
-                    areaHeat.Add(riskMap[riskNode.X, riskNode.Y + 1].NodeHeuristic);
-
-
-                int risk = Convert.ToInt32(riskNode.Value.NodeHeuristic / 9.0 * 0xFF);
-                map.FillRect(new Rectangle(riskNode.X * scale, riskNode.Y * scale, scale, scale), Color.FromArgb(risk, risk, risk));
-                try
-                {
-                    Console.SetCursorPosition(riskNode.X, riskNode.Y);
-                    Console.Write(riskNode.Value.NodeHeuristic);
-                }
-                catch { /*Out of bounds will not be rendered in the console window. too bad*/}
-            }
-            VisualFormHandler.Instance.Show(map);
-
-            AStarPathfinder aStar = new AStarPathfinder(connections);
-            aStar.OnExpanded += DrawExpansionState;
-            AStarNode[] path = aStar.GetPath(start, end).ToArray();
             double totalRisk = 0;
             for (int i = 0; i < path.Length; ++i)
             {
                 var node = path[i];
                 int progress = Convert.ToInt32((double)i / path.Length * 0xFF);
-                map.FillRect(new Rectangle(node.X * scale, node.Y * scale, scale, scale), Color.FromArgb(255 - progress, progress, 0));
+                map.FillRect(new Rectangle(node.X * scale, node.Y * scale, scale, scale), Color.FromArgb(progress, 0, 0, 0));
                 try
                 {
                     Console.SetCursorPosition(node.X, node.Y);
@@ -91,7 +56,7 @@ namespace AdventOfCode.Days
                 if (node == path.First()) continue;
                 totalRisk += node.NodeHeuristic;
             }
-            VisualFormHandler.Instance.Update(map);
+            formHandler.Update(map);
 
             Console.WriteLine();
             Console.WriteLine();
@@ -99,22 +64,91 @@ namespace AdventOfCode.Days
             return "Total Risk: " + Convert.ToInt32(totalRisk).ToString();
         }
 
+        private void AppendMap()
+        {
+            const int appendCount = 5;
+            int originalWidth = riskMap.XDim;
+            int originalHeight = riskMap.YDim;
+            for (int appendY = 0; appendY < appendCount; ++appendY)
+                for (int appendX = 0; appendX < appendCount; ++appendX)
+                {
+                    if (appendX == 0 && appendY == 0) continue;
+                    for (int y = 0; y < originalHeight; ++y)
+                        for (int x = 0; x < originalWidth; ++x)
+                        {
+                            int newX = x + originalWidth * appendX;
+                            int newY = y + originalHeight * appendY;
+                            double value = riskMap[x, y].NodeHeuristic + appendX + appendY;
+                            while (value > 9) value -= 8;
+                            riskMap.SetRelative(newX, newY, new AStarNode(newX, newY, value));
+                        }
+                }
+        }
+
+        private AStarNode[] Pathfind()
+        {
+            List<AStarNodeConnection> connections = new List<AStarNodeConnection>();
+            AStarNode start = riskMap.First();
+            AStarNode end = riskMap.Last();
+            LoadConnections(connections);
+            formHandler.Show(map);
+
+            AStarPathfinder aStar = new AStarPathfinder(connections);
+            aStar.OnExpanded += DrawExpansionState;
+            AStarNode[] path = aStar.GetPath(start, end).ToArray();
+            return path;
+        }
+
+        private void LoadConnections(List<AStarNodeConnection> connections)
+        {
+            foreach (DynamicGridValue<AStarNode> riskNode in riskMap)
+            {
+                if (riskNode.X > 0)
+                {
+                    var neighbour = riskMap[riskNode.X - 1, riskNode.Y];
+                    connections.Add(new TwoWayNodeConnection(riskNode, neighbour));
+                }
+                if (riskNode.Y > 0)
+                {
+                    var neighbour = riskMap[riskNode.X, riskNode.Y - 1];
+                    connections.Add(new TwoWayNodeConnection(riskNode, neighbour));
+                }
+
+                int risk = Convert.ToInt32(riskNode.Value.NodeHeuristic / 9.0 * 0xFF);
+                map.FillRect(new Rectangle(riskNode.X * scale, riskNode.Y * scale, scale, scale), Color.FromArgb(risk, 0, 0));
+                try
+                {
+                    Console.SetCursorPosition(riskNode.X, riskNode.Y);
+                    Console.Write(riskNode.Value.NodeHeuristic);
+                }
+                catch { /*Out of bounds will not be rendered in the console window. too bad*/}
+            }
+        }
+
         private void DrawExpansionState(IReadOnlyList<AStarNode> expanded, IReadOnlyList<AStarNode> considered, AStarNode active)
         {
             double maxExpansion = double.PositiveInfinity;
-            if(expanded.Count > 0)
+            double maxLength = double.PositiveInfinity;
+            if (expanded.Count > 0)
+            {
                 maxExpansion = expanded.Max(x => x.ExpansionPriority);
+                maxLength = expanded.Max(x => x.PathLength);
+            }
+            if(maxLength == 0)
+                maxLength = double.PositiveInfinity;
             foreach (AStarNode node in expanded)
             {
                 int brightness = Convert.ToInt32(node.ExpansionPriority / maxExpansion * 0xFF);
-                map.FillRect(new Rectangle(node.X * scale, node.Y * scale, scale, scale), Color.FromArgb(0, 0, brightness));
+                int risk = Convert.ToInt32(node.NodeHeuristic / 9 * 0xFF);
+                int length = Convert.ToInt32(node.PathLength / maxLength * 0xFF);
+                map.FillRect(new Rectangle(node.X * scale, node.Y * scale, scale, scale), Color.FromArgb(risk, length, brightness));
             }
             foreach (AStarNode node in considered)
             {
                 map.FillRect(new Rectangle(node.X * scale, node.Y * scale, scale, scale), Color.FromArgb(0x7F, 0x7F, 0xFF));
             }
             map.FillRect(new Rectangle(active.X * scale, active.Y * scale, scale, scale), Color.FromArgb(0xFF, 0xFF, 0));
-            VisualFormHandler.Instance.Update(map);
+            formHandler.Update(map);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -122,22 +156,10 @@ namespace AdventOfCode.Days
             if (!disposedValue)
             {
                 if (disposing)
-                {
-                    map.Dispose();
-                }
-
-                // TODO: Nicht verwaltete Ressourcen (nicht verwaltete Objekte) freigeben und Finalizer überschreiben
-                // TODO: Große Felder auf NULL setzen
+                    map?.Dispose();
                 disposedValue = true;
             }
         }
-
-        // // TODO: Finalizer nur überschreiben, wenn "Dispose(bool disposing)" Code für die Freigabe nicht verwalteter Ressourcen enthält
-        // ~Day15()
-        // {
-        //     // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {
