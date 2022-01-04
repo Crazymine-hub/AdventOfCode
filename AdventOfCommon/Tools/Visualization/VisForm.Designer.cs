@@ -40,6 +40,7 @@
             this.visualRender.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.visualRender.TabIndex = 2;
             this.visualRender.TabStop = false;
+            this.visualRender.Click += new System.EventHandler(this.VisForm_Click);
             // 
             // VisForm
             // 
