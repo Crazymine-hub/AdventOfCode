@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Days.Tools.Day15;
+using AdventOfCode.Tools;
 using AdventOfCode.Tools.DynamicGrid;
 using AdventOfCode.Tools.Extensions;
 using AdventOfCode.Tools.Pathfinding;
@@ -23,11 +24,14 @@ namespace AdventOfCode.Days
         Bitmap map;
         const int scale = 5;
         VisualFormHandler formHandler = VisualFormHandler.GetInstance();
+        bool part2;
+        ConsoleAssist assist;
 
         //let's mangle my aStar implementation
         //FIXME: THAT'S A MESS
         public override string Solve(string input, bool part2)
         {
+            this.part2 = part2;
             List<string> rows = GetLines(input);
             for (int y = 0; y < rows.Count; ++y)
             {
@@ -36,7 +40,11 @@ namespace AdventOfCode.Days
                     riskMap.SetRelative(x, y, new AStarNode(x, y, int.Parse(row[x].ToString())));
             }
 
-            if (part2) AppendMap();
+            if (part2)
+            {
+                AppendMap();
+                assist = new ConsoleAssist();
+            }
 
             map = new Bitmap(riskMap.XDim * scale, riskMap.YDim * scale);
             AStarNode[] path = Pathfind();
@@ -46,7 +54,7 @@ namespace AdventOfCode.Days
             {
                 var node = path[i];
                 int progress = Convert.ToInt32((double)i / path.Length * 0xFF);
-                map.FillRect(new Rectangle(node.X * scale, node.Y * scale, scale, scale), Color.FromArgb(progress, 0, 0, 0));
+                map.FillRect(new Rectangle(node.X * scale, node.Y * scale, scale, scale), Color.FromArgb(0, progress, 0));
                 try
                 {
                     Console.SetCursorPosition(node.X, node.Y);
@@ -79,7 +87,7 @@ namespace AdventOfCode.Days
                             int newX = x + originalWidth * appendX;
                             int newY = y + originalHeight * appendY;
                             double value = riskMap[x, y].NodeHeuristic + appendX + appendY;
-                            while (value > 9) value -= 8;
+                            while (value > 9) value -= 9;
                             riskMap.SetRelative(newX, newY, new AStarNode(newX, newY, value));
                         }
                 }
@@ -94,7 +102,10 @@ namespace AdventOfCode.Days
             formHandler.Show(map);
 
             AStarPathfinder aStar = new AStarPathfinder(connections);
-            aStar.OnExpanded += DrawExpansionState;
+            if (part2)
+                aStar.OnExpanded += SimpleProgress;
+            else
+                aStar.OnExpanded += DrawExpansionState;
             AStarNode[] path = aStar.GetPath(start, end).ToArray();
             return path;
         }
@@ -116,6 +127,7 @@ namespace AdventOfCode.Days
 
                 int risk = Convert.ToInt32(riskNode.Value.NodeHeuristic / 9.0 * 0xFF);
                 map.FillRect(new Rectangle(riskNode.X * scale, riskNode.Y * scale, scale, scale), Color.FromArgb(risk, 0, 0));
+                if (part2) continue;
                 try
                 {
                     Console.SetCursorPosition(riskNode.X, riskNode.Y);
@@ -127,6 +139,7 @@ namespace AdventOfCode.Days
 
         private void DrawExpansionState(IReadOnlyList<AStarNode> expanded, IReadOnlyList<AStarNode> considered, AStarNode active)
         {
+
             double maxExpansion = double.PositiveInfinity;
             double maxLength = double.PositiveInfinity;
             if (expanded.Count > 0)
@@ -134,7 +147,7 @@ namespace AdventOfCode.Days
                 maxExpansion = expanded.Max(x => x.ExpansionPriority);
                 maxLength = expanded.Max(x => x.PathLength);
             }
-            if(maxLength == 0)
+            if (maxLength == 0)
                 maxLength = double.PositiveInfinity;
             foreach (AStarNode node in expanded)
             {
@@ -149,6 +162,13 @@ namespace AdventOfCode.Days
             }
             map.FillRect(new Rectangle(active.X * scale, active.Y * scale, scale, scale), Color.FromArgb(0xFF, 0xFF, 0));
             formHandler.Update(map);
+        }
+
+        private void SimpleProgress(IReadOnlyList<AStarNode> expanded, IReadOnlyList<AStarNode> considered, AStarNode active)
+        {
+            Console.SetCursorPosition(0, 0);
+            Console.Write("BUSY...");
+            Console.Write(assist.GetNextProgressChar());
         }
 
         protected virtual void Dispose(bool disposing)
