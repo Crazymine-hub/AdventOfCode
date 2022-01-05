@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Days
@@ -103,12 +104,22 @@ namespace AdventOfCode.Days
 
             AStarPathfinder aStar = new AStarPathfinder(connections);
             if (part2)
-                aStar.OnExpanded += SimpleProgress;
-            else
-                aStar.OnExpanded += DrawExpansionState;
-            AStarNode[] path = aStar.GetPath(start, end).ToArray();
-            return path;
+            {
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+                void HandleCancellation(object sender, ConsoleCancelEventArgs e) => cancellationTokenSource.Cancel(); 
+
+                Console.CancelKeyPress += HandleCancellation;
+
+                Task<PathfindResult> pathfindTask = aStar.GetPathAsync(start, end, cancellationTokenSource.Token);
+                assist.WaitForAllTasks(new HashSet<Task>() { pathfindTask });
+                Console.CancelKeyPress -= HandleCancellation;
+                return pathfindTask.Result.Path;
+            }
+            aStar.OnExpanded += DrawExpansionState;
+            return aStar.GetPath(start, end).ToArray();
         }
+
 
         private void LoadConnections(List<AStarNodeConnection> connections)
         {
@@ -137,7 +148,7 @@ namespace AdventOfCode.Days
             }
         }
 
-        private void DrawExpansionState(IReadOnlyList<AStarNode> expanded, IReadOnlyList<AStarNode> considered, AStarNode active)
+        private void DrawExpansionState(IReadOnlyCollection<AStarNode> expanded, IReadOnlyCollection<AStarNode> considered, AStarNode active)
         {
 
             double maxExpansion = double.PositiveInfinity;
@@ -164,7 +175,7 @@ namespace AdventOfCode.Days
             formHandler.Update(map);
         }
 
-        private void SimpleProgress(IReadOnlyList<AStarNode> expanded, IReadOnlyList<AStarNode> considered, AStarNode active)
+        private void SimpleProgress()
         {
             Console.SetCursorPosition(0, 0);
             Console.Write("BUSY...");

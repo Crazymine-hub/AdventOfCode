@@ -25,10 +25,9 @@ namespace AdventOfCode.Tools
 
                 if (!int.TryParse(input, out int inputNr))
                 {
-                    message = "==========================\r\n";
-                    message += "YOU DIDN'T ENTER A NUMBER!\r\n";
-                    message += "==========================\r\n";
-                    continue;
+                    message = "==========================\r\n" +
+                    "YOU DIDN'T ENTER A NUMBER!\r\n" +
+                    "==========================\r\n";
                 }
                 else
                     return inputNr;
@@ -41,6 +40,27 @@ namespace AdventOfCode.Tools
             if (progressPos >= progressIndicator.Length)
                 progressPos = 0;
             return progressIndicator[progressPos];
+        }
+
+        public void WaitForAllTasks(IEnumerable<Task> tasks)
+        {
+            int allTasks = tasks.Count();
+            int previousActive = -1;
+            int activeCount = tasks.Count(x => !x.IsCompleted);
+            while (activeCount > 0)
+            {
+                if(previousActive != activeCount)
+                {
+                    previousActive = activeCount;
+                    Console.WriteLine();
+                    Console.Write($"Waiting for {activeCount}/{allTasks} tasks to complete... ");
+                }
+
+                --Console.CursorLeft;
+                Console.Write(GetNextProgressChar());
+                activeCount = tasks.Count(x => !x.IsCompleted);
+                Task.Delay(1000).Wait();
+            }
         }
 
         public static string Center(string text, int width, char padChar = ' ')
