@@ -35,6 +35,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,6 +49,11 @@
     <Compile Include="DayBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\Bitwise.cs" />
+    <Compile Include="Tools\BitwiseHandlerBase.cs" />
+    <Compile Include="Tools\SpecificBitwise\BitwiseAttribute.cs" />
+    <Compile Include="Tools\SpecificBitwise\IntBitwise.cs" />
+    <Compile Include="Tools\SpecificBitwise\LongBitwise.cs" />
+    <Compile Include="Tools\SpecificBitwise\ULongBitwise.cs" />
     <Compile Include="Tools\ConsoleAssist.cs" />
     <Compile Include="Tools\DynamicGrid.cs" />
     <Compile Include="Tools\MathHelper.cs" />
@@ -61,6 +69,8 @@
     <Compile Include="Tools\TraceChars.cs" />
     <Compile Include="Tools\VectorAssist.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
