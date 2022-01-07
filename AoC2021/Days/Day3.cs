@@ -27,7 +27,7 @@ namespace AdventOfCode.Days
             for (int i = 0; i < bitCount.Length; i++)
                 if (IsCommonSet(report.Count, bitCount[i]))
                     gamma = Bitwise.SetBit(gamma, bitCount.Length - 1 - i, true);
-            long epsilon = ~gamma & Bitwise.GetBitMask(bitCount.Length);
+            long epsilon = ~gamma & Bitwise.GetBitMask<long>(bitCount.Length);
             return $"Gamma: {gamma} Epsilon: {epsilon} Power Level: {gamma * epsilon}";
         }
 
