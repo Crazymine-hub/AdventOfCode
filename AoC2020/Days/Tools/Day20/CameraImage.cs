@@ -17,15 +17,15 @@ namespace AdventOfCode.Days.Tools.Day20
 
         //Borders are Assembled Left to Right or Top to Bottom.
         public IReadOnlyList<bool> TopBorder => Image[0].ToList();
-        public int TopBorderNr => Bitwise.GetBitMask(TopBorder);
+        public int TopBorderNr => Bitwise.GetValue<int>(TopBorder);
         public IReadOnlyList<bool> BottomBorder => Image.Last().ToList();
-        public int BottomBorderNr => Bitwise.GetBitMask(BottomBorder);
+        public int BottomBorderNr => Bitwise.GetValue<int>(BottomBorder);
 
         public IReadOnlyList<bool> LeftBorder => GetColumnList(0);
-        public int LeftBorderNr => Bitwise.GetBitMask(LeftBorder);
+        public int LeftBorderNr => Bitwise.GetValue<int>(LeftBorder);
 
         public IReadOnlyList<bool> RightBorder => GetColumnList(Image[0].Count - 1);
-        public int RightBorderNr => Bitwise.GetBitMask(RightBorder);
+        public int RightBorderNr => Bitwise.GetValue<int>(RightBorder);
 
 
         public CameraImage(List<string> imageInfo)

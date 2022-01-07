@@ -1,74 +1,78 @@
-﻿using System;
+﻿using AdventOfCode.Tools.SpecificBitwise;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools
 {
+    //Bitwise operations for ints
     public static class Bitwise
     {
-        public static int SetBit(int data, int bitNr, bool value)
+        private static Dictionary<Type, ImplementerDetail> Implementers = null;
+
+        public static T SetBit<T>(T data, int bitNr, bool value)
         {
-            int mask = 1 << bitNr;
-            data = data & ~mask;
-            if (value)
-                data = data | mask;
-            return data;
+            return (T)InvokeImplementer<T>(nameof(SetBit), new object[] { data, bitNr, value });
         }
 
-        public static bool IsBitSet(int data, int bitNr)
+        public static bool IsBitSet<T>(T data, int bitNr)
         {
-            return (data & (1 << bitNr)) != 0;
-        }
-        public static long SetBit(long data, int bitNr, bool value)
-        {
-            long mask = 1L << bitNr;
-            data = data & ~mask;
-            if (value)
-                data = data | mask;
-            return data;
+            return (bool)InvokeImplementer<T>(nameof(IsBitSet), new object[] { data, bitNr});
         }
 
-        public static bool IsBitSet(long data, int bitNr)
+        public static T GetBitMask<T>(int length)
         {
-            return (data & (1L << bitNr)) != 0;
+            return (T)InvokeImplementer<T>(nameof(GetBitMask), new object[] { length});
         }
 
-        public static long GetBitMask(int length)
+        public static int CountSetBits<T>(T data)
         {
-            long result = 1;
-            for (int i = 1; i < length; i++)
-                result = (result << 1) | 1;
-            return result;
+            return (int)InvokeImplementer<T>(nameof(CountSetBits), new object[] {data});
         }
 
-        public static int GetBitMask(IEnumerable<bool> values)
+        public static T GetValue<T>(IEnumerable<bool> values)
         {
-            int result = 0;
-            for (int i = 0; i < values.Count(); ++i)
-                result = SetBit(result, i, values.ElementAt(i));
-            return result;
+            return (T)InvokeImplementer<T>(nameof(GetValue), new object[] {values});
         }
 
-        public static long GetBitMaskLong(IEnumerable<bool> values)
+        public static List<bool> GetBits<T>(T bits)
         {
-            long result = 0;
-            for (int i = 0; i < values.Count(); ++i)
-                result = SetBit(result, i, values.ElementAt(i));
-            return result;
+            return (List<bool>)InvokeImplementer<T>(nameof(GetBits), new object[] {bits});
         }
 
-        public static int CountSetBits(int data)
+        private static object InvokeImplementer<T>(string methodName, object[] arguments)
         {
-            int cntr = 0;
-            while (data != 0)
+            List<Type> argumentTypes = new List<Type>();
+            foreach (var argument in arguments)
+                argumentTypes.Add(argument.GetType());
+            var targetMethod = GetImplementer(typeof(T)).GetMethod(methodName, argumentTypes.ToArray());
+            if (targetMethod == null) throw new MissingMethodException($"The method {methodName}({string.Join(", ", argumentTypes.Select(x => x.Name))}) is not available in the handler associated with the type {typeof(T)}.");
+            return targetMethod.Invoke(null, arguments);
+        }
+
+        private static Type GetImplementer(Type targetType)
+        {
+            if (Implementers == null) ListImplementers();
+            if (!Implementers.ContainsKey(targetType)) throw new NotSupportedException($"There is no known handler associated with the type '{targetType}'!");
+            return Implementers[targetType].Implementer;
+        }
+
+        private static void ListImplementers()
+        {
+            Implementers = new Dictionary<Type,ImplementerDetail>();
+            foreach(Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
-                if ((data & 1) == 1)
-                    cntr++;
-                data >>= 1;
+                var bitwiseAttribute = type.GetCustomAttributes().FirstOrDefault(attribute => attribute is BitwiseHandlerAttribute) as BitwiseHandlerAttribute;
+                if (bitwiseAttribute == null) continue;
+                Type handled = bitwiseAttribute.HandledType;
+                if (!Implementers.ContainsKey(handled))
+                    Implementers.Add(handled, new ImplementerDetail(type, bitwiseAttribute.Priority));
+                if(Implementers[handled].Priority < bitwiseAttribute.Priority)
+                    Implementers[handled] = new ImplementerDetail(type, bitwiseAttribute.Priority);
             }
-            return cntr;
         }
     }
 }
