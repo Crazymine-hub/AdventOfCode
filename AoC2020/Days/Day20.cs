@@ -123,8 +123,8 @@ namespace AdventOfCode.Days
                             for (int monsterY = 0; monsterY < monsterHeight; ++monsterY)
                             {
                                 //Get the area of the current line of the map and the monster as number (bitmask)
-                                long mappedValue = Bitwise.GetBitMaskLong(map.Image[y + monsterY].GetRange(x, monsterWidth));
-                                long monsterRow = Bitwise.GetBitMaskLong(monster.Image[monsterY]);
+                                long mappedValue = Bitwise.GetValue<long>(map.Image[y + monsterY].GetRange(x, monsterWidth));
+                                long monsterRow = Bitwise.GetValue<long>(monster.Image[monsterY]);
                                 //if the map contains the monster, the and join should output a perfect replica of the monster
                                 if ((mappedValue & monsterRow) != monsterRow)
                                 {//otherwise we don't have a complete monster

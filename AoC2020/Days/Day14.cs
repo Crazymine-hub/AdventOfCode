@@ -54,7 +54,7 @@ namespace AdventOfCode.Days
         private void RefreshMasks(string mask)
         {
             //our number is only 36 bits long. Get a 36 bit long fully set mask
-            force0 = Bitwise.GetBitMask(36);
+            force0 = Bitwise.GetBitMask<long>(36);
             force1 = 0;
             floating = new List<int>();
             for (int i = 0; i < mask.Length; i++)
@@ -84,7 +84,7 @@ namespace AdventOfCode.Days
             List<long> addresses = new List<long>();
             address |= force1;
             //maskValues counts upwards to get all combinations of floating numbers (Mask XX becomes 00 to 11)
-            long floatCountMask = Bitwise.GetBitMask(floating.Count);
+            long floatCountMask = Bitwise.GetBitMask<long>(floating.Count);
             for (int maskValues = 0; maskValues <= floatCountMask; maskValues++)
             {
                 long newAddress = address;
