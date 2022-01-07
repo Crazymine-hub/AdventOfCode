@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace AdventOfCode.Tools.SpecificBitwise
 {
     //Bitwise operations for ints
+    [BitwiseHandler(typeof(int))]
     public static class IntBitwise
     {
         public static int SetBit(int data, int bitNr, bool value)

@@ -10,7 +10,7 @@ namespace AdventOfCode.Tools.SpecificBitwise
     internal sealed class BitwiseHandlerAttribute : Attribute
     {
         public Type HandledType { get; }
-        public int Priority { get; set; }
+        public int Priority { get; set; } = 0;
         
         public BitwiseHandlerAttribute(Type handledType)
         {

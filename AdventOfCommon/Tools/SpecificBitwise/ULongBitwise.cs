@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace AdventOfCode.Tools.SpecificBitwise
 {
     //Bitwise operations for ulong
+    [BitwiseHandler(typeof(ulong))]
     public static class ULongBitwise
     {
         public static ulong SetBit(ulong data, int bitNr, bool value)

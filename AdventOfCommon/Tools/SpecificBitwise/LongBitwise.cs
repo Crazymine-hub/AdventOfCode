@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace AdventOfCode.Tools.SpecificBitwise
 {
     //Bitwise operations for long
+    [BitwiseHandler(typeof(long))]
     public static class LongBitwise
     {
         public static long SetBit(long data, int bitNr, bool value)

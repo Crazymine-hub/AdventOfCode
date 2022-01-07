@@ -11,7 +11,7 @@ namespace AdventOfCode.Tools
     //Bitwise operations for ints
     public static class Bitwise
     {
-        private static Dictionary<Type, (Type Implementer, int Priority)> Implementers = null;
+        private static Dictionary<Type, ImplementerDetail> Implementers = null;
 
         public static T SetBit<T>(T data, int bitNr, bool value)
         {
@@ -62,15 +62,16 @@ namespace AdventOfCode.Tools
 
         private static void ListImplementers()
         {
+            Implementers = new Dictionary<Type,ImplementerDetail>();
             foreach(Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
                 var bitwiseAttribute = type.GetCustomAttributes().FirstOrDefault(attribute => attribute is BitwiseHandlerAttribute) as BitwiseHandlerAttribute;
                 if (bitwiseAttribute == null) continue;
                 Type handled = bitwiseAttribute.HandledType;
                 if (!Implementers.ContainsKey(handled))
-                    Implementers.Add(handled, (type, bitwiseAttribute.Priority));
+                    Implementers.Add(handled, new ImplementerDetail(type, bitwiseAttribute.Priority));
                 if(Implementers[handled].Priority < bitwiseAttribute.Priority)
-                    Implementers[handled] = (type, bitwiseAttribute.Priority);
+                    Implementers[handled] = new ImplementerDetail(type, bitwiseAttribute.Priority);
             }
         }
     }
