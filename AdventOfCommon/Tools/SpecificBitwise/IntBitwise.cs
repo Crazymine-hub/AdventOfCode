@@ -32,7 +32,7 @@ namespace AdventOfCode.Tools.SpecificBitwise
             return result;
         }
 
-        public static int GetBitMask(IEnumerable<bool> values)
+        public static int GetValue(IEnumerable<bool> values)
         {
             int result = 0;
             for (int i = 0; i < values.Count(); ++i)

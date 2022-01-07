@@ -24,7 +24,7 @@ namespace AdventOfCode.Tools.SpecificBitwise
             return (data & (1UL << bitNr)) != 0;
         }
 
-        public static ulong GetBitMaskULong(IEnumerable<bool> values)
+        public static ulong GetValue(IEnumerable<bool> values)
         {
             ulong result = 0;
             for (int i = 0; i < values.Count(); ++i)

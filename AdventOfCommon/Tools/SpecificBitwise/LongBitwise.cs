@@ -24,7 +24,7 @@ namespace AdventOfCode.Tools.SpecificBitwise
             return (data & (1L << bitNr)) != 0;
         }
 
-        public static long GetBitMaskLong(IEnumerable<bool> values)
+        public static long GetValue(IEnumerable<bool> values)
         {
             long result = 0;
             for (int i = 0; i < values.Count(); ++i)

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools
 {
-    //Bitwise operations for ints
+    [Obsolete("Consider using the specialized class.")]
     public static class Bitwise
     {
         private static Dictionary<Type, ImplementerDetail> Implementers = null;
