@@ -52,6 +52,7 @@
     <Compile Include="Days\Day14.cs" />
     <Compile Include="Days\Day15.cs" />
     <Compile Include="Days\Day16.cs" />
+    <Compile Include="Days\Day17.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Days\Tools\Day12\CaveNode.cs" />
     <Compile Include="Days\Tools\Day15\TwoWayNodeConnection.cs" />
     <Compile Include="Days\Tools\Day16\BitsPacket.cs" />
+    <Compile Include="Days\Tools\Day17\ThrowResult.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
     <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
@@ -154,6 +156,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day16.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day17.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

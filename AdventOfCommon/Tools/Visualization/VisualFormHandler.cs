@@ -14,6 +14,11 @@ namespace AdventOfCode.Tools.Visualization
         private static List<VisualFormHandler> instances = new List<VisualFormHandler>();
         public static int ValidInstanceCount => instances.Count();
 
+        private VisualFormHandler()
+        {
+
+        }
+
         public static VisualFormHandler GetInstance()
         {
             VisualFormHandler handler = new VisualFormHandler();

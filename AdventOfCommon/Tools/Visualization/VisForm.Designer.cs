@@ -50,6 +50,7 @@
             this.ClientSize = new System.Drawing.Size(284, 239);
             this.Controls.Add(this.visualRender);
             this.Name = "VisForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Click += new System.EventHandler(this.VisForm_Click);
             ((System.ComponentModel.ISupportInitialize)(this.visualRender)).EndInit();
             this.ResumeLayout(false);

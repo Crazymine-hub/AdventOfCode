@@ -12,7 +12,7 @@ namespace AdventOfCode.Tools.Visualization
 {
     internal partial class VisForm : Form
     {
-        VisualState state;
+        VisualState state = VisualState.zoomed;
 
         private string titleText;
 
@@ -37,6 +37,10 @@ namespace AdventOfCode.Tools.Visualization
             InitializeComponent();
             Reset();
             Visible = false;
+            Left = SystemInformation.VirtualScreen.Width - Width;
+            Invalidate();
+            WindowState = FormWindowState.Maximized;
+            UpdateVisualState();
         }
 
         internal static VisForm CreateInstance()
@@ -71,7 +75,11 @@ namespace AdventOfCode.Tools.Visualization
                 state = 0;
 
             RefreshDisplayedText();
+            UpdateVisualState();
+        }
 
+        private void UpdateVisualState()
+        {
             switch (state)
             {
                 case VisualState.normal:
