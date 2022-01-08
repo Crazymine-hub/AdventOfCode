@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using AdventOfCode.Tools;
 
 namespace AdventOfCode
@@ -14,10 +15,12 @@ namespace AdventOfCode
         static string dayPath;
         static string year;
         static Assembly lib;
+        static CancellationTokenSource tokenSource;
 
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
+            Console.CancelKeyPress += Console_CancelKeyPress;
             Console.Title = "Advent of Code - Initializing";
             if (args.Length <= 0 || !TryGetLibrary(args[0]))
             {
@@ -48,6 +51,13 @@ namespace AdventOfCode
                 Console.WriteLine("Done! Press enter to return to start.");
                 while (Console.ReadKey(true).Key != ConsoleKey.Enter) { /*that is not the key i want*/}
             }
+        }
+
+        private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            if (tokenSource == null) return;
+            tokenSource.Cancel();
+            e.Cancel = true;
         }
 
         private static bool TryGetLibrary(string directory)
@@ -148,24 +158,34 @@ namespace AdventOfCode
                 Console.Title += " Part 1";
 
             Stopwatch stopwatch = new Stopwatch();
-            try
+            using (tokenSource = new CancellationTokenSource())
             {
-                if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + "_addition" + fileExtension))
-                    day.AdditionalContent = File.ReadAllText(dayPath + dayNr + "_addition" + fileExtension);
+                try
+                {
+                    if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + "_addition" + fileExtension))
+                        day.AdditionalContent = File.ReadAllText(dayPath + dayNr + "_addition" + fileExtension);
 
-                stopwatch.Start();
-                Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
-                stopwatch.Stop();
+                    day.CancellationToken = tokenSource.Token;
+                    stopwatch.Start();
+                    Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
+                    stopwatch.Stop();
 
-                if (day.UsesAdditionalContent && day.AdditionalContent != null)
-                    File.WriteAllText(dayPath + dayNr + "_addition" + fileExtension, day.AdditionalContent);
+                    if (day.UsesAdditionalContent && day.AdditionalContent != null)
+                        File.WriteAllText(dayPath + dayNr + "_addition" + fileExtension, day.AdditionalContent);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    if (ex.CancellationToken != tokenSource.Token) throw;
+                    Console.WriteLine("Operation canceled.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("An Exception occured while running the Day.");
+                    Console.WriteLine(ex.ToString());
+                }
+                (day as IDisposable)?.Dispose();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An Exception occured while running the Day.");
-                Console.WriteLine(ex.ToString());
-            }
-            (day as IDisposable)?.Dispose();
+            tokenSource = null;
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Completed in " + stopwatch.Elapsed.ToString());
