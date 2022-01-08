@@ -25,6 +25,7 @@ namespace AdventOfCode.Days
                 stopwatch.Start();
                 for (int i = 0; i < 100; ++i)
                 {
+                    CancellationToken.ThrowIfCancellationRequested();
                     Console.WriteLine(lobby.ToString(GetTileString, CorrectLine));
                     Console.WriteLine($"{i}: Found {lobby.Count(x => x)} black tiles. Elapsed: {stopwatch.Elapsed} Remaining: {new TimeSpan(stopwatch.ElapsedTicks / (i+1) * (100 - i))}");
                     Conway();

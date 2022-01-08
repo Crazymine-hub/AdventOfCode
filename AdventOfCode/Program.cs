@@ -15,6 +15,7 @@ namespace AdventOfCode
         static string dayPath;
         static string year;
         static Assembly lib;
+        static CancellationTokenSource tokenSource;
 
         static void Main(string[] args)
         {
@@ -128,23 +129,33 @@ namespace AdventOfCode
                 Console.Title += " Part 1";
 
             Stopwatch stopwatch = new Stopwatch();
-            try
+            using (tokenSource = new CancellationTokenSource())
             {
-                if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + "_addition" + fileExtension))
-                    day.AdditionalContent = File.ReadAllText(dayPath + dayNr + "_addition" + fileExtension);
+                try
+                {
+                    if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + "_addition" + fileExtension))
+                        day.AdditionalContent = File.ReadAllText(dayPath + dayNr + "_addition" + fileExtension);
 
-                stopwatch.Start();
-                Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
-                stopwatch.Stop();
+                    day.CancellationToken = tokenSource.Token;
+                    stopwatch.Start();
+                    Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
+                    stopwatch.Stop();
 
-                if (day.UsesAdditionalContent && day.AdditionalContent != null)
-                    File.WriteAllText(dayPath + dayNr + "_addition" + fileExtension, day.AdditionalContent);
+                    if (day.UsesAdditionalContent && day.AdditionalContent != null)
+                        File.WriteAllText(dayPath + dayNr + "_addition" + fileExtension, day.AdditionalContent);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    if (ex.CancellationToken != tokenSource.Token) throw;
+                    Console.WriteLine("Operation canceled.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("An Exception occured while running the Day.");
+                    Console.WriteLine(ex.ToString());
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An Exception occured while running the Day.");
-                Console.WriteLine(ex.ToString());
-            }
+            tokenSource = null;
 
             Console.WriteLine();
             Console.WriteLine();
@@ -187,6 +198,7 @@ namespace AdventOfCode
 
         private static void Initialize(string[] args)
         {
+            Console.CancelKeyPress += Console_CancelKeyPress;
             Console.Title = "Advent of Code - Initializing";
             if (args.Length <= 0 || !TryGetLibrary(args[0]))
             {
