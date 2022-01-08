@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Tools;
+using AdventOfCode.Tools.SpecificBitwise;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,12 @@ namespace AdventOfCode.Days.Tools.Day16
 {
     internal class BitsPacket
     {
-        public byte Version { get; }
-        public byte TypeId { get; }
+        public int Version { get; }
+        public int TypeId { get; }
         public ulong Value { get; }
         public List<BitsPacket> SubPackets { get; }
 
-        public BitsPacket(byte version, byte typeId, ulong value, List<BitsPacket> subPackets)
+        public BitsPacket(int version, int typeId, ulong value, List<BitsPacket> subPackets)
         {
             Version = version;
             TypeId = typeId;
@@ -22,30 +23,32 @@ namespace AdventOfCode.Days.Tools.Day16
             SubPackets = subPackets;
         }
 
-        public static List<BitsPacket> ReadPackets(string message)
+        public static List<BitsPacket> ReadPackets(string message, out List<BitsPacket> linearList)
         {
             Queue<bool> binaryMessage = new Queue<bool>();
+            linearList = new List<BitsPacket>();
             int position = 0;
-            while (position < message.Length) {
-                byte value = byte.Parse(message[position++].ToString() , System.Globalization.NumberStyles.AllowHexSpecifier);
+            while (position < message.Length)
+            {
+                byte value = byte.Parse(message[position++].ToString(), System.Globalization.NumberStyles.AllowHexSpecifier);
                 for (int i = 3; i >= 0; i--)
-                    binaryMessage.Enqueue(Bitwise.IsBitSet((int)value, i));
+                    binaryMessage.Enqueue(IntBitwise.IsBitSet(value, i));
             }
 
-            return ReadPackets(binaryMessage, true);
+            return ReadPackets(binaryMessage, true, linearList);
         }
 
-        private static List<BitsPacket> ReadPackets(Queue<bool> message, bool continueReading)
+        private static List<BitsPacket> ReadPackets(Queue<bool> message, bool continueReading, List<BitsPacket> linearPackets)
         {
             List<BitsPacket> packets = new List<BitsPacket>();
-            while (message.Count > 0)
+            while (message.Count > 0 && !message.All(x => x == false))
             {
                 int version = 0;
                 for (int i = 2; i >= 0; --i)
-                    version = Bitwise.SetBit(version, i, message.Dequeue());
+                    version = IntBitwise.SetBit(version, i, message.Dequeue());
                 int typeId = 0;
                 for (int i = 2; i >= 0; --i)
-                    typeId = Bitwise.SetBit(typeId, i, message.Dequeue());
+                    typeId = IntBitwise.SetBit(typeId, i, message.Dequeue());
 
                 ulong value = 0;
                 List<BitsPacket> subPackets = null;
@@ -56,11 +59,15 @@ namespace AdventOfCode.Days.Tools.Day16
                         value = ReadLiteral(message);
                         break;
                     default:
-                        subPackets = ReadOperatorPackage(message);
+                        subPackets = ReadOperatorPackage(message, linearPackets);
                         break;
                 }
 
-                if(!continueReading) return packets;
+                BitsPacket packet = new BitsPacket(version, typeId, value, subPackets);
+                packets.Add(packet);
+                linearPackets.Add(packet);
+
+                if (!continueReading) return packets;
             }
             return packets;
         }
@@ -78,14 +85,30 @@ namespace AdventOfCode.Days.Tools.Day16
             }
             while (hasMoreSegments);
             bits.Reverse();
-            ulong value = 0;
-            for(int i = 0; i < bits.Count; ++i)
-                value = Bitwise.SetBit(value, i, bits[i]);
-            return value;
+            return ULongBitwise.GetValue(bits);
         }
-        private static List<BitsPacket> ReadOperatorPackage(Queue<bool> message)
+        private static List<BitsPacket> ReadOperatorPackage(Queue<bool> message, List<BitsPacket> linearPackets)
         {
-            throw new NotImplementedException();
+            bool hasPacketNumber = message.Dequeue();
+            List<bool> bits = new List<bool>();
+            for (int i = 0; i < (hasPacketNumber ? 11 : 15); ++i)
+                bits.Add(message.Dequeue());
+            bits.Reverse();
+            int length = IntBitwise.GetValue(bits);
+            List<BitsPacket> subPackets = new List<BitsPacket>();
+            if (hasPacketNumber)
+            {
+                for (int i = 0; i < length; ++i)
+                    subPackets.AddRange(ReadPackets(message, false, linearPackets));
+            }
+            else
+            {
+                Queue<bool> packetContent = new Queue<bool>();
+                for (int i = 0; i < length; ++i)
+                    packetContent.Enqueue(message.Dequeue());
+                subPackets = ReadPackets(packetContent, true, linearPackets);
+            }
+            return subPackets;
         }
     }
 }

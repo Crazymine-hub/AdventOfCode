@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCode.Days.Tools.Day16;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,13 @@ namespace AdventOfCode.Days
         {
             if (part2) return Part2UnavailableMessage;
 
+            List<BitsPacket> packets = BitsPacket.ReadPackets(input, out List<BitsPacket> allPackets);
+
+
+            int versionSum = allPackets
+                .Select(x => x.Version)
+                .Aggregate((int accumulated, int next) => accumulated + next);
+            return $"Read {allPackets.Count} packet(s). Sum of all version numbers: {versionSum}";
         }
     }
 }
