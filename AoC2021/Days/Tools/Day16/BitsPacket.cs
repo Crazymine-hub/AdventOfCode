@@ -12,16 +12,50 @@ namespace AdventOfCode.Days.Tools.Day16
     {
         public int Version { get; }
         public int TypeId { get; }
-        public ulong Value { get; }
+
+        private ulong literalValue;
+        public ulong Value { get => GetValue(); }
+
+
         public List<BitsPacket> SubPackets { get; }
 
         public BitsPacket(int version, int typeId, ulong value, List<BitsPacket> subPackets)
         {
             Version = version;
             TypeId = typeId;
-            Value = value;
+            literalValue = value;
             SubPackets = subPackets;
         }
+
+        private ulong GetValue()
+        {
+            switch (TypeId)
+            {
+                case 0: //SUM
+                    return SubPackets.Select(x => x.Value).Aggregate((ulong accum, ulong next) => accum + next);
+                case 1: //PRODUCT
+                    var values = SubPackets.Select(x => x.Value).ToArray();
+                    ulong product = 1;
+                    for (int i = 0; i < values.Length; ++i)
+                        product *= values[i];
+                    return product;
+
+                case 2: //Minimum
+                    return SubPackets.Select(x => x.Value).Min();
+                case 3: //Maximum
+                    return SubPackets.Select(x => x.Value).Max();
+                case 4: //Literal packet
+                    return literalValue;
+                case 5: // GT (Always 2 SubPackets)
+                    return (SubPackets[0].Value > SubPackets[1].Value) ? 1ul : 0ul;
+                case 6: // LT (Always 2 SubPackets)
+                    return (SubPackets[0].Value < SubPackets[1].Value) ? 1ul : 0ul;
+                case 7: // EQ (Always 2 SubPackets)
+                    return (SubPackets[0].Value == SubPackets[1].Value) ? 1ul : 0ul;
+                default: throw new NotSupportedException($"Unknown packet type {TypeId}");
+            }
+        }
+
 
         public static List<BitsPacket> ReadPackets(string message, out List<BitsPacket> linearList)
         {
@@ -41,7 +75,7 @@ namespace AdventOfCode.Days.Tools.Day16
         private static List<BitsPacket> ReadPackets(Queue<bool> message, bool continueReading, List<BitsPacket> linearPackets)
         {
             List<BitsPacket> packets = new List<BitsPacket>();
-            while (message.Count > 0 && !message.All(x => x == false))
+            while (message.Count > 0 && message.Any(x => x))
             {
                 int version = 0;
                 for (int i = 2; i >= 0; --i)

@@ -13,15 +13,15 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
-
             List<BitsPacket> packets = BitsPacket.ReadPackets(input, out List<BitsPacket> allPackets);
 
 
             int versionSum = allPackets
                 .Select(x => x.Version)
                 .Aggregate((int accumulated, int next) => accumulated + next);
-            return $"Read {allPackets.Count} packet(s). Sum of all version numbers: {versionSum}";
+            return $"Read {allPackets.Count} packet(s).{Environment.NewLine}" +
+                $"Sum of all version numbers: {versionSum}{Environment.NewLine}" +
+                $"Transmission Value: {packets.First().Value}";
         }
     }
 }
