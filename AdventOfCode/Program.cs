@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using AdventOfCode.Tools;
 using AdventOfCode.Tools.Visualization;
 
@@ -209,6 +210,13 @@ namespace AdventOfCode
                     if (TryGetLibrary(Directory.GetCurrentDirectory() + "\\" + userYear)) break;
                 }
             }
+        }
+
+        private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            if (tokenSource == null) return;
+            tokenSource.Cancel();
+            e.Cancel = true;
         }
 
         private static bool TryGetLibrary(string directory)
