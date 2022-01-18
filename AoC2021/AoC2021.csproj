@@ -66,6 +66,10 @@
     <Compile Include="Days\Tools\Day15\TwoWayNodeConnection.cs" />
     <Compile Include="Days\Tools\Day16\BitsPacket.cs" />
     <Compile Include="Days\Tools\Day17\ThrowResult.cs" />
+    <Compile Include="Days\Tools\Day18\ISnailLiteral.cs" />
+    <Compile Include="Days\Tools\Day18\NumbersChangedException.cs" />
+    <Compile Include="Days\Tools\Day18\SimpleSnailNumber.cs" />
+    <Compile Include="Days\Tools\Day18\SnailNumber.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
     <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
@@ -162,6 +166,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day17.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day18.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
