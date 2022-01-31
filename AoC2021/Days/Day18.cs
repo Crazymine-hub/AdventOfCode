@@ -20,13 +20,13 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
+            if (part2) return GetMaxMagnitude(input);
             foreach (string line in GetLines(input))
             {
                 int position = 0;
                 ISnailLiteral appended = BuildNumber(line, ref position);
-                Console.WriteLine($"---- Appending {appended} ----");
                 if (position != line.Length - 1) throw new FormatException($"The line {line} was not fully processed. processing stopped at position {position}{Environment.NewLine}{"^".PadLeft(position + 1)}");
+                Console.WriteLine($"---- Appending {appended} ----");
 
                 if (homework == null)
                     homework = appended;
@@ -39,16 +39,71 @@ namespace AdventOfCode.Days
                 oldHeight = Console.WindowHeight - 1;
                 if (Console.CursorTop > oldHeight)
                     oldHeight = Console.CursorTop + 1;
-                do
-                {
-                    changeStatus = 0;
-                    PrintStartNewReduction();
-                    bool mustExplode = pairs.Any(x => x.Depth >= 4);
-                    ReduceNumber(homework, mustExplode, ref changeStatus);
-                    PrintEndReduction(changeStatus);
-                } while (changeStatus != 0);
+                RunReduction(homework, true);
             }
             return $"Magnitude is: {homework.Magnitude}";
+        }
+
+        private string GetMaxMagnitude(string input)
+        {
+            List<string> lines = new List<string>();
+            foreach (string line in GetLines(input))
+                lines.Add(line);
+
+            ISnailLiteral maxMagnitude = null;
+            for (int i = 0; i < lines.Count; ++i)
+            {
+                for (int j = 0; j < lines.Count; ++j)
+                {
+                    if (i == j) continue;
+                    Console.WriteLine($"Adding: {lines[i]} + {lines[j]}");
+                    pairs.Clear();
+                    numbers.Clear();
+                    int position = 0;
+                    string leftLine = "";
+                    lock (lines)
+                    {
+                        leftLine = lines[i];
+                    }
+                    ISnailLiteral left = BuildNumber(leftLine, ref position);
+                    if (position != leftLine.Length - 1) throw new FormatException($"The line {leftLine} was not fully processed. processing stopped at position {position}{Environment.NewLine}{"^".PadLeft(position + 1)}");
+
+                    string rightLine = "";
+                    lock (lines)
+                    {
+                        rightLine = lines[j];
+                    }
+                    position = 0;
+                    ISnailLiteral right = BuildNumber(rightLine, ref position);
+                    if (position != rightLine.Length - 1) throw new FormatException($"The line {rightLine} was not fully processed. processing stopped at position {position}{Environment.NewLine}{"^".PadLeft(position + 1)}");
+
+                    ISnailLiteral literal = new SnailNumber(left, right);
+                    RunReduction(literal, false);
+
+                    if(maxMagnitude == null || maxMagnitude.Magnitude < literal.Magnitude)
+                        maxMagnitude = literal;
+                }
+            }
+
+
+            if (maxMagnitude == null) return "No magnitude found at all.";
+
+            return $"The maximal Magnitude of {maxMagnitude.Magnitude} can be achieved with {maxMagnitude}";
+        }
+
+        private void RunReduction(ISnailLiteral literal, bool writeSteps)
+        {
+            byte changeStatus;
+            do
+            {
+                changeStatus = 0;
+                if (writeSteps)
+                    PrintStartNewReduction(literal);
+                bool mustExplode = pairs.Any(x => x.Depth >= 4);
+                ReduceNumber(literal, mustExplode, ref changeStatus);
+                if (writeSteps)
+                    PrintEndReduction(changeStatus);
+            } while (changeStatus != 0);
         }
 
         private ISnailLiteral BuildNumber(string line, ref int position)
@@ -60,7 +115,10 @@ namespace AdventOfCode.Days
                     ISnailLiteral left = BuildNumber(line, ref position);
                     position += 2;
                     ISnailLiteral value = new SnailNumber(left, BuildNumber(line, ref position));
-                    pairs.Add(value as SnailNumber);
+                    lock (pairs)
+                    {
+                        pairs.Add(value as SnailNumber);
+                    }
                     ++position;
                     return value;
                 case ',':
@@ -73,7 +131,10 @@ namespace AdventOfCode.Days
 
                     //this is madness
                     SimpleSnailNumber parsedNumber = new SimpleSnailNumber(int.Parse(number));
-                    numbers.Add(parsedNumber);
+                    lock (numbers)
+                    {
+                        numbers.Add(parsedNumber);
+                    }
                     return parsedNumber;
             }
         }
@@ -85,7 +146,7 @@ namespace AdventOfCode.Days
             {
                 if (mustExplode) return;
                 SimpleSnailNumber simpleNumber = (SimpleSnailNumber)processingNumber;
-                SplitNumber(simpleNumber, ref changeStatus, false);
+                SplitNumber(simpleNumber, ref changeStatus);
                 return;
             }
 
@@ -95,16 +156,14 @@ namespace AdventOfCode.Days
 
             ReduceNumber(number.Right, mustExplode, ref changeStatus, depth + 1);
             if (changeStatus != 0) return;
-            ExplodeNumber(number, ref changeStatus, false);
+            ExplodeNumber(number, ref changeStatus);
         }
 
-        private void ExplodeNumber(SnailNumber number, ref byte changeStatus, bool needsNewLine)
+        private void ExplodeNumber(SnailNumber number, ref byte changeStatus)
         {
             SimpleSnailNumber leftNumber = null;
             SimpleSnailNumber rightNumber = null;
             if (number.Depth < 4 || number.Left.GetType() != typeof(SimpleSnailNumber) || number.Right.GetType() != typeof(SimpleSnailNumber)) return;
-            if (needsNewLine)
-                MakeNewIndicator(changeStatus);
             changeStatus = 1;
 
             SimpleSnailNumber numberBuf = (SimpleSnailNumber)number.Right;
@@ -133,11 +192,9 @@ namespace AdventOfCode.Days
             ReplaceNumber(number, numberBuf);
         }
 
-        private void SplitNumber(SimpleSnailNumber number, ref byte changeStatus, bool needsNewLine)
+        private void SplitNumber(SimpleSnailNumber number, ref byte changeStatus)
         {
             if (number.Value < 10) return;
-            if (needsNewLine)
-                MakeNewIndicator(changeStatus);
             changeStatus = 2;
 
             int numberIndex = numbers.IndexOf(number);
@@ -163,9 +220,9 @@ namespace AdventOfCode.Days
                 throw new InvalidOperationException($"The number {previous} is not part of {previous.Parent}");
         }
 
-        private void PrintStartNewReduction()
+        private void PrintStartNewReduction(ISnailLiteral literal)
         {
-            Console.Write($"Reducing: {homework}");
+            Console.Write($"Reducing: {literal}");
         }
 
         private void PrintEndReduction(byte changeStatus)
@@ -177,12 +234,6 @@ namespace AdventOfCode.Days
                 case 2: Console.WriteLine("-"); break;
                 default: Console.WriteLine("?"); break;
             }
-        }
-
-        private void MakeNewIndicator(byte changeStatus)
-        {
-            PrintEndReduction(changeStatus);
-            PrintStartNewReduction();
         }
 
         private IEnumerable<ISnailLiteral> TraverseTree(ISnailLiteral rootLiteral)
