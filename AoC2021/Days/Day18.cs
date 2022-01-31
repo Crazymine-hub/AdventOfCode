@@ -26,7 +26,7 @@ namespace AdventOfCode.Days
                 int position = 0;
                 ISnailLiteral appended = BuildNumber(line, ref position);
                 Console.WriteLine($"---- Appending {appended} ----");
-                Task.Delay(1000).Wait();
+                if (position != line.Length - 1) throw new FormatException($"The line {line} was not fully processed. processing stopped at position {position}{Environment.NewLine}{"^".PadLeft(position + 1)}");
 
                 if (homework == null)
                     homework = appended;
@@ -35,7 +35,6 @@ namespace AdventOfCode.Days
                     homework = new SnailNumber(homework, appended);
                     pairs.Add(homework as SnailNumber);
                 }
-                if (position != line.Length - 1) throw new FormatException($"The line {line} was not fully processed. processing stopped at position {position}{Environment.NewLine}{"^".PadLeft(position + 1)}");
                 byte changeStatus = 0;
                 oldHeight = Console.WindowHeight - 1;
                 if (Console.CursorTop > oldHeight)
@@ -101,7 +100,7 @@ namespace AdventOfCode.Days
 
             --Console.CursorLeft;
             Console.Write(" ^");
-            ReduceNumber(number.Right,  mustExplode, ref changeStatus, depth + 1);
+            ReduceNumber(number.Right, mustExplode, ref changeStatus, depth + 1);
             if (changeStatus != 0) return;
             --Console.CursorLeft;
             Console.Write(" ^");
