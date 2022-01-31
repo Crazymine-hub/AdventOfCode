@@ -85,25 +85,16 @@ namespace AdventOfCode.Days
             {
                 if (mustExplode) return;
                 SimpleSnailNumber simpleNumber = (SimpleSnailNumber)processingNumber;
-                --Console.CursorLeft;
-                Console.Write(" ");
-                Console.Write("^".PadLeft(simpleNumber.Value.ToString().Length));
                 SplitNumber(simpleNumber, ref changeStatus, false);
                 return;
             }
 
-            --Console.CursorLeft;
-            Console.Write(" ^");
             SnailNumber number = (SnailNumber)processingNumber;
             ReduceNumber(number.Left, mustExplode, ref changeStatus, depth + 1);
             if (changeStatus != 0) return;
 
-            --Console.CursorLeft;
-            Console.Write(" ^");
             ReduceNumber(number.Right, mustExplode, ref changeStatus, depth + 1);
             if (changeStatus != 0) return;
-            --Console.CursorLeft;
-            Console.Write(" ^");
             ExplodeNumber(number, ref changeStatus, false);
         }
 
@@ -172,33 +163,13 @@ namespace AdventOfCode.Days
                 throw new InvalidOperationException($"The number {previous} is not part of {previous.Parent}");
         }
 
-        private void PrintStartNewReduction(int indicatorStartPosition = -1)
+        private void PrintStartNewReduction()
         {
             Console.Write($"Reducing: {homework}");
-            previousLineEnd = Console.CursorLeft;
-            Console.WriteLine();
-            int top = Console.CursorTop;
-
-            Console.CursorTop = oldHeight;
-            Console.Write(string.Empty.PadLeft(Console.WindowWidth - 1));
-            if (Console.WindowHeight - 1 > top)
-                Console.CursorTop = Console.WindowHeight - 1;
-            else
-                Console.WriteLine();
-            Console.CursorLeft = 0;
-            Console.Write($">{homework}");
-            oldHeight = Console.CursorTop;
-
-            Console.CursorTop = top;
-            if (indicatorStartPosition < 0)
-                indicatorStartPosition = "Reducing: ".Length;
-            Console.CursorLeft = indicatorStartPosition;
         }
 
         private void PrintEndReduction(byte changeStatus)
         {
-            --Console.CursorTop;
-            Console.CursorLeft = previousLineEnd;
             switch (changeStatus)
             {
                 case 0: Console.WriteLine("="); break;
@@ -210,10 +181,8 @@ namespace AdventOfCode.Days
 
         private void MakeNewIndicator(byte changeStatus)
         {
-            int left = Console.CursorLeft - 1;
             PrintEndReduction(changeStatus);
-            PrintStartNewReduction(left);
-            Console.Write('^');
+            PrintStartNewReduction();
         }
 
         private IEnumerable<ISnailLiteral> TraverseTree(ISnailLiteral rootLiteral)
