@@ -24,9 +24,9 @@ namespace AdventOfCode.Tools.SpecificBitwise
             return (data & 1 << bitNr) != 0;
         }
 
-        public static long GetBitMask(int length)
+        public static int GetBitMask(int length)
         {
-            long result = 1;
+            int result = 1;
             for (int i = 1; i < length; i++)
                 result = result << 1 | 1;
             return result;
