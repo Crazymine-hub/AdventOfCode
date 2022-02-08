@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AdventOfCode</RootNamespace>
     <AssemblyName>AoC2020</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -80,13 +81,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\AsmComputer\AsmComputer.cs" />
     <Compile Include="Tools\AsmComputer\InstructionInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AdventOfCommon\AdventOfCommon.csproj">
-      <Project>{4f6e4037-b01c-4c1c-b13f-bf7452fd1c37}</Project>
-      <Name>AdventOfCommon</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day7.txt">
@@ -208,6 +202,12 @@
     <None Include="Inputs\Day25.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AdventOfCommon\AdventOfCommon.csproj">
+      <Project>{4f6e4037-b01c-4c1c-b13f-bf7452fd1c37}</Project>
+      <Name>AdventOfCommon</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
