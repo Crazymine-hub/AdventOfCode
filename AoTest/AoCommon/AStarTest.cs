@@ -8,7 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 
-namespace AoCommonTest
+namespace AoTest.AoCommon
 {
     [TestClass]
     public class AStarTest
@@ -81,7 +81,7 @@ namespace AoCommonTest
 
         private static IEnumerable<object[]> GetTestMazes()
         {
-            foreach (string maze in Directory.GetFiles(@"..\..\Data\Mazes\non-perfect", "*.bmp"))
+            foreach (string maze in Directory.GetFiles(@"..\..\Data\AoCommon\Mazes\non-perfect", "*.bmp"))
             {
                 List<AStarNode> nodes = new List<AStarNode>();
                 List<AStarNode> solution = new List<AStarNode>();

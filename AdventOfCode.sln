@@ -19,7 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoCommonTest", "AoCommonTest\AoCommonTest.csproj", "{490CBFFD-9EB3-44CE-AAB2-448A0F6223C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoTest", "AoTest\AoTest.csproj", "{490CBFFD-9EB3-44CE-AAB2-448A0F6223C9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2021", "AoC2021\AoC2021.csproj", "{CAC734C9-1234-448A-AD75-3C5B411CE86E}"
 EndProject
