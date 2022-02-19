@@ -72,6 +72,7 @@
     <Compile Include="Days\Tools\Day18\NumbersChangedException.cs" />
     <Compile Include="Days\Tools\Day18\SimpleSnailNumber.cs" />
     <Compile Include="Days\Tools\Day18\SnailNumber.cs" />
+    <Compile Include="Days\Tools\Day19\IntersectResult.cs" />
     <Compile Include="Days\Tools\Day19\Point3.cs" />
     <Compile Include="Days\Tools\Day19\SensorData.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />

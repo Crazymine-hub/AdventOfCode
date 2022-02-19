@@ -114,6 +114,8 @@ namespace AdventOfCode.Days.Tools.Day19
             return newPoint;
         }
 
+        public Point3 Invert() => new Point3(-X, -Y, -Z);
+
 
         public override string ToString() => $"Point3: {{{X},{Y},{Z}}}";
 
