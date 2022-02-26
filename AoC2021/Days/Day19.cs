@@ -67,7 +67,7 @@ namespace AdventOfCode.Days
         {
             List<IntersectResult> newAdditions = null;
             if (currentRoot != null)
-                newAdditions = intersects.Where(x => x.RootSensor == currentRoot).ToList();
+                newAdditions = intersects.Where(x => x.RootSensor == currentRoot || x.TargetSensor == currentRoot).ToList();
             else
             {
                 var start = intersects.First();
@@ -78,27 +78,26 @@ namespace AdventOfCode.Days
             var newIntersects = intersects.Except(newAdditions).ToList();
             foreach (var addition in newAdditions)
             {
+                bool reverse = addition.TargetSensor == currentRoot;
                 var adjustedAddition = addition;
                 rotations.Push(addition.TargetRotation);
-                IEnumerable<Point3> attachments = AssembleBeaconMap(newIntersects, addition.TargetSensor, rotations);
+                IEnumerable<Point3> attachments = AssembleBeaconMap(newIntersects, reverse ? addition.RootSensor : addition.TargetSensor, rotations);
                 rotations.Pop();
-                /*foreach (int rotation in rotations)
-                {
-                    adjustedAddition = adjustedAddition.Rotate(rotation);
-                    attachments = attachments.Select(x => x.Rotate(rotation));
-                }*/
-                result.AddRange(AssembleBeaconIntersection(adjustedAddition, attachments));
+                result.AddRange(AssembleBeaconIntersection(adjustedAddition, attachments, reverse));
             }
             return result.Distinct().ToList();
         }
 
-        private List<Point3> AssembleBeaconIntersection(IntersectResult intersectResult, IEnumerable<Point3> additionalPoints)
+        private List<Point3> AssembleBeaconIntersection(IntersectResult intersectResult, IEnumerable<Point3> additionalPoints, bool reverse)
         {
-            var rotatedTarget = intersectResult.TargetSensor.Points.Select(point => point.Rotate(intersectResult.TargetRotation));
-            var rotatedAnchor = intersectResult.TargetPoint.Rotate(intersectResult.TargetRotation);
-            var resultBeacons = rotatedTarget.Select(point => point - rotatedAnchor + intersectResult.RootPoint).ToList();
+            var targetSensor = reverse ? intersectResult.RootSensor : intersectResult.TargetSensor;
+            var anchorPoint = reverse ? intersectResult.RootPoint : intersectResult.TargetPoint;
+            var rootPoint = reverse ? intersectResult.TargetPoint : intersectResult.RootPoint;
+            var rotatedTarget = targetSensor.Points.Select(point => point.Rotate(intersectResult.TargetRotation));
+            var rotatedAnchor = anchorPoint.Rotate(intersectResult.TargetRotation);
+            var resultBeacons = rotatedTarget.Select(point => point - rotatedAnchor + rootPoint).ToList();
             if (additionalPoints != null)
-                resultBeacons.AddRange(additionalPoints.Select(point => point.Rotate(intersectResult.TargetRotation) - rotatedAnchor + intersectResult.RootPoint));
+                resultBeacons.AddRange(additionalPoints.Select(point => point.Rotate(intersectResult.TargetRotation) - rotatedAnchor + rootPoint));
             return resultBeacons;
         }
     }
