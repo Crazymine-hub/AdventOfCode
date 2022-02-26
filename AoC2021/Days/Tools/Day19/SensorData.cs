@@ -24,11 +24,14 @@ namespace AdventOfCode.Days.Tools.Day19
             }
         }
 
-        public IEnumerable<Point3> GetPointsWithRotation(int rotation)
+        private SensorData(string name, HashSet<Point3> points)
         {
-            foreach (var point in points)
-                yield return point.GetRotatedPoint(rotation);
+            this.Name = name;
+            this.points = points;
         }
+
+        public SensorData Rotate(int rotation) => 
+            new SensorData(Name, points.Select(x => x.Rotate(rotation)).ToHashSet());
 
         public override string ToString() => Name;
     }

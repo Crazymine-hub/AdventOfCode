@@ -21,7 +21,7 @@ namespace AdventOfCode.Days.Tools.Day19
         public object Clone() => CloneDirect();
         public Point3 CloneDirect() => new Point3(X, Y, Z);
 
-        public Point3 GetRotatedPoint(int rotation)
+        public Point3 Rotate(int rotation)
         {
             if (rotation < 0 || rotation > 23) throw new ArgumentException($"The value {rotation} is outside the Range {{0;23}}.", nameof(rotation));
             Point3 newPoint = this.CloneDirect();

@@ -23,7 +23,7 @@ namespace AoTest.AoC2021
         public void Point3RotationTest(int rotationStep, Point3 expected)
         {
             
-            Assert.AreEqual(expected, basePoint.GetRotatedPoint(rotationStep));
+            Assert.AreEqual(expected, basePoint.Rotate(rotationStep));
         }
 
         public static IEnumerable<object[]> GetPossibleRotations()
