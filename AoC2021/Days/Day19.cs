@@ -66,10 +66,13 @@ namespace AdventOfCode.Days
         private List<Point3> AssembleBeaconMap(List<IntersectResult> intersects, SensorData currentRoot, Stack<int> rotations)
         {
             List<IntersectResult> newAdditions = null;
-            if(currentRoot != null)
+            if (currentRoot != null)
                 newAdditions = intersects.Where(x => x.RootSensor == currentRoot).ToList();
             else
-                newAdditions = new List<IntersectResult>(){ intersects.First()};
+            {
+                var start = intersects.First();
+                newAdditions = new List<IntersectResult>() { new IntersectResult(start.RootSensor, start.RootPoint, start.RootSensor, start.RootPoint, 0) };
+            }
             List<Point3> result = new List<Point3>();
 
             var newIntersects = intersects.Except(newAdditions).ToList();
@@ -79,11 +82,11 @@ namespace AdventOfCode.Days
                 rotations.Push(addition.TargetRotation);
                 IEnumerable<Point3> attachments = AssembleBeaconMap(newIntersects, addition.TargetSensor, rotations);
                 rotations.Pop();
-                foreach (int rotation in rotations)
+                /*foreach (int rotation in rotations)
                 {
                     adjustedAddition = adjustedAddition.Rotate(rotation);
                     attachments = attachments.Select(x => x.Rotate(rotation));
-                }
+                }*/
                 result.AddRange(AssembleBeaconIntersection(adjustedAddition, attachments));
             }
             return result.Distinct().ToList();
