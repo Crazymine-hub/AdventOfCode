@@ -119,9 +119,11 @@ namespace AdventOfCode.Days.Tools.Day19
 
         public override string ToString() => $"Point3: {{{X},{Y},{Z}}}";
 
+        public override bool Equals(object obj) => obj is Point3 point && Equals(this, point);
+
         public bool Equals(Point3 a, Point3 b) => (a.X == b.X && a.Y == b.Y && a.Z == b.Z);
 
-        public int GetHashCode(Point3 obj) => X ^ Y ^ Z;
+        public int GetHashCode(Point3 obj) => obj.X ^ obj.Y ^ obj.Z;
 
         public static Point3 operator -(Point3 a, Point3 b) => new Point3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         public static Point3 operator +(Point3 a, Point3 b) => new Point3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);

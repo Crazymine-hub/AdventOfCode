@@ -36,9 +36,10 @@ namespace AdventOfCode.Days
                 }
             Task.WaitAll(compareTasks.ToArray());
 
-            var result = AssembleBeaconMap(compareTasks.Where(x => x.Result != null).Select(x => (IntersectResult)x.Result).ToList(), null, new Stack<int>());
+            var intersections = compareTasks.Where(x => x.Result != null).Select(x => (IntersectResult)x.Result).ToList();
+            var result = AssembleBeaconMap(intersections, null, new Stack<int>());
 
-            return "";
+            return $"Found {result.Count} beacons.";
         }
 
         private IntersectResult? CompareSensorData(SensorData rootSensor, SensorData intersectSensor)
@@ -85,7 +86,7 @@ namespace AdventOfCode.Days
                 rotations.Pop();
                 result.AddRange(AssembleBeaconIntersection(adjustedAddition, attachments, reverse));
             }
-            return result.Distinct().ToList();
+            return result/*.Distinct()*/.ToList();
         }
 
         private List<Point3> AssembleBeaconIntersection(IntersectResult intersectResult, IEnumerable<Point3> additionalPoints, bool reverse)

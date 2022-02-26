@@ -30,5 +30,7 @@ namespace AdventOfCode.Days.Tools.Day19
                 TargetSensor.Rotate(rotation),
                 TargetPoint.Rotate(rotation),
                 TargetRotation);
+
+        public override string ToString() => $"{RootSensor.Name} X {TargetSensor.Name}";
     }
 }
