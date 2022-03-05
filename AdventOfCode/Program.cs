@@ -12,6 +12,7 @@ namespace AdventOfCode
 {
     class Program
     {
+        private const string AdditionFileSuffix = "_addition";
         static string message = "";
         static string dayPath;
         static string year;
@@ -134,8 +135,8 @@ namespace AdventOfCode
             {
                 try
                 {
-                    if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + "_addition" + fileExtension))
-                        day.AdditionalContent = File.ReadAllText(dayPath + dayNr + "_addition" + fileExtension);
+                    if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + AdditionFileSuffix + fileExtension))
+                        day.AdditionalContent = File.ReadAllText(dayPath + dayNr + AdditionFileSuffix + fileExtension);
 
                     day.CancellationToken = tokenSource.Token;
                     stopwatch.Start();
@@ -143,7 +144,7 @@ namespace AdventOfCode
                     stopwatch.Stop();
 
                     if (day.UsesAdditionalContent && day.AdditionalContent != null)
-                        File.WriteAllText(dayPath + dayNr + "_addition" + fileExtension, day.AdditionalContent);
+                        File.WriteAllText(dayPath + dayNr + AdditionFileSuffix + fileExtension, day.AdditionalContent);
                 }
                 catch (OperationCanceledException ex)
                 {

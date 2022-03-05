@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Days.Tools.Day19
 {
-    public struct Point3 : ICloneable, IEqualityComparer<Point3>
+    public struct Point3 : ICloneable
     {
         public int X { get; set; }
         public int Y { get; set; }
@@ -21,9 +21,10 @@ namespace AdventOfCode.Days.Tools.Day19
         public object Clone() => CloneDirect();
         public Point3 CloneDirect() => new Point3(X, Y, Z);
 
+
         public Point3 Rotate(int rotation)
         {
-            if (rotation < 0 || rotation > 23) throw new ArgumentException($"The value {rotation} is outside the Range {{0;23}}.", nameof(rotation));
+            if (rotation < 0 || rotation > 24) throw new ArgumentException($"The value {rotation} is outside the Range {{0;23}}.", nameof(rotation));
             Point3 newPoint = this.CloneDirect();
             int steps = rotation / 4;
 
@@ -98,14 +99,14 @@ namespace AdventOfCode.Days.Tools.Day19
                 newPoint.Y = buf;
 
                 if (unrotated.X < 0)
-                    newPoint.Y = Math.Abs(newPoint.Y);
-                else
                     newPoint.Y = Math.Abs(newPoint.Y) * -1;
+                else
+                    newPoint.Y = Math.Abs(newPoint.Y);
 
                 if (unrotated.Y < 0)
-                    newPoint.X = Math.Abs(newPoint.X) * -1;
-                else
                     newPoint.X = Math.Abs(newPoint.X);
+                else
+                    newPoint.X = Math.Abs(newPoint.X) * -1;
 
                 unrotated = newPoint;
                 newPoint = unrotated.CloneDirect();
@@ -117,16 +118,38 @@ namespace AdventOfCode.Days.Tools.Day19
         public Point3 Invert() => new Point3(-X, -Y, -Z);
 
 
-        public override string ToString() => $"Point3: {{{X},{Y},{Z}}}";
 
-        public override bool Equals(object obj) => obj is Point3 point && Equals(this, point);
+        public override bool Equals(object obj)
+        {
+            if(!(obj is Point3)) return false;
+            var target = (Point3) obj;
+            return (X == target.X && Y == target.Y && Z == target.Z);
+        } 
 
-        public bool Equals(Point3 a, Point3 b) => (a.X == b.X && a.Y == b.Y && a.Z == b.Z);
-
-        public int GetHashCode(Point3 obj) => obj.X ^ obj.Y ^ obj.Z;
+        public static string GetStanfordPly(IEnumerable<Point3> points, string comment = "")
+        {
+            StringBuilder plyFile = new StringBuilder();
+            plyFile.AppendLine("ply");
+            plyFile.AppendLine("format ascii 1.0");
+            foreach (string commentLine in comment.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                plyFile.AppendLine($"comment {commentLine}");
+            plyFile.AppendLine($"element vertex {points.Count()}");
+            plyFile.AppendLine("property float x");
+            plyFile.AppendLine("property float y");
+            plyFile.AppendLine("property float z");
+            plyFile.AppendLine("end_header");
+            foreach (var point in points)
+            {
+                plyFile.Append($"{(point.X / 100.0).ToString(System.Globalization.NumberFormatInfo.InvariantInfo)} ");
+                plyFile.Append($"{(point.Y / 100.0).ToString(System.Globalization.NumberFormatInfo.InvariantInfo)} ");
+                plyFile.Append($"{(point.Z / 100.0).ToString(System.Globalization.NumberFormatInfo.InvariantInfo)}");
+                plyFile.AppendLine();
+            }
+            return plyFile.ToString();
+        }
 
         public static Point3 operator -(Point3 a, Point3 b) => new Point3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         public static Point3 operator +(Point3 a, Point3 b) => new Point3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
-
+        public override string ToString() => $"Point3: {{{X},{Y},{Z}}}";
     }
 }

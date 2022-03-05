@@ -23,6 +23,15 @@ namespace AdventOfCode.Days.Tools.Day19
             RootSensor = rootSensor;
         }
 
+        public SensorData GetOther(SensorData current)
+        {
+            if (current.Equals(RootSensor))
+                return TargetSensor;
+            if (current.Equals(TargetSensor))
+                return RootSensor;
+            throw new ArgumentException($"Sensor {current} not in this intersection");
+        }
+
         public IntersectResult Rotate(int rotation) =>
             new IntersectResult(
                 RootSensor.Rotate(rotation),

@@ -34,5 +34,7 @@ namespace AdventOfCode.Days.Tools.Day19
             new SensorData(Name, points.Select(x => x.Rotate(rotation)).ToHashSet());
 
         public override string ToString() => Name;
+
+        public string GetStanfordPly() => Point3.GetStanfordPly(Points, $"AoC 2021 Day19 Sensor {Name}");
     }
 }
