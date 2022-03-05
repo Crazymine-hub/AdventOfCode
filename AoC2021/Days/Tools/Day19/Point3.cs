@@ -124,7 +124,8 @@ namespace AdventOfCode.Days.Tools.Day19
             if(!(obj is Point3)) return false;
             var target = (Point3) obj;
             return (X == target.X && Y == target.Y && Z == target.Z);
-        } 
+        }
+        public override string ToString() => $"Point3: {{{X},{Y},{Z}}}";
 
         public static string GetStanfordPly(IEnumerable<Point3> points, string comment = "")
         {
@@ -148,8 +149,13 @@ namespace AdventOfCode.Days.Tools.Day19
             return plyFile.ToString();
         }
 
+        public static int ManhattanDistance(Point3 a, Point3 b)
+        {
+            var vector = b - a;
+            return Math.Abs(vector.X) + Math.Abs(vector.Y) + Math.Abs(vector.Z);
+        }
+
         public static Point3 operator -(Point3 a, Point3 b) => new Point3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         public static Point3 operator +(Point3 a, Point3 b) => new Point3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
-        public override string ToString() => $"Point3: {{{X},{Y},{Z}}}";
     }
 }

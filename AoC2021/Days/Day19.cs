@@ -19,8 +19,6 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
-
             List<Task<IntersectResult?>> compareTasks = new List<Task<IntersectResult?>>();
 
             foreach (var lineGroup in GetGroupedLines(input))
@@ -43,12 +41,30 @@ namespace AdventOfCode.Days
             CancellationToken.ThrowIfCancellationRequested();
 
             var intersections = compareTasks.Where(x => x.Result != null).Select(x => (IntersectResult)x.Result).ToList();
-            var result = AssembleBeaconMap(intersections, null, new List<SensorData>());
+            var sensorLocations = new List<(SensorData, Point3)>();
+            var result = AssembleBeaconMap(intersections, null, ref sensorLocations);
 
             AdditionalContent = Point3.GetStanfordPly(result, "This is a PLY file of the final Points for AdventOfCode 2021 Day 19.\n" +
                 "It can be opened with 3D Visualisation software, e.g. Blender");
 
-            return $"Found {result.Count} beacons.";
+
+            int maxDistance = 0;
+            SensorData sensorA = null;
+            SensorData sensorB = null;
+            for (int i = 0; i < sensorLocations.Count - 1; ++i)
+                for (int j = i + 1; j < sensorLocations.Count; ++j)
+                {
+                    int distance = Point3.ManhattanDistance(sensorLocations[i].Item2, sensorLocations[j].Item2);
+                    if(distance > maxDistance)
+                    {
+                        maxDistance = distance;
+                        sensorA = sensorLocations[i].Item1;
+                        sensorB = sensorLocations[j].Item1;
+                    }
+                }
+
+                return $"Found {result.Count} beacons.\r\n"+
+                $"The maximum manhattan distance between sensors {sensorA} and {sensorB} is {maxDistance}.";
         }
 
         private IntersectResult? CompareSensorData(SensorData rootSensor, SensorData intersectSensor)
@@ -74,10 +90,13 @@ namespace AdventOfCode.Days
             return null;
         }
 
-        private List<Point3> AssembleBeaconMap(List<IntersectResult> intersects, SensorData currentRoot, List<SensorData> analyzed, Stack<bool> trace = null)
+        private List<Point3> AssembleBeaconMap(List<IntersectResult> intersects, SensorData currentRoot, ref List<(SensorData, Point3)> sensorLocations,
+            List<SensorData> analyzed = null, Stack<bool> trace = null)
         {
             if (trace == null)
                 trace = new Stack<bool>();
+            if (analyzed == null)
+                analyzed = new List<SensorData>();
 
             List<IntersectResult> newAdditions = null;
             if (currentRoot != null)
@@ -86,7 +105,7 @@ namespace AdventOfCode.Days
             {
                 var start = intersects.First();
                 analyzed.Add(start.RootSensor);
-                var beaconMap = AssembleBeaconMap(intersects, start.RootSensor, analyzed, trace);
+                var beaconMap = AssembleBeaconMap(intersects, start.RootSensor, ref sensorLocations, analyzed, trace);
                 beaconMap.AddRange(start.RootSensor.Points);
                 beaconMap = beaconMap.Distinct().ToList();
                 return beaconMap;
@@ -105,16 +124,19 @@ namespace AdventOfCode.Days
                 Console.Write(isLast ? " └" : " ├");
                 Console.WriteLine(realAddition.TargetSensor.ToString());
                 trace.Push(!isLast);
+                List<(SensorData, Point3)> activeSensorPoints = new List<(SensorData, Point3)>();
+                IEnumerable<Point3> attachments = AssembleBeaconMap(intersects, realAddition.TargetSensor, ref activeSensorPoints, analyzed, trace);
 
-                IEnumerable<Point3> attachments = AssembleBeaconMap(intersects, realAddition.TargetSensor, analyzed, trace);
-                result.AddRange(AssembleBeaconIntersection(realAddition, attachments));
+                result.AddRange(AssembleBeaconIntersection(realAddition, attachments, ref activeSensorPoints));
 
+                sensorLocations.AddRange(activeSensorPoints);
                 trace.Pop();
             }
+            sensorLocations.Add((currentRoot, new Point3(0, 0, 0)));
             return result.Distinct().ToList();
         }
 
-        private List<Point3> AssembleBeaconIntersection(IntersectResult intersectResult, IEnumerable<Point3> additionalPoints)
+        private List<Point3> AssembleBeaconIntersection(IntersectResult intersectResult, IEnumerable<Point3> additionalPoints, ref List<(SensorData, Point3)> sensorPoints)
         {
             var rotatedBeacons = intersectResult.TargetSensor.Points.Select(point => point.Rotate(intersectResult.TargetRotation));
             var rotatedReference = intersectResult.TargetPoint.Rotate(intersectResult.TargetRotation);
@@ -122,6 +144,8 @@ namespace AdventOfCode.Days
 
             if (additionalPoints != null)
                 resultBeacons.AddRange(additionalPoints.Select(point => point.Rotate(intersectResult.TargetRotation) - rotatedReference + intersectResult.RootPoint));
+            
+            sensorPoints = sensorPoints.Select(point => (point.Item1, point.Item2.Rotate(intersectResult.TargetRotation) - rotatedReference + intersectResult.RootPoint)).ToList();
             return resultBeacons;
         }
     }
