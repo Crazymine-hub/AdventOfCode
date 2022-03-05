@@ -94,7 +94,6 @@ namespace AdventOfCode.Days
             List<Point3> result = new List<Point3>();
 
             analyzed.AddRange(newAdditions.Select(x => x.GetOther(currentRoot)));
-            //intersects.RemoveAll(x => newAdditions.Contains(x));
             foreach (var addition in newAdditions)
             {
                 var realAddition = addition;
@@ -117,23 +116,12 @@ namespace AdventOfCode.Days
 
         private List<Point3> AssembleBeaconIntersection(IntersectResult intersectResult, IEnumerable<Point3> additionalPoints)
         {
-            var reverse = false;
-            var targetSensor = reverse ? intersectResult.RootSensor : intersectResult.TargetSensor;
-            var targetReferencePoint = reverse ? intersectResult.RootPoint : intersectResult.TargetPoint;
-            var rootAnchorPoint = reverse ? intersectResult.TargetPoint : intersectResult.RootPoint;
-            var rotatedBeacons = targetSensor.Points.Select(point => point.Rotate(intersectResult.TargetRotation));
-            var rotatedReference = targetReferencePoint.Rotate(intersectResult.TargetRotation);
-            var resultBeacons = rotatedBeacons.Select(point => point - rotatedReference + rootAnchorPoint).ToList();
-
-            var testBeacons = new List<Point3>();
-            testBeacons.AddRange(resultBeacons);
-            testBeacons.AddRange(intersectResult.RootSensor.Points);
-            int fullCount = testBeacons.Count;
-            var distinctBeacons = testBeacons.Distinct().ToList();
-            int difference = fullCount - distinctBeacons.Count;
+            var rotatedBeacons = intersectResult.TargetSensor.Points.Select(point => point.Rotate(intersectResult.TargetRotation));
+            var rotatedReference = intersectResult.TargetPoint.Rotate(intersectResult.TargetRotation);
+            var resultBeacons = rotatedBeacons.Select(point => point - rotatedReference + intersectResult.RootPoint).ToList();
 
             if (additionalPoints != null)
-                resultBeacons.AddRange(additionalPoints.Select(point => point.Rotate(intersectResult.TargetRotation) - rotatedReference + rootAnchorPoint));
+                resultBeacons.AddRange(additionalPoints.Select(point => point.Rotate(intersectResult.TargetRotation) - rotatedReference + intersectResult.RootPoint));
             return resultBeacons;
         }
     }
