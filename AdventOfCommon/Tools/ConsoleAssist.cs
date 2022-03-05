@@ -42,7 +42,7 @@ namespace AdventOfCode.Tools
             return progressIndicator[progressPos];
         }
 
-        public void WaitForAllTasks(IEnumerable<Task> tasks)
+        public void WaitForAllTasks(IEnumerable<Task> tasks, int delay = 1000, System.Threading.CancellationToken cancellationToken = default)
         {
             int allTasks = tasks.Count();
             int previousActive = -1;
@@ -52,15 +52,19 @@ namespace AdventOfCode.Tools
                 if(previousActive != activeCount)
                 {
                     previousActive = activeCount;
-                    Console.WriteLine();
-                    Console.Write($"Waiting for {activeCount}/{allTasks} tasks to complete... ");
+                    Console.CursorLeft = 0;
+                    Console.Write($"Waiting for {activeCount}/{allTasks} tasks to complete...  ");
                 }
 
                 --Console.CursorLeft;
                 Console.Write(GetNextProgressChar());
                 activeCount = tasks.Count(x => !x.IsCompleted);
-                Task.Delay(1000).Wait();
+                Task.Delay(delay).Wait();
+                cancellationToken.ThrowIfCancellationRequested();
             }
+
+            Console.WriteLine();
+            Console.WriteLine("All Complete");
         }
 
         public static string Center(string text, int width, char padChar = ' ')

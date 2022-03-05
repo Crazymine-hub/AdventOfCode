@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Days.Tools.Day19;
+using AdventOfCode.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace AdventOfCode.Days
         public override bool UsesAdditionalContent => true;
 
         List<SensorData> sensors = new List<SensorData>();
+
+        private ConsoleAssist consoleAssist = new ConsoleAssist();
 
         public override string Solve(string input, bool part2)
         {
@@ -35,7 +38,9 @@ namespace AdventOfCode.Days
                     task.Start();
                     compareTasks.Add(task);
                 }
-            Task.WaitAll(compareTasks.ToArray(), CancellationToken);
+            Console.WriteLine("Checking Matches....");
+            consoleAssist.WaitForAllTasks(compareTasks, 100);
+            CancellationToken.ThrowIfCancellationRequested();
 
             var intersections = compareTasks.Where(x => x.Result != null).Select(x => (IntersectResult)x.Result).ToList();
             var result = AssembleBeaconMap(intersections, null, new List<SensorData>());
@@ -54,9 +59,9 @@ namespace AdventOfCode.Days
                 List<Point3> rootPattern = rootSensor.Points.Select(point => point - rootBeacon).ToList();
                 foreach (Point3 targetBeacon in intersectSensor.Points)
                 {
-                    CancellationToken.ThrowIfCancellationRequested();
                     for (int rotation = 0; rotation < 24; ++rotation)
                     {
+                        CancellationToken.ThrowIfCancellationRequested();
                         Point3 rotatedTarget = targetBeacon.Rotate(rotation);
                         IEnumerable<Point3> rotatedPoints = intersectSensor.Points.Select(point => point.Rotate(rotation));
                         IEnumerable<Point3> rotatedPattern = rotatedPoints.Select(point => point - rotatedTarget);
