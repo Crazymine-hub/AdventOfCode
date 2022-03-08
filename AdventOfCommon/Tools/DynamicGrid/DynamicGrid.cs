@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.DynamicGrid
 {
-    public class DynamicGrid<T> : IEnumerable<DynamicGridValue<T>>
+    public sealed class DynamicGrid<T> : IEnumerable<DynamicGridValue<T>>
     {
         private readonly List<List<T>> grid;
 
@@ -17,6 +17,8 @@ namespace AdventOfCode.Tools.DynamicGrid
         public int XOrigin { get; private set; }
         public int YOrigin { get; private set; }
 
+        public event Func<T> GetDefault;
+
         public DynamicGrid(int dimX = 1, int dimY = 1)
         {
             grid = new List<List<T>>();
@@ -24,10 +26,17 @@ namespace AdventOfCode.Tools.DynamicGrid
             while (YDim < dimY) IncreaseY(false);
         }
 
+        private T GetDefaultValue()
+        {
+            if(GetDefault == null)
+                return default(T);
+            return GetDefault();
+        }
+
         public void IncreaseX(bool front)
         {
             for (int y = 0; y < YDim; y++)
-                grid[y].Insert(front ? 0 : XDim, default);
+                grid[y].Insert(front ? 0 : XDim, GetDefaultValue());
             ++XDim;
             if (front)
                 ++XOrigin;
@@ -38,7 +47,7 @@ namespace AdventOfCode.Tools.DynamicGrid
             List<T> row = new List<T>();
             for (int x = 0; x < XDim; x++)
             {
-                row.Add(default);
+                row.Add(GetDefaultValue());
             }
             grid.Insert(front ? 0 : YDim, row);
             ++YDim;
@@ -63,9 +72,13 @@ namespace AdventOfCode.Tools.DynamicGrid
                 --YOrigin;
         }
 
+        public bool InRange(int x, int y) => x >= 0 && x < XDim && y >= 0 && y < YDim;
+
         public T GetRelative(int x, int y)
         {
-            return this[XOrigin + x, YOrigin + y];
+            int newX = XOrigin + x;
+            int newY = YOrigin + y;
+            return this[newX, newY];
         }
 
         public void SetRelative(int x, int y, T value)
@@ -75,12 +88,24 @@ namespace AdventOfCode.Tools.DynamicGrid
 
         public void CutDown(Predicate<T> isEmpty = null)
         {
-            if (isEmpty == null) isEmpty = new Predicate<T>(x => x.Equals(default(T)));
+            if (isEmpty == null) isEmpty = new Predicate<T>(x => x.Equals(GetDefaultValue()));
 
             while (grid[0].All(x => isEmpty(x))) DecreaseY(true);
             while (grid.Last().All(x => isEmpty(x))) DecreaseY(false);
             while (grid.All(x => isEmpty(x[0]))) DecreaseX(true);
             while (grid.All(x => isEmpty(x.Last()))) DecreaseX(false);
+        }
+
+        public void AddMargin(int width = 1)
+        {
+            if (width < 0) throw new ArgumentOutOfRangeException(nameof(width), "Value cannot be less than 0.");
+            for (int i = 0; i < width; ++i)
+            {
+                IncreaseX(true);
+                IncreaseX(false);
+                IncreaseY(true);
+                IncreaseY(false);
+            }
         }
 
         public void MakeAvaliable(int x, int y)
@@ -96,6 +121,29 @@ namespace AdventOfCode.Tools.DynamicGrid
             {
                 IncreaseY(true);
                 ++y;
+            }
+        }
+
+        public IEnumerable<DynamicGridValue<T>> GetNeighbours(int x, int y, bool diagonal = true, bool relative = false)
+        {
+            if (relative)
+            {
+                x += XOrigin;
+                y += YOrigin;
+            }
+            for (int row = y - 1; row <= y + 1; ++row)
+            {
+                for (int column = x - 1; column <= x + 1; ++column)
+                {
+                    if (!diagonal && !(row == y || column == x)) continue;
+                    if (!InRange(column, row))
+                    {
+                        yield return new DynamicGridValue<T>(column, row, GetDefaultValue());
+                        continue;
+                    }
+                    var cellValue = new DynamicGridValue<T>(column, row, this[column, row]);
+                    yield return cellValue;
+                }
             }
         }
 
@@ -134,7 +182,8 @@ namespace AdventOfCode.Tools.DynamicGrid
             for (int y = 0; y < YDim; ++y)
                 for (int x = 0; x < XDim; ++x)
                 {
-                    yield return new DynamicGridValue<T>(x, y, this[x, y]);
+                    var cellValue = new DynamicGridValue<T>(x, y, this[x, y]);
+                    yield return cellValue;
                 }
         }
     }

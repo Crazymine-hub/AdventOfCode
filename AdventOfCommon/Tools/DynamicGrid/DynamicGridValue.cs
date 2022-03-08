@@ -19,6 +19,8 @@ namespace AdventOfCode.Tools.DynamicGrid
             Value = value;
         }
 
+        public override string ToString() => $"{Value} @({X},{Y})";
+
         public static implicit operator T(DynamicGridValue<T> gridValue)
         {
             return gridValue.Value;

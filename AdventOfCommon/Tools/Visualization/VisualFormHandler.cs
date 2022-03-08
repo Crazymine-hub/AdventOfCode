@@ -50,7 +50,7 @@ namespace AdventOfCode.Tools.Visualization
 
         public string Title { get => VisualForm.Title; set => VisualForm.Title = value; }
 
-        public void Show(Image visualBmp, bool createCopy = true)
+        public void Show(Image visualBmp = null, bool createCopy = true)
         {
             if (VisualForm.InvokeRequired)
             {
@@ -58,7 +58,8 @@ namespace AdventOfCode.Tools.Visualization
                 return;
             }
             Reset();
-            Update(visualBmp, createCopy);
+            if (visualBmp != null)
+                Update(visualBmp, createCopy);
             VisualForm.Show();
         }
 
