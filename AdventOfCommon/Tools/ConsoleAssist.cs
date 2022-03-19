@@ -44,7 +44,6 @@ namespace AdventOfCode.Tools
 
         public void WaitForAllTasks(IEnumerable<Task> tasks, int delay = 1000, System.Threading.CancellationToken cancellationToken = default)
         {
-            int allTasks = tasks.Count();
             int previousActive = -1;
             int activeCount = tasks.Count(x => !x.IsCompleted);
             while (activeCount > 0)
@@ -52,8 +51,10 @@ namespace AdventOfCode.Tools
                 if(previousActive != activeCount)
                 {
                     previousActive = activeCount;
+                    --Console.CursorLeft;
+                    Console.Write(" ");
                     Console.CursorLeft = 0;
-                    Console.Write($"Waiting for {activeCount}/{allTasks} tasks to complete...  ");
+                    Console.Write($"Waiting for {activeCount}/{tasks.Count()} tasks to complete...  ");
                 }
 
                 --Console.CursorLeft;

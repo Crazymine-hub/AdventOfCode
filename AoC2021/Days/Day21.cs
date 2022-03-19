@@ -1,4 +1,7 @@
-﻿using System;
+﻿using AdventOfCode.Days.Tools.Day21;
+using AdventOfCode.Tools;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,94 +14,93 @@ namespace AdventOfCode.Days
     {
         public override string Title => "Dirac Dice";
 
-        int player1Pos = 0;
-        int player2Pos = 0;
-        int player1Score = 0;
-        int player2Score = 0;
-        int lastDieRoll = 0;
-        int dieRollCount = 0;
+        bool part2;
+        ulong lastDieRoll = 0;
+        ulong dieRollCount = 0;
+        ulong targetScore = 0;
+        readonly ulong[] winCount = new ulong[2];
 
-        const int targetScore = 1_000;
+        private ulong universeCount = 0;
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
+            this.part2 = part2;
+            targetScore = part2 ? 21UL : 1000UL;
             var matches = Regex.Matches(input, @"Player (1|2) starting position: (\d+)");
-            LoadPlayerPosition(matches[0]);
-            LoadPlayerPosition(matches[1]);
-
-            Console.Clear();
-            Console.WriteLine(string.Join(" ", Enumerable.Range(1, 10)));
-            bool player1 = false;
-            while (player1Score < targetScore && player2Score < targetScore)
+            ulong position1 = ulong.Parse(matches[0].Groups[2].Value);
+            ulong position2 = ulong.Parse(matches[1].Groups[2].Value);
+            if (matches[0].Groups[1].Value == "2")
             {
-                player1 = !player1;
-                MakePlayerMove(player1);
-                Console.SetCursorPosition(0, 3);
-                Console.WriteLine($"Player 1: {player1Score}");
-                Console.WriteLine($"Player 2: {player2Score}");
-                Task.Delay(6).Wait();
+                var positionBuffer = position2;
+                position2 = position1;
+                position1 = positionBuffer;
+            }
+            GameState state = new GameState(position1, position2);
+
+            state = PlayGame(state);
+
+            int winner = 0;
+            if (part2)
+            {
+                winner = winCount[0] > winCount[1] ? 1 : 2;
+                return $"Winner is Player {winner} in {winCount[winner - 1]} universes";
+            }
+            winner = state.GetWinner(targetScore);
+            ulong gameHash = winner == 1 ? state.Player2Score : state.Player1Score;
+            gameHash *= dieRollCount;
+            return $"Game Hash is {gameHash} (P1: {state.Player1Score} P2: {state.Player2Score} D: {dieRollCount})";
+        }
+
+        private GameState PlayGame(GameState initialState, ulong depth = 0)
+        {
+            int winner = initialState.GetWinner(targetScore);
+            if (winner != 0)
+            {
+                checked
+                {
+                    ++winCount[winner - 1];
+                }
+                return initialState;
             }
 
-            Console.WriteLine($"Player {(player1 ? 1 : 2)} wins");
-            int loosingPlayerScore = player1Score >= targetScore ? player2Score : player1Score;
-
-            return $"Game Hash value = {loosingPlayerScore * dieRollCount}";
+            GameState movedState = initialState;
+            foreach (ulong diceValue in RollDice())
+            {
+                ++universeCount;
+                movedState = initialState.ApplyMoves(diceValue);
+                movedState = PlayGame(movedState, depth + 1);
+            }
+            return movedState;
         }
 
-        private void LoadPlayerPosition(Match matches)
+        private Queue<ulong> RollDice()
         {
-            int position = int.Parse(matches.Groups[2].Value);
-            if (matches.Groups[1].Value == "1")
-                player1Pos = position;
-            else
-                player2Pos = position;
+            Queue<ulong> rolls = new Queue<ulong>();
+            if (part2)
+            {
+                for (ulong i = 1; i <= 3; ++i)
+                    for (ulong j = 1; j <= 3; ++j)
+                        for (ulong k = 1; k <= 3; ++k)
+                            rolls.Enqueue(i + j + k); //+3 = offset 1 each
+                return rolls;
+            }
+
+
+            for (ulong i = 0; i < 3; ++i)
+                rolls.Enqueue(GetNextDiceRoll());
+            rolls.Enqueue(rolls.Aggregate((ulong accumulator, ulong next) => accumulator + next));
+            while (rolls.Count > 1)
+                rolls.Dequeue();
+            return rolls;
         }
 
-        private int GetNextDiceRoll()
+        private ulong GetNextDiceRoll()
         {
             var result = ++lastDieRoll;
             if (lastDieRoll == 100)
                 lastDieRoll = 0;
             ++dieRollCount;
             return result;
-        }
-
-        private void MakePlayerMove(bool player1)
-        {
-            int position = player1 ? player1Pos : player2Pos;
-            int cursorPosition = (position - 1) * 2 - 1;
-            if (cursorPosition < 0)
-                cursorPosition += 20;
-            Console.CursorLeft = cursorPosition;
-            for (int i = 0; i < 3; ++i)
-                position += GetNextDiceRoll();
-            while (position > 10)
-                position -= 10;
-
-
-            Console.CursorTop = player1 ? 1 : 2;
-            while (Console.CursorLeft + 1 != position * 2)
-            {
-                if (Console.CursorLeft > 0)
-                    --Console.CursorLeft;
-                Console.Write("  ");
-                if (Console.CursorLeft >= 20)
-                    Console.CursorLeft = 0;
-                Console.Write("X");
-                Task.Delay(2).Wait();
-            }
-
-            if (player1)
-            {
-                player1Pos = position;
-                player1Score += position;
-            }
-            else
-            {
-                player2Pos = position;
-                player2Score += position;
-            }
         }
     }
 }
