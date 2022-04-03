@@ -1,5 +1,4 @@
-﻿using AdventOfCode.Days.Tools.Day21;
-using AdventOfCode.Tools;
+﻿using AdventOfCode.Tools;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,86 +14,112 @@ namespace AdventOfCode.Days
         public override string Title => "Dirac Dice";
 
         bool part2;
-        ulong lastDieRoll = 0;
-        ulong dieRollCount = 0;
-        ulong targetScore = 0;
-        readonly ulong[] winCount = new ulong[2];
+        long lastDieRoll = 0;
+        long dieRollCount = 0;
+        long targetScore = 0;
 
-        private ulong universeCount = 0;
+        long p1Score;
+        long p2Score;
+
+        private long universeCount = 0;
+        private readonly (long value, long amount)[] diceUniverses = new (long, long)[]{
+            (3, 1),
+            (4, 3),
+            (5, 6),
+            (6, 7),
+            (7, 6),
+            (8, 3),
+            (9, 1)
+            };
 
         public override string Solve(string input, bool part2)
         {
             this.part2 = part2;
-            targetScore = part2 ? 21UL : 1000UL;
+            targetScore = part2 ? 21L : 1000L;
             var matches = Regex.Matches(input, @"Player (1|2) starting position: (\d+)");
-            ulong position1 = ulong.Parse(matches[0].Groups[2].Value);
-            ulong position2 = ulong.Parse(matches[1].Groups[2].Value);
+            long p1Pos = long.Parse(matches[0].Groups[2].Value) - 1;
+            long p2Pos = long.Parse(matches[1].Groups[2].Value) - 1;
             if (matches[0].Groups[1].Value == "2")
             {
-                var positionBuffer = position2;
-                position2 = position1;
-                position1 = positionBuffer;
+                var positionBuffer = p2Pos;
+                p2Pos = p1Pos;
+                p1Pos = positionBuffer;
             }
-            GameState state = new GameState(position1, position2);
 
-            state = PlayGame(state);
+            PlayGame(p1Pos, p1Score, p2Pos, p2Score, out long p1Wins, out long p2Wins, true);
 
-            int winner = 0;
+
             if (part2)
             {
-                winner = winCount[0] > winCount[1] ? 1 : 2;
-                return $"Winner is Player {winner} in {winCount[winner - 1]} universes";
+                //(long wins1, long wins2) = PlayCopy(p1Pos, targetScore, p2Pos, targetScore);
+                //return $"Winner is in {Math.Max(wins1, wins2)}";
+                long winCount = p1Wins > p2Wins ? p1Wins : p2Wins;
+                return $"Winner is Player {(p1Wins == winCount ? 1 : 2)} in {winCount} universes";
             }
-            winner = state.GetWinner(targetScore);
-            ulong gameHash = winner == 1 ? state.Player2Score : state.Player1Score;
+            long gameHash = p1Score > p2Score ? p2Score : p1Score;
             gameHash *= dieRollCount;
-            return $"Game Hash is {gameHash} (P1: {state.Player1Score} P2: {state.Player2Score} D: {dieRollCount})";
+            return $"Game Hash is {gameHash} (P1: {p1Score} P2: {p2Score} D: {dieRollCount})";
         }
 
-        private GameState PlayGame(GameState initialState, ulong depth = 0)
+        private void PlayGame(long p1Pos, long p1Score, long p2Pos, long p2Score, out long p1Wins, out long p2Wins, bool p1Turn)
         {
-            int winner = initialState.GetWinner(targetScore);
-            if (winner != 0)
+            p1Wins = 0;
+            p2Wins = 0;
+            this.p1Score = p1Score;
+            this.p2Score = p2Score;
+            if (p1Score >= targetScore)
             {
-                checked
+                ++p1Wins;
+                return;
+            }
+
+            if (p2Score >= targetScore)
+            {
+                ++p2Wins;
+                return;
+            }
+
+            long nP1Pos = p1Pos;
+            long nP1Score = p1Score;
+            long nP2Pos = p2Pos;
+            long nP2Score = p2Score;
+
+            foreach (var diceThrow in RollDice())
+            {
+                if (p1Turn)
                 {
-                    ++winCount[winner - 1];
+                    nP1Pos = MakeMoves(p1Pos, diceThrow.value);
+                    nP1Score = p1Score + nP1Pos + 1;
                 }
-                return initialState;
+                else
+                {
+                    nP2Pos = MakeMoves(p2Pos, diceThrow.value);
+                    nP2Score = p2Score + nP2Pos + 1;
+                }
+                PlayGame(nP1Pos, nP1Score, nP2Pos, nP2Score, out long uP1Wins, out long uP2Wins, !p1Turn);
+                p1Wins += uP1Wins * diceThrow.amount;
+                p2Wins += uP2Wins * diceThrow.amount;
             }
-
-            GameState movedState = initialState;
-            foreach (ulong diceValue in RollDice())
-            {
-                ++universeCount;
-                movedState = initialState.ApplyMoves(diceValue);
-                movedState = PlayGame(movedState, depth + 1);
-            }
-            return movedState;
         }
 
-        private Queue<ulong> RollDice()
+        long MakeMoves(long currentPosition, long moves) => (currentPosition + moves) % 10;
+
+        private IEnumerable<(long value, long amount)> RollDice()
         {
-            Queue<ulong> rolls = new Queue<ulong>();
             if (part2)
             {
-                for (ulong i = 1; i <= 3; ++i)
-                    for (ulong j = 1; j <= 3; ++j)
-                        for (ulong k = 1; k <= 3; ++k)
-                            rolls.Enqueue(i + j + k); //+3 = offset 1 each
-                return rolls;
+                foreach (var universe in diceUniverses)
+                    yield return universe;
+                yield break;
             }
 
-
-            for (ulong i = 0; i < 3; ++i)
-                rolls.Enqueue(GetNextDiceRoll());
-            rolls.Enqueue(rolls.Aggregate((ulong accumulator, ulong next) => accumulator + next));
-            while (rolls.Count > 1)
-                rolls.Dequeue();
-            return rolls;
+            long accumulator = 0;
+            for (long i = 0; i < 3; ++i)
+                accumulator += GetNextDiceRoll();
+            yield return (accumulator, 1);
         }
 
-        private ulong GetNextDiceRoll()
+        private long GetNextDiceRoll()
         {
             var result = ++lastDieRoll;
             if (lastDieRoll == 100)
