@@ -6,16 +6,18 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.DynamicGrid
 {
-    public class DynamicGridValue<T>
+    public struct DynamicGridValue<T>
     {
         public T Value { get; }
         public int X { get; }
         public int Y { get; }
+        public int Z { get; }
 
-        internal DynamicGridValue(int x, int y, T value)
+        internal DynamicGridValue(int x, int y, int z, T value)
         {
             X = x;
             Y = y;
+            Z = z;
             Value = value;
         }
 

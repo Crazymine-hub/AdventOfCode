@@ -9,34 +9,38 @@ namespace AdventOfCode.Tools.DynamicGrid
 {
     public sealed class DynamicGrid<T> : IEnumerable<DynamicGridValue<T>>
     {
-        private readonly List<List<T>> grid;
+        private readonly List<List<List<T>>> grid;
 
         public int XDim { get; private set; }
         public int YDim { get; private set; }
+        public int ZDim { get; private set; }
 
         public int XOrigin { get; private set; }
         public int YOrigin { get; private set; }
+        public int ZOrigin { get; private set; }
 
         public event Func<T> GetDefault;
 
-        public DynamicGrid(int dimX = 1, int dimY = 1)
+        public DynamicGrid(int dimX = 1, int dimY = 1, int dimZ = 1)
         {
-            grid = new List<List<T>>();
+            grid = new List<List<List<T>>>();
             while (XDim < dimX) IncreaseX(false);
             while (YDim < dimY) IncreaseY(false);
+            while (ZDim < dimZ) IncreaseZ(false);
         }
 
         private T GetDefaultValue()
         {
-            if(GetDefault == null)
+            if (GetDefault == null)
                 return default(T);
             return GetDefault();
         }
 
         public void IncreaseX(bool front)
         {
-            for (int y = 0; y < YDim; y++)
-                grid[y].Insert(front ? 0 : XDim, GetDefaultValue());
+            for (int z = 0; z < ZDim; z++)
+                for (int y = 0; y < YDim; y++)
+                    grid[z][y].Insert(front ? 0 : XDim, GetDefaultValue());
             ++XDim;
             if (front)
                 ++XOrigin;
@@ -44,21 +48,43 @@ namespace AdventOfCode.Tools.DynamicGrid
 
         public void IncreaseY(bool front)
         {
-            List<T> row = new List<T>();
-            for (int x = 0; x < XDim; x++)
+            for (int z = 0; z < ZDim; z++)
             {
-                row.Add(GetDefaultValue());
+                List<T> row = new List<T>();
+                for (int x = 0; x < XDim; x++)
+                {
+                    row.Add(GetDefaultValue());
+                }
+                grid[z].Insert(front ? 0 : YDim, row);
             }
-            grid.Insert(front ? 0 : YDim, row);
             ++YDim;
             if (front)
                 ++YOrigin;
         }
 
+        public void IncreaseZ(bool front)
+        {
+            List<List<T>> newGrid = new List<List<T>>();
+            for (int y = 0; y < YDim; y++)
+            {
+                List<T> row = new List<T>();
+                for (int x = 0; x < XDim; x++)
+                {
+                    row.Add(GetDefaultValue());
+                }
+                newGrid.Add(row);
+            }
+            grid.Insert(front ? 0 : ZDim, newGrid);
+            ++ZDim;
+            if (front)
+                ++ZOrigin;
+        }
+
         public void DecreaseX(bool front)
         {
-            for (int y = 0; y < YDim; y++)
-                grid[y].RemoveAt(front ? 0 : XDim - 1);
+            for (int z = 0; z < ZDim; z++)
+                for (int y = 0; y < YDim; y++)
+                    grid[z][y].RemoveAt(front ? 0 : XDim - 1);
             --XDim;
             if (front)
                 --XOrigin;
@@ -66,34 +92,55 @@ namespace AdventOfCode.Tools.DynamicGrid
 
         public void DecreaseY(bool front)
         {
-            grid.RemoveAt(front ? 0 : YDim - 1);
+            for (int z = 0; z < ZDim; z++)
+                grid[z].RemoveAt(front ? 0 : YDim - 1);
             --YDim;
             if (front)
                 --YOrigin;
         }
 
-        public bool InRange(int x, int y) => x >= 0 && x < XDim && y >= 0 && y < YDim;
+        public void DecreaseZ(bool front)
+        {
+            grid.RemoveAt(front ? 0 : ZDim - 1);
+            --ZDim;
+            if (front)
+                --ZOrigin;
+        }
 
-        public T GetRelative(int x, int y)
+        public bool InRange(int x, int y, int z = 1) => x >= 0 && x < XDim && y >= 0 && y < YDim && z > 0 && z < ZDim;
+
+        public T GetRelative(int x, int y, int z = 1)
         {
             int newX = XOrigin + x;
             int newY = YOrigin + y;
-            return this[newX, newY];
+            int newZ = ZOrigin + z;
+            return this[newX, newY, newZ];
         }
 
         public void SetRelative(int x, int y, T value)
         {
-            this[XOrigin + x, YOrigin + y] = value;
+            MakeAvaliable(XOrigin + x, YOrigin + y);
+            this[XOrigin + x, YOrigin + y, 1] = value;
+        }
+
+        public void SetRelative(int x, int y, int z, T value)
+        {
+            MakeAvaliable(XOrigin + x, YOrigin + y, ZOrigin + z);
+            this[XOrigin + x, YOrigin + y, ZOrigin + z] = value;
         }
 
         public void CutDown(Predicate<T> isEmpty = null)
         {
             if (isEmpty == null) isEmpty = new Predicate<T>(x => x.Equals(GetDefaultValue()));
 
-            while (grid[0].All(x => isEmpty(x))) DecreaseY(true);
-            while (grid.Last().All(x => isEmpty(x))) DecreaseY(false);
-            while (grid.All(x => isEmpty(x[0]))) DecreaseX(true);
-            while (grid.All(x => isEmpty(x.Last()))) DecreaseX(false);
+            while (grid.First().All(y => y.All(x => isEmpty(x)))) DecreaseZ(true);
+            while (grid.Last().All(y => y.All(x => isEmpty(x)))) DecreaseZ(false);
+
+            while (grid.All(z => z.First().All(x => isEmpty(x)))) DecreaseY(true);
+            while (grid.All(z => z.Last().All(x => isEmpty(x)))) DecreaseY(false);
+
+            while (grid.All(z => z.All(y => isEmpty(y.First())))) DecreaseX(true);
+            while (grid.All(z => z.All(y => isEmpty(y.Last())))) DecreaseX(false);
         }
 
         public void AddMargin(int width = 1)
@@ -105,10 +152,12 @@ namespace AdventOfCode.Tools.DynamicGrid
                 IncreaseX(false);
                 IncreaseY(true);
                 IncreaseY(false);
+                IncreaseZ(true);
+                IncreaseZ(false);
             }
         }
 
-        public void MakeAvaliable(int x, int y)
+        public void MakeAvaliable(int x, int y, int z = 1)
         {
             while (x >= XDim) IncreaseX(false);
             while (x < 0)
@@ -122,52 +171,66 @@ namespace AdventOfCode.Tools.DynamicGrid
                 IncreaseY(true);
                 ++y;
             }
+            while (z >= ZDim) IncreaseZ(false);
+            while (z < 0)
+            {
+                IncreaseZ(true);
+                ++z;
+            }
         }
 
-        public IEnumerable<DynamicGridValue<T>> GetNeighbours(int x, int y, bool diagonal = true, bool relative = false)
+        public IEnumerable<DynamicGridValue<T>> GetNeighbours(int x, int y, int z = 1, bool diagonal = true, bool relative = false)
         {
             if (relative)
             {
                 x += XOrigin;
                 y += YOrigin;
+                z += ZOrigin;
             }
-            for (int row = y - 1; row <= y + 1; ++row)
+            for (int layer = z - 1; layer <= z + 1; ++layer)
             {
-                for (int column = x - 1; column <= x + 1; ++column)
+                for (int row = y - 1; row <= y + 1; ++row)
                 {
-                    if (!diagonal && !(row == y || column == x)) continue;
-                    if (!InRange(column, row))
+                    for (int column = x - 1; column <= x + 1; ++column)
                     {
-                        yield return new DynamicGridValue<T>(column, row, GetDefaultValue());
-                        continue;
+                        if (!diagonal && !(layer == z || row == y || column == x)) continue;
+                        if (!InRange(column, row, layer))
+                        {
+                            yield return new DynamicGridValue<T>(column, row, layer, GetDefaultValue());
+                            continue;
+                        }
+                        var cellValue = new DynamicGridValue<T>(column, row, layer, this[column, row, layer]);
+                        yield return cellValue;
                     }
-                    var cellValue = new DynamicGridValue<T>(column, row, this[column, row]);
-                    yield return cellValue;
                 }
             }
         }
 
-        public T this[int x, int y]
+        public T this[int x, int y, int z = 1]
         {
-            get => grid[y][x];
+            get => grid[z][y][x];
             set
             {
-                MakeAvaliable(x, y);
-                grid[y][x] = value;
+                MakeAvaliable(x, y, z);
+                grid[z][y][x] = value;
             }
         }
 
-        public string ToString(Func<T, int, int, string> stringConverter, Func<string, int, string> lineEndHandler = null)
+        public string GetStringRepresentation(Func<T, int, int, string> stringConverter, Func<string, int, string> lineEndHandler = null)
         {
             StringBuilder result = new StringBuilder();
-            for (int y = 0; y < YDim; ++y)
+            for (int z = 0; z < ZDim; ++z)
             {
-                string line = "";
-                for (int x = 0; x < XDim; ++x)
-                    line += stringConverter(this[x, y], x, y);
-                if (lineEndHandler != null)
-                    line = lineEndHandler(line, y);
-                result.AppendLine(line);
+                for (int y = 0; y < YDim; ++y)
+                {
+                    StringBuilder line = new StringBuilder();
+                    for (int x = 0; x < XDim; ++x)
+                        line.Append(stringConverter(this[x, y], x, y));
+                    if (lineEndHandler != null)
+                        line.Append(lineEndHandler(line.ToString(), y));
+                    result.AppendLine(line.ToString());
+                }
+                result.AppendLine();
             }
             return result.ToString().Remove(result.Length - Environment.NewLine.Length);
         }
@@ -179,12 +242,13 @@ namespace AdventOfCode.Tools.DynamicGrid
 
         public IEnumerator<DynamicGridValue<T>> GetEnumerator()
         {
-            for (int y = 0; y < YDim; ++y)
-                for (int x = 0; x < XDim; ++x)
-                {
-                    var cellValue = new DynamicGridValue<T>(x, y, this[x, y]);
-                    yield return cellValue;
-                }
+            for (int z = 0; z < ZDim; ++z)
+                for (int y = 0; y < YDim; ++y)
+                    for (int x = 0; x < XDim; ++x)
+                    {
+                        var cellValue = new DynamicGridValue<T>(x, y, z, this[x, y, z]);
+                        yield return cellValue;
+                    }
         }
     }
 }
