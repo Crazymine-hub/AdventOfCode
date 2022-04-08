@@ -1,4 +1,4 @@
-﻿using AdventOfCode.Days.Tools.Day19;
+﻿using AdventOfCode.Tools.Graphics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

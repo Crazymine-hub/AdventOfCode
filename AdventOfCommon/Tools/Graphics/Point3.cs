@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdventOfCode.Days.Tools.Day19
+namespace AdventOfCode.Tools.Graphics
 {
-    public struct Point3 : ICloneable
+    public struct Point3 : ICloneable, IEquatable<Point3>
     {
         public int X { get; set; }
         public int Y { get; set; }
@@ -25,7 +25,7 @@ namespace AdventOfCode.Days.Tools.Day19
         public Point3 Rotate(int rotation)
         {
             if (rotation < 0 || rotation > 24) throw new ArgumentException($"The value {rotation} is outside the Range {{0;23}}.", nameof(rotation));
-            Point3 newPoint = this.CloneDirect();
+            Point3 newPoint = CloneDirect();
             int steps = rotation / 4;
 
             Point3 unrotated = newPoint;
@@ -117,14 +117,6 @@ namespace AdventOfCode.Days.Tools.Day19
 
         public Point3 Invert() => new Point3(-X, -Y, -Z);
 
-
-
-        public override bool Equals(object obj)
-        {
-            if(!(obj is Point3)) return false;
-            var target = (Point3) obj;
-            return (X == target.X && Y == target.Y && Z == target.Z);
-        }
         public override string ToString() => $"Point3: {{{X},{Y},{Z}}}";
 
         public static string GetStanfordPly(IEnumerable<Point3> points, string comment = "")
@@ -155,7 +147,53 @@ namespace AdventOfCode.Days.Tools.Day19
             return Math.Abs(vector.X) + Math.Abs(vector.Y) + Math.Abs(vector.Z);
         }
 
+        public bool Equals(Point3 other)
+        {
+            return X == other.X && Y == other.Y && Z == other.Z;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Point3 && Equals((Point3)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
+        }
+
+
         public static Point3 operator -(Point3 a, Point3 b) => new Point3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         public static Point3 operator +(Point3 a, Point3 b) => new Point3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        public static bool operator ==(Point3 a, Point3 b) => a.Equals(b);
+        public static bool operator !=(Point3 a, Point3 b) => !a.Equals(b);
+
+        #region Assist Functions
+        public double GetLength()
+        {
+            return Math.Sqrt(Math.Pow(X, 2) + Math.Pow(Y, 2) + Math.Pow(Z, 2));
+        }
+
+        public Point3 Minimize()
+        {
+            int divisor = (int)MathHelper.GreatestCommonDivisor(X, Y, Z);
+            return new Point3(X / divisor, Y / divisor, Z / divisor);
+        }
+
+        public Point3 GetSignInfo()
+        {
+            return new Point3(Math.Sign(X), Math.Sign(Y), Math.Sign(Z));
+        }
+
+        public double GetAngleBetween(Point3 vec2)
+        {
+            return Math.Acos(GetCrossProduct(vec2) / (GetLength() * vec2.GetLength())) * 180 / Math.PI;
+        }
+
+        public int GetCrossProduct(Point3 vec2)
+        {
+            return X * vec2.X + Y * vec2.Y + Z * vec2.Z;
+        }
+        #endregion
     }
 }

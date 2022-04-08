@@ -1,5 +1,6 @@
 ﻿using AdventOfCode.Days.Tools.Day19;
 using AdventOfCode.Tools;
+using AdventOfCode.Tools.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
