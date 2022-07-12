@@ -60,6 +60,7 @@
     <Compile Include="Days\Day20.cs" />
     <Compile Include="Days\Day21.cs" />
     <Compile Include="Days\Day22.cs" />
+    <Compile Include="Days\Day23.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
     <Compile Include="Days\Day5.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Days\Tools\Day19\IntersectResult.cs" />
     <Compile Include="Days\Tools\Day19\SensorData.cs" />
     <Compile Include="Days\Tools\Day22\CubeArea.cs" />
+    <Compile Include="Days\Tools\Day23\AmphipodNode.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
     <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
@@ -199,6 +201,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day22.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day23.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
