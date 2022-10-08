@@ -63,15 +63,6 @@ namespace AdventOfCode.Days
             return $"The Amphipods will consume {startState.CheapestMoveCost} energy (calculated in {stopwatch.Elapsed})";
         }
 
-        private List<string> TemporaryVisualize(string boardString)
-        {
-            string oldBoard = SerializeBoard();
-            DeserializeBoard(boardString);
-            var result = VisualizeBoard();
-            DeserializeBoard(boardString);
-            return result;
-        }
-
         private List<string> VisualizeBoard()
         {
             var lowest = nodes.Max(x => x.Y) + 1;
