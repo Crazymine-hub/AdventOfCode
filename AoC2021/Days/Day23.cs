@@ -45,9 +45,6 @@ namespace AdventOfCode.Days
             stopwatch.Stop();
 
             Console.WriteLine($"Genrated {exploredPaths.Count} board states in {stopwatch.Elapsed}");
-            Console.WriteLine("Validating generated states...");
-            Console.WriteLine("(This is a debugging step)");
-            if (HasLoop(startState)) throw new InvalidOperationException("There should be no loops in the state list");
 
             Console.WriteLine("Calculating...");
             var uncalculatedStates = exploredPaths.ToHashSet();
@@ -91,29 +88,6 @@ namespace AdventOfCode.Days
                 result.Add(line);
             }
             return result;
-        }
-
-        private bool HasLoop(BoardState startState)
-        {
-            Stack<(BoardState state, IEnumerator<BoardState> exploreStatus)> path = new Stack<(BoardState, IEnumerator<BoardState>)>();
-            var currentState = startState;
-            path.Push((currentState, currentState.FurtherStates.Select(x => x.state).GetEnumerator()));
-            while (path.Any())
-            {
-                var pathState = path.Peek();
-                //Console.Write(string.Concat(Enumerable.Repeat("  ", path.Count - 1)));
-                //Console.WriteLine(pathState.state.StateString);
-                if (!pathState.exploreStatus.MoveNext())
-                {
-                    path.Pop();
-                    continue;
-                }
-                currentState = pathState.exploreStatus.Current;
-                if (path.Select(x => x.state).Contains(currentState)) return true;
-                path.Push((currentState, currentState.FurtherStates.Select(x => x.state).GetEnumerator()));
-            }
-
-            return false;
         }
 
         private void ProcessBoardStates()
