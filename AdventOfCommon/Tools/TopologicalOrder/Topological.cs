@@ -25,7 +25,7 @@ namespace AdventOfCode.Tools.TopologicalOrder
         {
             isTraced.Add(item.Name);
 
-            foreach (var dependency in items.Where(x => item.Dependencies.ContainsKey(x.Name)))
+            foreach (var dependency in items.Where(x => item.IsDependantOn(x.Name)))
                 if (!isTraced.Contains(dependency.Name))
                 {
                     Trace(dependency, items);

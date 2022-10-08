@@ -8,7 +8,7 @@ namespace AdventOfCode.Tools.TopologicalOrder
 {
     public abstract class TopoItem
     {
-        public abstract string Name { get; set; }
-        public abstract Dictionary<string, int> Dependencies { get; set; }
+        public abstract string Name { get; }
+        public abstract bool IsDependantOn(string dependencyName);
     }
 }
