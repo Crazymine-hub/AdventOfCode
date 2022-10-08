@@ -4,6 +4,8 @@ using AdventOfCode.Tools.Pathfinding.AStar;
 using AdventOfCode.Tools.TopologicalOrder;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -39,9 +41,13 @@ namespace AdventOfCode.Days
 
             Console.WriteLine();
             Console.WriteLine("Processing Board...");
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             ProcessBoardStates();
+            stopwatch.Stop();
 
-            Console.WriteLine("Validating generated moves...");
+            Console.WriteLine($"Genrated {exploredPaths.Count} board states in {stopwatch.Elapsed}");
+            Console.WriteLine("Validating generated states...");
             Console.WriteLine("(This is a debugging step)");
             if (HasLoop(startState)) throw new InvalidOperationException("There should be no loops in the state list");
 
