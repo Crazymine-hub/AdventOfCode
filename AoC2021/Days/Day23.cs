@@ -27,8 +27,7 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
-            LoadLayout(input);
+            LoadLayout(input, part2);
 
             Console.WriteLine(string.Join("\r\n", VisualizeBoard()));
 
@@ -63,27 +62,26 @@ namespace AdventOfCode.Days
             return $"The Amphipods will consume {startState.CheapestMoveCost} energy (calculated in {stopwatch.Elapsed})";
         }
 
-        private List<string> VisualizeBoard()
+        private string VisualizeBoard()
         {
             var lowest = nodes.Max(x => x.Y) + 1;
             var furthest = nodes.Max(x => x.X) + 1;
-            var result = new List<string>();
+            var result = new StringBuilder();
             for (int y = 0; y <= lowest; ++y)
             {
-                string line = string.Empty;
                 for (int x = 0; x <= furthest; ++x)
                 {
                     var node = nodes.SingleOrDefault(n => n.X == x && n.Y == y);
                     if (node == null)
                     {
-                        line += '#';
+                        result.Append('#');
                         continue;
                     }
-                    line += amphipodNames[node.OccupiedBy];
+                    result.Append(amphipodNames[node.OccupiedBy]);
                 }
-                result.Add(line);
+                result.AppendLine();
             }
-            return result;
+            return result.ToString();
         }
 
         private void ProcessBoardStates()
@@ -144,9 +142,14 @@ namespace AdventOfCode.Days
             }
         }
 
-        private void LoadLayout(string input)
+        private void LoadLayout(string input, bool insertFoldedPart)
         {
             var lines = GetLines(input);
+            if (insertFoldedPart)
+            {
+                lines.Insert(3, "  #D#C#B#A#");
+                lines.Insert(4, "  #D#B#A#C#");
+            }
             int lineLength = lines.Select(l => l.Length).Max();
             for (int lineNr = 0; lineNr < lines.Count; lineNr++)
             {
