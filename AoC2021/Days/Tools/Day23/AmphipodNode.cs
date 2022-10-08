@@ -1,19 +1,25 @@
 ﻿using AdventOfCode.Tools.Pathfinding.AStar;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Days.Tools.Day23
 {
+    [DebuggerDisplay("Amphipod ({X}|{Y}) O:{OccupiedBy} H:{HomeTo}")]
     internal class AmphipodNode : AStarNode
     {
-        private char occupiedBy = '\0';
+        public const byte UnoccupiedNodeValue = 0;
+
+        private byte occupiedBy = 0;
 
         public bool CanOccupy { get; }
-        public char HomeTo { get; set; } = '\0';
-        public char OccupiedBy
+        public byte HomeTo { get; set; } = 0;
+        public bool IsAtHome { get => HomeTo != UnoccupiedNodeValue && HomeTo == OccupiedBy; }
+        public bool IsOccupied { get => OccupiedBy != UnoccupiedNodeValue; }
+        public byte OccupiedBy
         {
             get => occupiedBy;
             set
@@ -23,11 +29,11 @@ namespace AdventOfCode.Days.Tools.Day23
             }
         }
 
-        public AmphipodNode(int x, int y, bool canOccupy, char homeTo, char occupiedBy) : base(x, y, 0)
+        public AmphipodNode(int x, int y, bool canOccupy, byte homeTo, byte occupiedBy) : base(x, y, 0)
         {
             CanOccupy = canOccupy;
             HomeTo = homeTo;
-            if(CanOccupy) OccupiedBy = occupiedBy;
+            if (CanOccupy) OccupiedBy = occupiedBy;
         }
     }
 }

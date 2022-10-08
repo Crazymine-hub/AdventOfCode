@@ -1,9 +1,11 @@
 ﻿using AdventOfCode.Days.Tools.Day23;
 using AdventOfCode.Tools.Pathfinding;
 using AdventOfCode.Tools.Pathfinding.AStar;
+using AdventOfCode.Tools.TopologicalOrder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,34 +14,154 @@ namespace AdventOfCode.Days
     public class Day23 : DayBase
     {
         public override string Title => "Amphipod";
+        private readonly List<char> amphipodNames = new List<char> { '.', 'A', 'B', 'C', 'D' };
+        private readonly List<long> amphipodEnergyCost = new List<long> { 0, 1, 10, 100, 1000 };
 
-        private List<AmphipodNode> nodes = new List<AmphipodNode>();
-        private List<AStarNodeConnection> connections = new List<AStarNodeConnection>();
-        private readonly char[] ampiphodeNames = new char[] { 'A', 'B', 'C', 'D' };
+        private readonly List<AmphipodNode> nodes = new List<AmphipodNode>();
+        private readonly List<AStarNodeConnection> connections = new List<AStarNodeConnection>();
         private AStarPathfinder pathfinder;
-
+        private HashSet<BoardState> exploredPaths = new HashSet<BoardState>();
+        private Queue<BoardState> unexploredStates = new Queue<BoardState>();
 
         public override string Solve(string input, bool part2)
         {
             if (part2) return Part2UnavailableMessage;
             LoadLayout(input);
 
-            foreach (var node in nodes)
-            {
-                Console.SetCursorPosition(node.X, node.Y);
-                if(IsAtHome(node))
-                    Console.Write("H");
-                else if (CanBeMoved(node))
-                    Console.Write("O");
-                else if (node.CanOccupy)
-                    Console.Write("+");
-                else
-                    Console.Write("X");
-            }
+            Console.WriteLine(string.Join("\r\n", VisualizeBoard()));
             pathfinder = new AStarPathfinder(connections);
 
             Console.WriteLine();
-            return Part2UnavailableMessage;
+
+            var startState = new BoardState(SerializeBoard(), false);
+            BoardState bufferState = null;
+            unexploredStates.Enqueue(startState);
+
+            Console.WriteLine();
+            Console.WriteLine("Processing Board...");
+            ProcessBoardStates();
+
+            Console.WriteLine("Validating generated moves...");
+            Console.WriteLine("(This is a debugging step)");
+            if (HasLoop(startState)) throw new InvalidOperationException("There should be no loops in the state list");
+
+            Console.WriteLine("Calculating...");
+            var uncalculatedStates = exploredPaths.ToHashSet();
+            while (uncalculatedStates.Any())
+            {
+                var current = uncalculatedStates.First(x => x.CanCalculateCost());
+                current.StartCheapestMoveCalculation();
+                uncalculatedStates.Remove(current);
+            }
+
+            return $"The Amphipods will consume {startState.CheapestMoveCost} energy";
+        }
+
+        private List<string> TemporaryVisualize(string boardString)
+        {
+            string oldBoard = SerializeBoard();
+            DeserializeBoard(boardString);
+            var result = VisualizeBoard();
+            DeserializeBoard(boardString);
+            return result;
+        }
+
+        private List<string> VisualizeBoard()
+        {
+            var lowest = nodes.Max(x => x.Y) + 1;
+            var furthest = nodes.Max(x => x.X) + 1;
+            var result = new List<string>();
+            for (int y = 0; y <= lowest; ++y)
+            {
+                string line = string.Empty;
+                for (int x = 0; x <= furthest; ++x)
+                {
+                    var node = nodes.SingleOrDefault(n => n.X == x && n.Y == y);
+                    if (node == null)
+                    {
+                        line += '#';
+                        continue;
+                    }
+                    line += amphipodNames[node.OccupiedBy];
+                }
+                result.Add(line);
+            }
+            return result;
+        }
+
+        private bool HasLoop(BoardState startState)
+        {
+            Stack<(BoardState state, IEnumerator<BoardState> exploreStatus)> path = new Stack<(BoardState, IEnumerator<BoardState>)>();
+            var currentState = startState;
+            path.Push((currentState, currentState.FurtherStates.Select(x => x.state).GetEnumerator()));
+            while (path.Any())
+            {
+                var pathState = path.Peek();
+                //Console.Write(string.Concat(Enumerable.Repeat("  ", path.Count - 1)));
+                //Console.WriteLine(pathState.state.StateString);
+                if (!pathState.exploreStatus.MoveNext())
+                {
+                    path.Pop();
+                    continue;
+                }
+                currentState = pathState.exploreStatus.Current;
+                if (path.Select(x => x.state).Contains(currentState)) return true;
+                path.Push((currentState, currentState.FurtherStates.Select(x => x.state).GetEnumerator()));
+            }
+
+            return false;
+        }
+
+        private void ProcessBoardStates()
+        {
+            while (unexploredStates.Any())
+            {
+                var currentState = unexploredStates.Dequeue();
+                exploredPaths.Add(currentState);
+                DeserializeBoard(currentState.StateString);
+                var moves = GetMovableAmphipodNodes().SelectMany(x => GetTargetPaths(x)).ToList();
+                foreach (var move in moves)
+                {
+                    DeserializeBoard(currentState.StateString);
+                    var moveCost = ApplyMove(move);
+                    var boardString = SerializeBoard();
+                    var nextState = exploredPaths.SingleOrDefault(x => x.Equals(boardString));
+
+                    if (nextState != null)
+                    {
+                        currentState.FurtherStates.Add((nextState, moveCost));
+                        continue;
+                    }
+                    nextState = unexploredStates.SingleOrDefault(x => x.StateString == boardString);
+                    if (nextState != null)
+                    {
+                        currentState.FurtherStates.Add((nextState, moveCost));
+                        continue;
+                    }
+
+                    nextState = new BoardState(boardString, IsComplete());
+                    currentState.FurtherStates.Add((nextState, moveCost));
+                    unexploredStates.Enqueue(nextState);
+                }
+            }
+        }
+
+        private long ApplyMove(AmphipodPath path)
+        {
+            path.To.OccupiedBy = path.From.OccupiedBy;
+            path.From.OccupiedBy = AmphipodNode.UnoccupiedNodeValue;
+            return path.PathLength * amphipodEnergyCost.ElementAt(path.To.OccupiedBy);
+        }
+
+        private IEnumerable<AmphipodPath> GetTargetPaths(AmphipodNode amphipod)
+        {
+            var targetNodes = nodes.Where(n => IsValidTarget(amphipod, n));
+            foreach (var targetNode in targetNodes)
+            {
+                var path = pathfinder.GetPath(amphipod, targetNode).Cast<AmphipodNode>().ToArray();
+                if (path.Skip(1).Any(n => n.IsOccupied)) continue;
+                yield return new AmphipodPath(amphipod, path.Last(), path.Length - 1);
+            }
         }
 
         private void LoadLayout(string input)
@@ -48,19 +170,23 @@ namespace AdventOfCode.Days
             int lineLength = lines.Select(l => l.Length).Max();
             for (int lineNr = 0; lineNr < lines.Count; lineNr++)
             {
-                int neighbourIndex = 0;
+                byte neighbourIndex = 1;
                 AmphipodNode lastNode = null;
                 var line = lines[lineNr].PadRight(lineLength);
                 for (int charNr = 0; charNr < line.Length; charNr++)
                 {
-                    if (line[charNr] == ' ' || line[charNr] == '#') continue;
+                    if (line[charNr] == ' ' || line[charNr] == '#')
+                    {
+                        lastNode = null;
+                        continue;
+                    }
                     bool hasTunnel = lineNr == 1 && lines[lineNr + 1][charNr] != '#';
 
                     var node = new AmphipodNode(charNr,
                                                 lineNr,
                                                 !hasTunnel,
-                                                lineNr > 1 && line[charNr] != '#' ? ampiphodeNames[neighbourIndex++] : '\0',
-                                                line[charNr] == '.' ? '\0' : line[charNr]);
+                                                lineNr > 1 && line[charNr] != '#' ? neighbourIndex++ : (byte)0,
+                                                (byte)(line[charNr] == '.' ? 0 : amphipodNames.IndexOf(line[charNr])));
                     nodes.Add(node);
                     if (lastNode != null)
                         connections.Add(new AStarNodeConnection(lastNode, node));
@@ -72,7 +198,51 @@ namespace AdventOfCode.Days
             }
         }
 
-        private bool IsAtHome(AmphipodNode node) => node.HomeTo != '\0' && node.HomeTo == node.OccupiedBy;
-        private bool CanBeMoved(AmphipodNode node) => node.OccupiedBy != '\0' && connections.Where(x => x.HasConnectionTo(node)).Any(x => ((AmphipodNode)x.GetOtherNode(node)).OccupiedBy == '\0');
+        private IEnumerable<AmphipodNode> GetMovableAmphipodNodes() => nodes.Where(n => CanBeMoved(n));
+        private bool CanBeMoved(AmphipodNode node) => node.IsOccupied && HasFreeNeighbours(node) && (!node.IsAtHome || (
+            node.IsAtHome &&
+            nodes.Any(x => x.Y > node.Y && x.HomeTo == node.HomeTo && x.OccupiedBy != node.OccupiedBy)
+            ));
+
+        private bool HasFreeNeighbours(AmphipodNode node) => connections
+                        .Any(connection => connection.HasConnectionTo(node) && !((AmphipodNode)connection.GetOtherNode(node)).IsOccupied);
+
+        private bool IsComplete() => nodes.All(x => x.HomeTo == AmphipodNode.UnoccupiedNodeValue || x.IsAtHome);
+
+        private bool IsValidTarget(AmphipodNode amphipod, AmphipodNode target) =>
+            target.CanOccupy &&
+            !target.IsOccupied &&
+            (
+                (target.HomeTo == AmphipodNode.UnoccupiedNodeValue && amphipod.HomeTo != AmphipodNode.UnoccupiedNodeValue) || //going to hallway? (start node can't be hallway)
+                (target.HomeTo == amphipod.OccupiedBy && CanMoveInRoom(target) //is the room right and can we go in?
+            && nodes  //is the node we move to the deepest, we can go in that room (i.e. highest Y value)? we don't wan't to move again or leave empty space in this move.
+                .Where(x => x.HomeTo == target.HomeTo && x.OccupiedBy == AmphipodNode.UnoccupiedNodeValue)
+                .OrderByDescending(x => x.Y).First() == target)
+            );
+
+        private bool CanMoveInRoom(AmphipodNode node) =>
+            node.HomeTo == AmphipodNode.UnoccupiedNodeValue ?
+                throw new InvalidOperationException($"Node ({node.X}|{node.Y}) is not part of a room") :
+                //room should be free, or only occupied by correct amphipods
+                nodes.Where(x => x.HomeTo == node.HomeTo).All(x => x.OccupiedBy == AmphipodNode.UnoccupiedNodeValue || x.OccupiedBy == x.HomeTo);
+
+        public string SerializeBoard() =>
+            Convert.ToBase64String(nodes
+            .OrderBy(x => x.X)
+            .ThenBy(x => x.Y)
+            .Select(x => x.OccupiedBy)
+            .ToArray());
+
+
+        public void DeserializeBoard(string boardString)
+        {
+            var board = Convert.FromBase64String(boardString);
+            if (board.Length != nodes.Count) throw new ArgumentException("Given board size doesn't match the target board size.");
+            foreach (var amphipod in nodes.OrderBy(x => x.X).ThenBy(x => x.Y).Zip(board, (node, boardValue) => (node, boardValue)))
+            {
+                if (!amphipod.node.CanOccupy && amphipod.boardValue == AmphipodNode.UnoccupiedNodeValue) continue;
+                amphipod.node.OccupiedBy = amphipod.boardValue;
+            }
+        }
     }
 }
