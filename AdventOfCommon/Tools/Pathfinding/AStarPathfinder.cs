@@ -60,6 +60,10 @@ namespace AdventOfCode.Tools.Pathfinding
             {
                 AddNeighbourConnectionEntry(connection, connection.NodeA);
                 AddNeighbourConnectionEntry(connection, connection.NodeB);
+                connection.NodeA.PathLength = double.PositiveInfinity;
+                connection.NodeB.PathLength = double.PositiveInfinity;
+                connection.NodeA.PreviousNode = null;
+                connection.NodeB.PreviousNode = null;
             }
 
 
