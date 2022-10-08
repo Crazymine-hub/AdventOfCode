@@ -100,7 +100,7 @@ namespace AdventOfCode.Days
                     var moveCost = ApplyMove(move);
                     var boardString = SerializeBoard();
 
-                    if (exploredStates.Contains(boardString) || unexploredStates.Contains(boardString))
+                    if (states.ContainsKey(boardString))
                     {
                         currentState.FurtherStates.Add((states[boardString], moveCost));
                         continue;
