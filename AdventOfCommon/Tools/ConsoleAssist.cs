@@ -51,8 +51,6 @@ namespace AdventOfCode.Tools
                 if(previousActive != activeCount)
                 {
                     previousActive = activeCount;
-                    --Console.CursorLeft;
-                    Console.Write(" ");
                     Console.CursorLeft = 0;
                     Console.Write($"Waiting for {activeCount}/{tasks.Count()} tasks to complete...  ");
                 }
