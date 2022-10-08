@@ -52,9 +52,11 @@ namespace AdventOfCode.Days
             var uncalculatedStates = states.Values.ToHashSet();
             while (uncalculatedStates.Any())
             {
-                var current = uncalculatedStates.First(x => x.CanCalculateCost());
-                current.StartCheapestMoveCalculation();
-                uncalculatedStates.Remove(current);
+                foreach (var current in uncalculatedStates.Where(x => x.CanCalculateCost()).ToHashSet())
+                {
+                    current.StartCheapestMoveCalculation();
+                    uncalculatedStates.Remove(current);
+                }
             }
 
             stopwatch.Stop();
@@ -136,7 +138,7 @@ namespace AdventOfCode.Days
 
             while (toExpand.Any())
             {
-                (var currentNode,var pathLength) = toExpand.Dequeue();
+                (var currentNode, var pathLength) = toExpand.Dequeue();
                 ++pathLength;
                 foreach (var neighbour in GetNeighbourNodes(currentNode))
                 {
