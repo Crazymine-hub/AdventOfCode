@@ -6,8 +6,16 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools
 {
+    /// <summary>
+    /// Tool for analyzing digits of a number
+    /// </summary>
     public static class NumberLists
     {
+        /// <summary>
+        /// Stores each digit of a number in an array. Highest digit first
+        /// </summary>
+        /// <param name="number">The number to separate</param>
+        /// <returns>An array with each digit  of the number</returns>
         public static ulong[] MakeArray(ulong number)
         {
             ulong fac = 10;
@@ -21,6 +29,11 @@ namespace AdventOfCode.Tools
             return result.ToArray();
         }
 
+        /// <summary>
+        /// Creates a number from an array of digits
+        /// </summary>
+        /// <param name="number">The number in array form. each position being a single digit.</param>
+        /// <returns>The Number the digits represent.</returns>
         public static ulong MakeNumber(ulong[] number)
         {
             ulong result = 0;
@@ -32,6 +45,12 @@ namespace AdventOfCode.Tools
             return result / 10;
         }
 
+        /// <summary>
+        /// Sets all digits of the number to the same value.
+        /// </summary>
+        /// <param name="number">The number in digitized form</param>
+        /// <param name="digitValue">the value to set each digit to.</param>
+        /// <returns></returns>
         public static ulong[] SetAll(ulong[] number, ulong digitValue)
         {
             for (int i = 0; i < number.Length; i++)
