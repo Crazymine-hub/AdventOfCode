@@ -21,7 +21,6 @@ namespace AdventOfCode.Days
 
         private readonly List<AmphipodNode> nodes = new List<AmphipodNode>();
         private readonly List<AStarNodeConnection> connections = new List<AStarNodeConnection>();
-        private AStarPathfinder pathfinder;
         private HashSet<BoardState> exploredPaths = new HashSet<BoardState>();
         private Queue<BoardState> unexploredStates = new Queue<BoardState>();
 
@@ -31,7 +30,6 @@ namespace AdventOfCode.Days
             LoadLayout(input);
 
             Console.WriteLine(string.Join("\r\n", VisualizeBoard()));
-            pathfinder = new AStarPathfinder(connections);
 
             Console.WriteLine();
 
@@ -161,12 +159,24 @@ namespace AdventOfCode.Days
 
         private IEnumerable<AmphipodPath> GetTargetPaths(AmphipodNode amphipod)
         {
-            var targetNodes = nodes.Where(n => IsValidTarget(amphipod, n));
-            foreach (var targetNode in targetNodes)
+            Queue<(AmphipodNode node, int startDistance)> toExpand = new Queue<(AmphipodNode node, int startDistance)>();
+            HashSet<AmphipodNode> exploredTargets = new HashSet<AmphipodNode>();
+            toExpand.Enqueue((amphipod, 0));
+
+            while (toExpand.Any())
             {
-                var path = pathfinder.GetPath(amphipod, targetNode).Cast<AmphipodNode>().ToArray();
-                if (path.Skip(1).Any(n => n.IsOccupied)) continue;
-                yield return new AmphipodPath(amphipod, path.Last(), path.Length - 1);
+                (var currentNode,var pathLength) = toExpand.Dequeue();
+                ++pathLength;
+                foreach (var neighbour in GetNeighbourNodes(currentNode))
+                {
+                    if (exploredTargets.Contains(neighbour) || neighbour.IsOccupied)
+                        continue;
+                    if (IsValidTarget(amphipod, neighbour))
+                        yield return new AmphipodPath(amphipod, neighbour, pathLength);
+                    toExpand.Enqueue((neighbour, pathLength));
+
+                }
+                exploredTargets.Add(currentNode);
             }
         }
 
@@ -231,8 +241,10 @@ namespace AdventOfCode.Days
                 throw new InvalidOperationException($"Node ({node.X}|{node.Y}) is not part of a room") :
                 //room should be free, or only occupied by correct amphipods
                 nodes.Where(x => x.HomeTo == node.HomeTo).All(x => x.OccupiedBy == AmphipodNode.UnoccupiedNodeValue || x.OccupiedBy == x.HomeTo);
+        private IEnumerable<AmphipodNode> GetNeighbourNodes(AmphipodNode amphipod)
+            => connections.Where(x => x.HasConnectionTo(amphipod)).Select(x => x.GetOtherNode(amphipod)).Cast<AmphipodNode>();
 
-        public string SerializeBoard() =>
+        private string SerializeBoard() =>
             Convert.ToBase64String(nodes
             .OrderBy(x => x.X)
             .ThenBy(x => x.Y)
@@ -240,7 +252,7 @@ namespace AdventOfCode.Days
             .ToArray());
 
 
-        public void DeserializeBoard(string boardString)
+        private void DeserializeBoard(string boardString)
         {
             var board = Convert.FromBase64String(boardString);
             if (board.Length != nodes.Count) throw new ArgumentException("Given board size doesn't match the target board size.");
