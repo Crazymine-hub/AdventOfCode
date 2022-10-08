@@ -21,8 +21,9 @@ namespace AdventOfCode.Days
 
         private readonly List<AmphipodNode> nodes = new List<AmphipodNode>();
         private readonly List<AStarNodeConnection> connections = new List<AStarNodeConnection>();
-        private HashSet<BoardState> exploredPaths = new HashSet<BoardState>();
-        private Queue<BoardState> unexploredStates = new Queue<BoardState>();
+        private Dictionary<string, BoardState> states = new Dictionary<string, BoardState>();
+        private HashSet<string> exploredStates = new HashSet<string>();
+        private Queue<string> unexploredStates = new Queue<string>();
 
         public override string Solve(string input, bool part2)
         {
@@ -34,8 +35,8 @@ namespace AdventOfCode.Days
             Console.WriteLine();
 
             var startState = new BoardState(SerializeBoard(), false);
-            BoardState bufferState = null;
-            unexploredStates.Enqueue(startState);
+            states.Add(startState.StateString, startState);
+            unexploredStates.Enqueue(startState.StateString);
 
             Console.WriteLine();
             Console.WriteLine("Processing Board...");
@@ -44,10 +45,11 @@ namespace AdventOfCode.Days
             ProcessBoardStates();
             stopwatch.Stop();
 
-            Console.WriteLine($"Genrated {exploredPaths.Count} board states in {stopwatch.Elapsed}");
+            Console.WriteLine($"Genrated {exploredStates.Count} board states in {stopwatch.Elapsed}");
 
             Console.WriteLine("Calculating...");
-            var uncalculatedStates = exploredPaths.ToHashSet();
+            stopwatch.Restart();
+            var uncalculatedStates = states.Values.ToHashSet();
             while (uncalculatedStates.Any())
             {
                 var current = uncalculatedStates.First(x => x.CanCalculateCost());
@@ -55,7 +57,8 @@ namespace AdventOfCode.Days
                 uncalculatedStates.Remove(current);
             }
 
-            return $"The Amphipods will consume {startState.CheapestMoveCost} energy";
+            stopwatch.Stop();
+            return $"The Amphipods will consume {startState.CheapestMoveCost} energy (calculated in {stopwatch.Elapsed})";
         }
 
         private List<string> TemporaryVisualize(string boardString)
@@ -94,8 +97,8 @@ namespace AdventOfCode.Days
         {
             while (unexploredStates.Any())
             {
-                var currentState = unexploredStates.Dequeue();
-                exploredPaths.Add(currentState);
+                BoardState currentState = states[unexploredStates.Dequeue()];
+                exploredStates.Add(currentState.StateString);
                 DeserializeBoard(currentState.StateString);
                 var moves = GetMovableAmphipodNodes().SelectMany(x => GetTargetPaths(x)).ToList();
                 foreach (var move in moves)
@@ -103,23 +106,17 @@ namespace AdventOfCode.Days
                     DeserializeBoard(currentState.StateString);
                     var moveCost = ApplyMove(move);
                     var boardString = SerializeBoard();
-                    var nextState = exploredPaths.SingleOrDefault(x => x.Equals(boardString));
 
-                    if (nextState != null)
+                    if (exploredStates.Contains(boardString) || unexploredStates.Contains(boardString))
                     {
-                        currentState.FurtherStates.Add((nextState, moveCost));
-                        continue;
-                    }
-                    nextState = unexploredStates.SingleOrDefault(x => x.StateString == boardString);
-                    if (nextState != null)
-                    {
-                        currentState.FurtherStates.Add((nextState, moveCost));
+                        currentState.FurtherStates.Add((states[boardString], moveCost));
                         continue;
                     }
 
-                    nextState = new BoardState(boardString, IsComplete());
+                    BoardState nextState = new BoardState(boardString, IsComplete());
                     currentState.FurtherStates.Add((nextState, moveCost));
-                    unexploredStates.Enqueue(nextState);
+                    unexploredStates.Enqueue(nextState.StateString);
+                    states.Add(nextState.StateString, nextState);
                 }
             }
         }
