@@ -107,9 +107,9 @@ namespace AdventOfCode.Tools.DynamicGrid
                 --ZOrigin;
         }
 
-        public bool InRange(int x, int y, int z = 1) => x >= 0 && x < XDim && y >= 0 && y < YDim && z > 0 && z < ZDim;
+        public bool InRange(int x, int y, int z = 0) => x >= 0 && x < XDim && y >= 0 && y < YDim && z >= 0 && z < ZDim;
 
-        public T GetRelative(int x, int y, int z = 1)
+        public T GetRelative(int x, int y, int z = 0)
         {
             int newX = XOrigin + x;
             int newY = YOrigin + y;
@@ -119,8 +119,7 @@ namespace AdventOfCode.Tools.DynamicGrid
 
         public void SetRelative(int x, int y, T value)
         {
-            MakeAvaliable(XOrigin + x, YOrigin + y);
-            this[XOrigin + x, YOrigin + y, 1] = value;
+            SetRelative(x, y, 0, value);
         }
 
         public void SetRelative(int x, int y, int z, T value)
@@ -157,7 +156,7 @@ namespace AdventOfCode.Tools.DynamicGrid
             }
         }
 
-        public void MakeAvaliable(int x, int y, int z = 1)
+        public void MakeAvaliable(int x, int y, int z = 0)
         {
             while (x >= XDim) IncreaseX(false);
             while (x < 0)
@@ -179,7 +178,7 @@ namespace AdventOfCode.Tools.DynamicGrid
             }
         }
 
-        public IEnumerable<DynamicGridValue<T>> GetNeighbours(int x, int y, int z = 1, bool diagonal = true, bool relative = false)
+        public IEnumerable<DynamicGridValue<T>> GetNeighbours(int x, int y, int z = 0, bool diagonal = true, bool relative = false)
         {
             if (relative)
             {
@@ -206,7 +205,7 @@ namespace AdventOfCode.Tools.DynamicGrid
             }
         }
 
-        public T this[int x, int y, int z = 1]
+        public T this[int x, int y, int z = 0]
         {
             get => grid[z][y][x];
             set
