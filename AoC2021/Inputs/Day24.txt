@@ -16,6 +16,7 @@ add y w
 add y 4
 mul y x
 add z y
+
 inp w
 mul x 0
 add x z
@@ -232,6 +233,8 @@ add y w
 add y 1
 mul y x
 add z y
+
+
 inp w
 mul x 0
 add x z

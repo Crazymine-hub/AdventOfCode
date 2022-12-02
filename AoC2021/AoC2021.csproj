@@ -83,6 +83,8 @@
     <Compile Include="Days\Tools\Day23\AmphipodNode.cs" />
     <Compile Include="Days\Tools\Day23\AmphipodPath.cs" />
     <Compile Include="Days\Tools\Day23\BoardState.cs" />
+    <Compile Include="Days\Tools\Day24\ModelNumberState.cs" />
+    <Compile Include="Days\Tools\Day24\ProgramStep.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
     <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
