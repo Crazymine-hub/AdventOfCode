@@ -62,6 +62,7 @@
     <Compile Include="Days\Day22.cs" />
     <Compile Include="Days\Day23.cs" />
     <Compile Include="Days\Day24.cs" />
+    <Compile Include="Days\Day25.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
     <Compile Include="Days\Day5.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Days\Tools\Day23\BoardState.cs" />
     <Compile Include="Days\Tools\Day24\ModelNumberState.cs" />
     <Compile Include="Days\Tools\Day24\ProgramStep.cs" />
+    <Compile Include="Days\Tools\Day25\CucumberState.cs" />
     <Compile Include="Days\Tools\Day4\BingoBoard.cs" />
     <Compile Include="Days\Tools\Day8\DisplaySegmentInfo.cs" />
     <Compile Include="Days\Tools\Day8\SegmentGroupInfo.cs" />
@@ -216,6 +218,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day24.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day25.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
