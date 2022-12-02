@@ -28,7 +28,7 @@ namespace AdventOfCode.Tools
             return Math.Abs(a * b) / GreatestCommonDivisor(a, b);
         }
 
-        public static long GreatestCommonDivisor(long[] numbers)
+        public static long GreatestCommonDivisor(params long[] numbers)
         {
             if (numbers.Length == 0) throw new ArgumentException("numbers has to contain at least one element", "numbers");
             if (numbers.Length == 1) return numbers[0];
@@ -56,6 +56,12 @@ namespace AdventOfCode.Tools
             } while (b != 0);
 
             return Math.Abs(a);
+        }
+
+        public static int Clamp(int value, int minimum, int maximum)
+        {
+            if (maximum < minimum) throw new ArgumentOutOfRangeException("maximum", "Maximum cannot be smaller than minium");
+            return value < minimum ? minimum : (value > maximum ? maximum : value);
         }
 
         public static int IntegerFactorization(ulong number)

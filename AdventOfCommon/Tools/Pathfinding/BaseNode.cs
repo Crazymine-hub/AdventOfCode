@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.Pathfinding
 {
-    public class BaseNode: IEquatable<BaseNode>
+    public class BaseNode : IEquatable<BaseNode>
     {
         public virtual int X { get; protected set; }
         public virtual int Y { get; protected set; }
@@ -25,10 +25,10 @@ namespace AdventOfCode.Tools.Pathfinding
             return other != null && other.X == X && other.Y == Y;
         }
 
-        public virtual double GetDistanceTo(BaseNode other)
+        public virtual double GetDistanceTo(BaseNode target)
         {
-            if (other == null) throw new ArgumentNullException(nameof(other));
-            return VectorAssist.GetLength(VectorAssist.PointDifference(this, other));
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            return VectorAssist.GetLength(VectorAssist.PointDifference(this, target));
         }
 
         public static implicit operator Point(BaseNode operatedNode) => new Point(operatedNode.X, operatedNode.Y);

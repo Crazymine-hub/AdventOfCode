@@ -8,9 +8,9 @@
     <ProjectGuid>{490CBFFD-9EB3-44CE-AAB2-448A0F6223C9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AoCommonTest</RootNamespace>
-    <AssemblyName>AoCommonTest</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <RootNamespace>AoTest</RootNamespace>
+    <AssemblyName>AoTest</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
@@ -20,6 +20,7 @@
     <TestProjectType>UnitTest</TestProjectType>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,24 +51,30 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AStarTest.cs" />
+    <Compile Include="AoC2021\Day19Test.cs" />
+    <Compile Include="AoCommon\AStarTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\Mazes\non-perfect\maze1.bmp" />
-    <Content Include="Data\Mazes\non-perfect\maze2.bmp" />
-    <Content Include="Data\Mazes\non-perfect\maze3.bmp" />
-    <Content Include="Data\Mazes\non-perfect\maze4.bmp" />
+    <Content Include="Data\AoCommon\Mazes\non-perfect\maze1.bmp" />
+    <Content Include="Data\AoCommon\Mazes\non-perfect\maze2.bmp" />
+    <Content Include="Data\AoCommon\Mazes\non-perfect\maze3.bmp" />
+    <Content Include="Data\AoCommon\Mazes\non-perfect\maze4.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AdventOfCommon\AdventOfCommon.csproj">
       <Project>{4F6E4037-B01C-4C1C-B13F-BF7452FD1C37}</Project>
       <Name>AdventOfCommon</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AoC2021\AoC2021.csproj">
+      <Project>{cac734c9-1234-448a-ad75-3c5b411ce86e}</Project>
+      <Name>AoC2021</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

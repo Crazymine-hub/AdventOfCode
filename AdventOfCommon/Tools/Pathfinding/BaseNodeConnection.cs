@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.Pathfinding
 {
-    public class BaseNodeConnection
+    public class BaseNodeConnection: IEquatable<BaseNodeConnection>
     {
         public virtual BaseNode NodeA { get; protected set; }
         public virtual BaseNode NodeB { get; protected set; }
@@ -25,12 +25,12 @@ namespace AdventOfCode.Tools.Pathfinding
             distance = Math.Sqrt(Math.Pow(NodeB.X - NodeA.X, 2) + Math.Pow(NodeB.Y - NodeA.Y, 2));
         }
 
-        public bool HasConnectionTo(BaseNode target)
+        public virtual bool HasConnectionTo(BaseNode target)
         {
             return (NodeA == target || NodeB == target);
         }
 
-        public BaseNode GetOtherNode(BaseNode target)
+        public virtual BaseNode GetOtherNode(BaseNode target)
         {
             if (NodeA == target)
                 return NodeB;
@@ -40,14 +40,33 @@ namespace AdventOfCode.Tools.Pathfinding
                 throw new ArgumentException("Node not in this connection");
         }
 
-        public new string ToString()
+        public override string ToString()
         {
             return NodeA.ToString().PadRight(10) + "<-> " + NodeB.ToString().PadRight(10) + "@".PadLeft(5) + distance.ToString("0.00");
         }
 
         public virtual bool IsSameConnection(BaseNodeConnection other)
         {
-            return other.NodeA == NodeA && other.NodeB == NodeB || other.NodeA == NodeB && other.NodeB == NodeA;
+            return other != null && (other.NodeA == NodeA && other.NodeB == NodeB || other.NodeA == NodeB && other.NodeB == NodeA);
+        }
+
+        public virtual bool Equals(BaseNodeConnection other)
+        {
+            return IsSameConnection(other);
+        }
+
+
+        public static string GetPathString(IEnumerable<BaseNodeConnection> connections, BaseNode start)
+        {
+            StringBuilder path = new StringBuilder();
+            foreach (BaseNodeConnection connection in connections)
+            {
+                path.Append(start.ToString());
+                path.Append("->");
+                start = connection.GetOtherNode(start);
+            }
+            path.Append(start.ToString());
+            return path.ToString();
         }
 
         //public static void PrintConnections(List<BaseNodeConnection> connections, int vOffset, bool bold = false)

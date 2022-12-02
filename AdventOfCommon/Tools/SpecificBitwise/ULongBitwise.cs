@@ -24,6 +24,14 @@ namespace AdventOfCode.Tools.SpecificBitwise
             return (data & (1UL << bitNr)) != 0;
         }
 
+        public static ulong GetBitMask(int length)
+        {
+            ulong result = 1;
+            for (int i = 1; i < length; i++)
+                result = result << 1 | 1;
+            return result;
+        }
+
         public static ulong GetValue(IEnumerable<bool> values)
         {
             ulong result = 0;

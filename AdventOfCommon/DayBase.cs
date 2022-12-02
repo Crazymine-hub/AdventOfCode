@@ -10,12 +10,12 @@ namespace AdventOfCode
     public abstract class DayBase
     {
         public string AdditionalContent { get; set; }
-        public bool UsesAdditionalContent { get; protected set; } = false;
+        public virtual bool UsesAdditionalContent { get; protected set; } = false;
         public CancellationToken CancellationToken { get; set; } = default;
         public abstract string Title { get; }
         public abstract string Solve(string input, bool part2);
 
-        
+        protected const string Part2UnavailableMessage = "Part 2 is unavailable";
 
         protected List<string> GetLines(string input)
         {

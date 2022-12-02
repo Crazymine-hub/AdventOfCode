@@ -16,6 +16,6 @@ namespace AdventOfCode.Tools.Pathfinding.AStar
         }
 
         private new BaseNode GetOtherNode(BaseNode node) => base.GetOtherNode(node);
-        public AStarNode GetOtherNode(AStarNode node) =>(AStarNode)GetOtherNode((BaseNode)node);
+        public virtual AStarNode GetOtherNode(AStarNode node) =>(AStarNode)GetOtherNode((BaseNode)node);
     }
 }
