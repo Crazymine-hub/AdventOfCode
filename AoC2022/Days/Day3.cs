@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Days
 {
-    internal class Day3 : DayBase
+    public class Day3 : DayBase
     {
         public override string Title => "Rucksack Reorganization";
 
