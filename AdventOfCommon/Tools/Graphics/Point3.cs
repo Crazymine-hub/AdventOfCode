@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.Graphics
 {
+    [DebuggerDisplay("Point3 ({X}, {Y}, {Z})")]
     public struct Point3 : ICloneable, IEquatable<Point3>
     {
         public int X { get; set; }

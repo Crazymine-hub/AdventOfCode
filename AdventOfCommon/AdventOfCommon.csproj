@@ -82,6 +82,7 @@
     <Compile Include="Tools\Visualization\DebugForms\AStarDebugForm.Designer.cs">
       <DependentUpon>AStarDebugForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\Visualization\RenderMode.cs" />
     <Compile Include="Tools\Visualization\VisForm.cs">
       <SubType>Form</SubType>
     </Compile>
