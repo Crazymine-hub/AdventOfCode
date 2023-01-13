@@ -15,28 +15,31 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
-
             foreach (var monkeyStatus in GetGroupedLines(input))
                 try
                 {
-                    monkeys.Add(new Monkey(monkeyStatus, MonkeyThrowHandler));
+                    monkeys.Add(new Monkey(monkeyStatus, MonkeyThrowHandler, !part2));
                 }
                 catch (Exception ex)
                 {
                     throw new ArgumentException("Monkey Data failed: " + monkeyStatus, ex);
                 }
 
-            for (int i = 0; i < 20; ++i)
+            long worryCap = AdventOfCode.Tools.MathHelper.LeastCommonMultiple(monkeys.Select(x => x.WorryTest));
+            foreach (var monkey in monkeys)
+                monkey.WorryCap = worryCap;
+
+            for (int i = 1; i <= (part2 ? 10_000 : 20); ++i)
             {
                 foreach (Monkey monkey in monkeys)
                     monkey.ProcessItems();
 
-                Console.WriteLine(string.Join(Environment.NewLine, monkeys.OrderByDescending(x => x.ItemsCheckedCount).Select(x => x.ToString())));
+                Console.WriteLine($"== After round {i} ==");
+                Console.WriteLine(string.Join(Environment.NewLine, monkeys.Select(x => x.ToString())));
                 Console.WriteLine();
             }
 
-            return "Multiplied most active inspections: " + monkeys
+            return "Level of monkey business: " + monkeys
                 .OrderByDescending(x => x.ItemsCheckedCount)
                 .Take(2)
                 .Select(x => x.ItemsCheckedCount)
@@ -44,10 +47,9 @@ namespace AdventOfCode.Days
                 .ToString();
         }
 
-        private void MonkeyThrowHandler(int monkeyNumber, int targetMonkey, int item)
+        private void MonkeyThrowHandler(int monkeyNumber, int targetMonkey, long item)
         {
-            Console.WriteLine($"Monkey {monkeyNumber} -> {item} -> {targetMonkey}");
             monkeys[targetMonkey].RecieveItem(item);
-        } 
+        }
     }
 }

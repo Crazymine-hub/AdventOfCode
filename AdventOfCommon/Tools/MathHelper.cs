@@ -8,15 +8,16 @@ namespace AdventOfCode.Tools
 {
     public static class MathHelper
     {
-        public static long LeastCommonMultiple(params long[] numbers)
+        public static long LeastCommonMultiple(params long[] numbers) => LeastCommonMultiple(numbers.AsEnumerable());
+        public static long LeastCommonMultiple(IEnumerable<long> numbers)
         {
-            if (numbers.Length == 0) throw new ArgumentException("numbers has to contain at least one element", "numbers");
-            if (numbers.Length == 1) return numbers[0];
-            long result = numbers[0];
+            if (numbers.Count() == 0) throw new ArgumentException("numbers has to contain at least one element", "numbers");
+            if (numbers.Count() == 1) return numbers.First(); ;
+            long result = numbers.First();
 
-            for (int i = 1; i < numbers.Length; i++)
+            foreach(var number in numbers.Skip(1))
             {
-                result = LeastCommonMultiple(result, numbers[i]);
+                result = LeastCommonMultiple(result, number);
             }
             return result;
         }
