@@ -10,6 +10,7 @@ namespace AdventOfCode.Tools.DynamicGrid
     public sealed class DynamicGrid<T> : IEnumerable<DynamicGridValue<T>>
     {
         private readonly List<List<List<T>>> grid;
+        public const int DefaultLayer = 0;
 
         public int XDim { get; private set; }
         public int YDim { get; private set; }
@@ -107,9 +108,9 @@ namespace AdventOfCode.Tools.DynamicGrid
                 --ZOrigin;
         }
 
-        public bool InRange(int x, int y, int z = 0) => x >= 0 && x < XDim && y >= 0 && y < YDim && z >= 0 && z < ZDim;
+        public bool InRange(int x, int y, int z = DefaultLayer) => x >= 0 && x < XDim && y >= 0 && y < YDim && z >= 0 && z < ZDim;
 
-        public T GetRelative(int x, int y, int z = 0)
+        public T GetRelative(int x, int y, int z = DefaultLayer)
         {
             int newX = XOrigin + x;
             int newY = YOrigin + y;
@@ -142,7 +143,7 @@ namespace AdventOfCode.Tools.DynamicGrid
             while (grid.All(z => z.All(y => isEmpty(y.Last())))) DecreaseX(false);
         }
 
-        public void AddMargin(int width = 1)
+        public void AddMargin(int width = 1, bool marginZ = false)
         {
             if (width < 0) throw new ArgumentOutOfRangeException(nameof(width), "Value cannot be less than 0.");
             for (int i = 0; i < width; ++i)
@@ -151,12 +152,15 @@ namespace AdventOfCode.Tools.DynamicGrid
                 IncreaseX(false);
                 IncreaseY(true);
                 IncreaseY(false);
-                IncreaseZ(true);
-                IncreaseZ(false);
+                if (marginZ)
+                {
+                    IncreaseZ(true);
+                    IncreaseZ(false);
+                }
             }
         }
 
-        public void MakeAvaliable(int x, int y, int z = 0)
+        public void MakeAvaliable(int x, int y, int z = DefaultLayer)
         {
             while (x >= XDim) IncreaseX(false);
             while (x < 0)
@@ -178,7 +182,7 @@ namespace AdventOfCode.Tools.DynamicGrid
             }
         }
 
-        public IEnumerable<DynamicGridValue<T>> GetNeighbours(int x, int y, int z = 0, bool diagonal = true, bool relative = false)
+        public IEnumerable<DynamicGridValue<T>> GetNeighbours(int x, int y, int z, bool diagonal = true, bool relative = false)
         {
             if (relative)
             {
@@ -201,6 +205,29 @@ namespace AdventOfCode.Tools.DynamicGrid
                         var cellValue = new DynamicGridValue<T>(column, row, layer, this[column, row, layer]);
                         yield return cellValue;
                     }
+                }
+            }
+        }
+
+        public IEnumerable<DynamicGridValue<T>> GetNeighbours(int x, int y, bool diagonal = true, bool relative = false)
+        {
+            if (relative)
+            {
+                x += XOrigin;
+                y += YOrigin;
+            }
+            for (int row = y - 1; row <= y + 1; ++row)
+            {
+                for (int column = x - 1; column <= x + 1; ++column)
+                {
+                    if (!diagonal && !(row == y || column == x)) continue;
+                    if (!InRange(column, row, DefaultLayer))
+                    {
+                        yield return new DynamicGridValue<T>(column, row, DefaultLayer, GetDefaultValue());
+                        continue;
+                    }
+                    var cellValue = new DynamicGridValue<T>(column, row, DefaultLayer, this[column, row, DefaultLayer]);
+                    yield return cellValue;
                 }
             }
         }

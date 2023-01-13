@@ -6,17 +6,21 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.Pathfinding
 {
-    public class BaseNodeConnection: IEquatable<BaseNodeConnection>
+    public class BaseNodeConnection : IEquatable<BaseNodeConnection>
     {
         public virtual BaseNode NodeA { get; protected set; }
         public virtual BaseNode NodeB { get; protected set; }
+
+        public virtual ConnectionDirection Direction { get; }
+
         protected double distance;
         public virtual double Distance => distance;
 
-        public BaseNodeConnection(BaseNode a, BaseNode b)
+        public BaseNodeConnection(BaseNode a, BaseNode b, ConnectionDirection direction = ConnectionDirection.Both)
         {
             NodeA = a;
             NodeB = b;
+            Direction = direction;
             RefreshDistance();
         }
 
@@ -47,7 +51,16 @@ namespace AdventOfCode.Tools.Pathfinding
 
         public virtual bool IsSameConnection(BaseNodeConnection other)
         {
-            return other != null && (other.NodeA == NodeA && other.NodeB == NodeB || other.NodeA == NodeB && other.NodeB == NodeA);
+            return other != null &&
+                (
+                    other.NodeA == NodeA && other.NodeB == NodeB && Direction == other.Direction && Direction != ConnectionDirection.None ||
+                    other.NodeA == NodeB && other.NodeB == NodeA && 
+                    (
+                        (Direction == other.Direction && Direction == ConnectionDirection.Both) ||
+                        (Direction == ConnectionDirection.AToB && other.Direction == ConnectionDirection.BToA) ||
+                        (Direction == ConnectionDirection.BToA && other.Direction == ConnectionDirection.AToB)
+                    )
+                );
         }
 
         public virtual bool Equals(BaseNodeConnection other)

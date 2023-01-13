@@ -52,6 +52,7 @@
     <Compile Include="Tools\Bitwise.cs" />
     <Compile Include="Tools\Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Tools\Graphics\Point3.cs" />
+    <Compile Include="Tools\Pathfinding\ConnectionDirection.cs" />
     <Compile Include="Tools\SpecificBitwise\BitwiseAttribute.cs" />
     <Compile Include="Tools\SpecificBitwise\ImplementerDetail.cs" />
     <Compile Include="Tools\SpecificBitwise\IntBitwise.cs" />

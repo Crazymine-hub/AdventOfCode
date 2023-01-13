@@ -11,7 +11,7 @@ namespace AdventOfCode.Tools.Pathfinding.AStar
         public new AStarNode NodeA { get => (AStarNode)base.NodeA; protected set => base.NodeA = value; }
         public new AStarNode NodeB { get => (AStarNode)base.NodeB; protected set => base.NodeB = value; }
 
-        public AStarNodeConnection(AStarNode a, AStarNode b) : base(a, b)
+        public AStarNodeConnection(AStarNode a, AStarNode b, ConnectionDirection direction = ConnectionDirection.Both) : base(a, b, direction)
         {
         }
 

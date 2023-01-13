@@ -9,29 +9,15 @@ using System.Threading.Tasks;
 namespace AdventOfCode.Tools.Pathfinding
 {
     public delegate void ExpansionDelegate(IReadOnlyCollection<AStarNode> expanded, IReadOnlyCollection<AStarNode> considered, AStarNode active);
-    public class PathfindResult
-    {
-        public AStarNode[] Path { get; }
-        public List<AStarNodeConnection> ConnectionList { get; }
-        public double TotalDistance { get; }
-
-        public PathfindResult(AStarNode[] path, List<AStarNodeConnection> connectionList, double totalDistance)
-        {
-            Path = path;
-            ConnectionList = connectionList;
-            TotalDistance = totalDistance;
-        }
-    }
+    public delegate bool PathCheckerDelegate(AStarNodeConnection nodeConnection);
 
     public class AStarPathfinder
     {
         readonly List<AStarNodeConnection> connections;
         readonly List<AStarNode> nodes;
-        HashSet<AStarNode> expandedNodes;
-        HashSet<AStarNode> consideredNodes;
-        Dictionary<AStarNode, HashSet<AStarNodeConnection>> neighbourDictionary;
 
         public event ExpansionDelegate OnExpanded;
+        public PathCheckerDelegate CheckPathCallback { get; set; }
 
         public double DistanceHeatWeigh { get; set; } = 0.5;
 
@@ -52,18 +38,24 @@ namespace AdventOfCode.Tools.Pathfinding
                                   out double totalDistance)
         {
             AStarNode active = startNode;
-            expandedNodes = new HashSet<AStarNode>();
-            consideredNodes = new HashSet<AStarNode>();
-            neighbourDictionary = new Dictionary<AStarNode, HashSet<AStarNodeConnection>>();
-
+            HashSet<AStarNode> expandedNodes = new HashSet<AStarNode>();
+            HashSet<AStarNode> consideredNodes = new HashSet<AStarNode>();
+            Dictionary<AStarNode, HashSet<AStarNodeConnection>> neighbourDictionary = new Dictionary<AStarNode, HashSet<AStarNodeConnection>>();
             foreach (var connection in connections)
             {
-                AddNeighbourConnectionEntry(connection, connection.NodeA);
-                AddNeighbourConnectionEntry(connection, connection.NodeB);
-                connection.NodeA.PathLength = double.PositiveInfinity;
-                connection.NodeB.PathLength = double.PositiveInfinity;
-                connection.NodeA.PreviousNode = null;
-                connection.NodeB.PreviousNode = null;
+                if (connection.Direction.HasFlag(ConnectionDirection.AToB))
+                {
+                    AddNeighbourConnectionEntry(neighbourDictionary, connection, connection.NodeA);
+                    connection.NodeA.PathLength = double.PositiveInfinity;
+                    connection.NodeA.PreviousNode = null;
+                }
+
+                if (connection.Direction.HasFlag(ConnectionDirection.BToA))
+                {
+                    AddNeighbourConnectionEntry(neighbourDictionary, connection, connection.NodeB);
+                    connection.NodeB.PathLength = double.PositiveInfinity;
+                    connection.NodeB.PreviousNode = null;
+                }
             }
 
 
@@ -74,7 +66,7 @@ namespace AdventOfCode.Tools.Pathfinding
             while (active != endNode)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                ExpandNode(active);
+                ExpandNode(expandedNodes, consideredNodes, neighbourDictionary, active);
 
                 var withoutExpanded = consideredNodes.Except(expandedNodes);
 
@@ -89,7 +81,7 @@ namespace AdventOfCode.Tools.Pathfinding
                 foreach(var node in withoutExpanded.Except(inUseNodes))
                     if(nextActive == null || nextActive.ExpansionPriority > node.ExpansionPriority)
                         nextActive = node;
-                if (nextActive == active) return new AStarNode[0];
+                if (nextActive == active || nextActive == null) return new AStarNode[0];
                 active = nextActive;
 
             }
@@ -101,17 +93,20 @@ namespace AdventOfCode.Tools.Pathfinding
 
         }
 
-        private void AddNeighbourConnectionEntry(AStarNodeConnection connection, AStarNode connTarget)
+        private void AddNeighbourConnectionEntry(Dictionary<AStarNode, HashSet<AStarNodeConnection>> neighbourDictionary, AStarNodeConnection connection, AStarNode connTarget)
         {
             if (!neighbourDictionary.ContainsKey(connTarget))
                 neighbourDictionary.Add(connTarget, new HashSet<AStarNodeConnection>());
             neighbourDictionary[connTarget].Add(connection);
         }
 
-        private void ExpandNode(AStarNode active)
+        private void ExpandNode(HashSet<AStarNode> expandedNodes,
+                                HashSet<AStarNode> consideredNodes,
+                                Dictionary<AStarNode, HashSet<AStarNodeConnection>> neighbourDictionary,
+                                AStarNode active)
         {
-
-            IEnumerable<AStarNodeConnection> neighbours = neighbourDictionary[active];
+            if(!neighbourDictionary.TryGetValue(active, out HashSet<AStarNodeConnection> neighbours))
+                neighbours = new HashSet<AStarNodeConnection>();
             double totalDistance = active.PathLength;
 
             foreach (var connection in neighbours)
@@ -148,22 +143,6 @@ namespace AdventOfCode.Tools.Pathfinding
             return GetPath(startNode, endNode, CancellationToken.None, out connectionList, out totalDistance);
         }
 
-        public Task<PathfindResult> GetPathAsync(AStarNode startNode,
-                                  AStarNode endNode,
-                                  CancellationToken cancellationToken)
-        {
-            return Task.Run(() =>
-            {
-                return new PathfindResult(
-                    GetPath(startNode, endNode, cancellationToken, out var connectionList, out double totalDistance),
-                    connectionList,
-                    totalDistance);
-            }, cancellationToken);
-        }
-
-        private IEnumerable<AStarNodeConnection> GetNeighbours(AStarNode targetNode) =>
-            connections.Where(conn => conn.HasConnectionTo(targetNode));
-
         public static List<AStarNode> GetPathToNode(AStarNode targetNode)
         {
             var path = new Stack<AStarNode>();
@@ -174,15 +153,5 @@ namespace AdventOfCode.Tools.Pathfinding
             }
             return path.ToList();
         }
-
-        //private List<AStarNode> GetPathToNode(AStarNode targetNode)
-        //{
-        //    var path = new List<AStarNode>();
-        //    if (targetNode == null) return path;
-
-        //    path.AddRange(GetPathToNode(targetNode.PreviousNode));
-        //    path.Add(targetNode);
-        //    return path;
-        //}
     }
 }
