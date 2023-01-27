@@ -9,6 +9,8 @@ namespace AdventOfCode.Tools.Extensions
 {
     public static class BitmapExtension
     {
+        public static void FillRect(this Bitmap bmp, int x, int y, int width, int height, Color color) =>
+            FillRect(bmp, new Rectangle(x, y, width, height), color);
         public static void FillRect(this Bitmap bmp, Rectangle rect, Color color)
         {
             var lockInfo = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);

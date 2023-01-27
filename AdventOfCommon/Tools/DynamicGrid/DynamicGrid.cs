@@ -115,7 +115,14 @@ namespace AdventOfCode.Tools.DynamicGrid
             int newX = XOrigin + x;
             int newY = YOrigin + y;
             int newZ = ZOrigin + z;
-            return this[newX, newY, newZ];
+            try
+            {
+                return this[newX, newY, newZ];
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return GetDefaultValue();
+            }
         }
 
         public void SetRelative(int x, int y, T value)
