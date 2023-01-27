@@ -12,25 +12,52 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
+            if (part2) return OrderData(input);
+            return CheckPairOrder(input);
+        }
+
+        private string OrderData(string input)
+        {
+            var data = GetLines(input);
+            data.RemoveAll(x => string.IsNullOrWhiteSpace(x));
+            data.Add("[[2]]");
+            data.Add("[[6]]");
+            data.Sort((a, b) =>
+            {
+                switch (CheckPair(a, b))
+                {
+                    case null: return 0;
+                    case true: return -1;
+                    case false: return 1;
+                    default: throw new NotSupportedException();
+                }
+            });
+            var decodeKey = data.IndexOf("[[2]]") + 1;
+            decodeKey *= data.IndexOf("[[6]]") + 1;
+            return $"Decode Key is {decodeKey}";
+        }
+
+        private string CheckPairOrder(string input)
+        {
             var pairs = GetGroupedLines(input);
             int indexSum = 0;
-            for(int i = 0; i < pairs.Count; ++i)
+            for (int i = 0; i < pairs.Count; ++i)
             {
                 var pair = GetLines(pairs[i]);
                 if (pair.Count != 2) throw new FormatException("The separated content doesn't make a pair.");
                 var correctOrder = CheckPair(pair[0], pair[1]);
-                if (correctOrder)
+                if (!correctOrder.HasValue) throw new InvalidOperationException("Pairs seem to be equal");
+                if (correctOrder.Value)
                     indexSum += i + 1;
                 Console.WriteLine(pair[0]);
                 Console.WriteLine(pair[1]);
-                Console.WriteLine(correctOrder ? "correct" : "reversed");
+                Console.WriteLine(correctOrder.Value ? "correct" : "reversed");
                 Console.WriteLine();
             }
             return $"The Sum of all right ordered indices is {indexSum}";
         }
 
-        private bool CheckPair(string a, string b)
+        private bool? CheckPair(string a, string b)
         {
             int? leftNumber = null;
             int? rightNumber = null;
@@ -95,7 +122,7 @@ namespace AdventOfCode.Days
                 else throw new FormatException("Not a covered Case");
             }
 
-            throw new InvalidOperationException("The Arrays could not be ordered.");
+            return null;
         }
     }
 }
