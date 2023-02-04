@@ -22,12 +22,15 @@ namespace AdventOfCode.Tools.DynamicGrid
 
         public event Func<T> GetDefault;
 
-        public DynamicGrid(int dimX = 1, int dimY = 1, int dimZ = 1)
+        public DynamicGrid(int dimX = 1, int dimY = 1, int dimZ = 1, int xOffset = 0, int yOffset = 0, int zOffset = 0)
         {
             grid = new List<List<List<T>>>();
             while (XDim < dimX) IncreaseX(false);
             while (YDim < dimY) IncreaseY(false);
             while (ZDim < dimZ) IncreaseZ(false);
+            XOrigin = -xOffset;
+            YOrigin = -yOffset;
+            ZOrigin = -zOffset;
         }
 
         private T GetDefaultValue()

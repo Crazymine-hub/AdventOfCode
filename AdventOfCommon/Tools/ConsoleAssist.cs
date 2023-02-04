@@ -58,8 +58,11 @@ namespace AdventOfCode.Tools
                 --Console.CursorLeft;
                 Console.Write(GetNextProgressChar());
                 activeCount = tasks.Count(x => !x.IsCompleted);
-                Task.Delay(delay).Wait();
-                cancellationToken.ThrowIfCancellationRequested();
+                var start = DateTime.Now;
+                while ((DateTime.Now - start).TotalMilliseconds < delay)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
             }
 
             Console.WriteLine();
