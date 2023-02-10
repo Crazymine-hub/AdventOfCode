@@ -149,6 +149,7 @@ namespace AdventOfCode
                 catch (OperationCanceledException ex)
                 {
                     if (ex.CancellationToken != tokenSource.Token) throw;
+                    tokenSource.Cancel();
                     Console.WriteLine("Operation canceled.");
                 }
                 catch (Exception ex)
@@ -176,6 +177,7 @@ namespace AdventOfCode
                 }
             }
             VisualFormHandler.ClearAll();
+            GC.Collect();
             return true;
         }
 

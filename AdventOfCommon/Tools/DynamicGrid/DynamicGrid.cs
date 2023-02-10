@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.DynamicGrid
 {
-    public sealed class DynamicGrid<T> : IEnumerable<DynamicGridValue<T>>
+    public sealed class DynamicGrid<T>: IEnumerable<DynamicGridValue<T>>
     {
         private readonly List<List<List<T>>> grid;
         public const int DefaultLayer = 0;
@@ -22,15 +22,30 @@ namespace AdventOfCode.Tools.DynamicGrid
 
         public event Func<T> GetDefault;
 
-        public DynamicGrid(int dimX = 1, int dimY = 1, int dimZ = 1, int xOffset = 0, int yOffset = 0, int zOffset = 0)
+        public DynamicGrid(int dimX = 1, int dimY = 1, int dimZ = 1, int xOffset = 0, int yOffset = 0, int zOffset = 0, Func<T> getDefaultEvent = null)
         {
-            grid = new List<List<List<T>>>();
-            while (XDim < dimX) IncreaseX(false);
-            while (YDim < dimY) IncreaseY(false);
-            while (ZDim < dimZ) IncreaseZ(false);
+            if (getDefaultEvent != null)
+                GetDefault += getDefaultEvent;
+            grid = new List<List<List<T>>>(dimZ);
+            for (int z = 0; z < dimZ; ++z)
+            {
+                grid.Add(new List<List<T>>(YDim));
+                for (int y = 0; y < dimY; ++y)
+                {
+                    grid[z].Add(new List<T>(XDim));
+                    for (int x = 0; x < dimX; ++x)
+                    {
+                        grid[z][y].Add(GetDefaultValue());
+                    }
+                }
+            }
+
             XOrigin = -xOffset;
             YOrigin = -yOffset;
             ZOrigin = -zOffset;
+            XDim = dimX;
+            YDim = dimY;
+            ZDim = dimZ;
         }
 
         private T GetDefaultValue()
@@ -112,6 +127,7 @@ namespace AdventOfCode.Tools.DynamicGrid
         }
 
         public bool InRange(int x, int y, int z = DefaultLayer) => x >= 0 && x < XDim && y >= 0 && y < YDim && z >= 0 && z < ZDim;
+        public bool InRangeRelative(int x, int y, int z = DefaultLayer) => InRange(x + XOrigin, y + YOrigin, z + ZOrigin);
 
         public T GetRelative(int x, int y, int z = DefaultLayer)
         {

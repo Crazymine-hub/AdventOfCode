@@ -42,27 +42,59 @@ namespace AdventOfCode.Tools
             return progressIndicator[progressPos];
         }
 
-        public void WaitForAllTasks(IEnumerable<Task> tasks, int delay = 1000, System.Threading.CancellationToken cancellationToken = default)
+        public void WaitForAllTasks(IEnumerable<Task> tasks, int delay = 1000, System.Threading.CancellationToken cancellationToken = default, Func<string> progressUpdateCallback = null)
         {
             int previousActive = -1;
             int activeCount = tasks.Count(x => !x.IsCompleted);
-            while (activeCount > 0)
+            try
             {
-                if(previousActive != activeCount)
+                Console.TreatControlCAsInput = true;
+                int indicatorPosition = 0;
+                var width = 0;
+                while (activeCount > 0)
                 {
-                    previousActive = activeCount;
-                    Console.CursorLeft = 0;
-                    Console.Write($"Waiting for {activeCount}/{tasks.Count()} tasks to complete...  ");
-                }
+                    if (previousActive != activeCount)
+                    {
+                        previousActive = activeCount;
+                        width = Console.CursorLeft;
+                        Console.CursorLeft = 0;
+                        Console.Write(string.Empty.PadLeft(width));
+                        Console.CursorLeft = 0;
+                        Console.Write($"Waiting for {activeCount}/{tasks.Count()} tasks to complete...  ");
+                        indicatorPosition = Console.CursorLeft;
+                    }
 
-                --Console.CursorLeft;
-                Console.Write(GetNextProgressChar());
-                activeCount = tasks.Count(x => !x.IsCompleted);
-                var start = DateTime.Now;
-                while ((DateTime.Now - start).TotalMilliseconds < delay)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    width = Console.CursorLeft - indicatorPosition;
+                    Console.CursorLeft = indicatorPosition;
+                    Console.Write(GetNextProgressChar());
+                    if (progressUpdateCallback != null)
+                    {
+                        Console.Write(string.Empty.PadLeft(width));
+                        Console.CursorLeft -= width;
+                        Console.Write(" ");
+                        Console.Write(progressUpdateCallback());
+                    }
+                    activeCount = tasks.Count(x => !x.IsCompleted);
+                    var start = DateTime.Now;
+                    while ((DateTime.Now - start).TotalMilliseconds < delay)
+                    {
+                        if (Console.KeyAvailable)
+                        {
+                            var key = Console.ReadKey(false);
+                            if (key.Modifiers == ConsoleModifiers.Control && (key.Key == ConsoleKey.C || key.Key == ConsoleKey.Pause))
+                            {
+                                Console.WriteLine();
+                                Console.WriteLine($"Waiting canceled");
+                                throw new OperationCanceledException(cancellationToken);
+                            }
+                        }
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
                 }
+            }
+            finally
+            {
+                Console.TreatControlCAsInput = false;
             }
 
             Console.WriteLine();
