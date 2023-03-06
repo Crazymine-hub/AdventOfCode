@@ -133,18 +133,21 @@ namespace AdventOfCode
             Stopwatch stopwatch = new Stopwatch();
             using (tokenSource = new CancellationTokenSource())
             {
+#if !DEBUG
                 try
                 {
-                    if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + AdditionFileSuffix + fileExtension))
-                        day.AdditionalContent = File.ReadAllText(dayPath + dayNr + AdditionFileSuffix + fileExtension);
+#endif
+                if (day.UsesAdditionalContent && File.Exists(dayPath + dayNr + AdditionFileSuffix + fileExtension))
+                    day.AdditionalContent = File.ReadAllText(dayPath + dayNr + AdditionFileSuffix + fileExtension);
 
-                    day.CancellationToken = tokenSource.Token;
-                    stopwatch.Start();
-                    Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
-                    stopwatch.Stop();
+                day.CancellationToken = tokenSource.Token;
+                stopwatch.Start();
+                Console.WriteLine(day.Solve(LoadInput(dayPath + dayNr + fileExtension, custIn), useSecond == 2));
+                stopwatch.Stop();
 
-                    if (day.UsesAdditionalContent && day.AdditionalContent != null)
-                        File.WriteAllText(dayPath + dayNr + AdditionFileSuffix + fileExtension, day.AdditionalContent);
+                if (day.UsesAdditionalContent && day.AdditionalContent != null)
+                    File.WriteAllText(dayPath + dayNr + AdditionFileSuffix + fileExtension, day.AdditionalContent);
+#if !DEBUG
                 }
                 catch (OperationCanceledException ex)
                 {
@@ -157,6 +160,7 @@ namespace AdventOfCode
                     Console.WriteLine("An Exception occured while running the Day.");
                     Console.WriteLine(ex.ToString());
                 }
+#endif
             }
             tokenSource = null;
 
