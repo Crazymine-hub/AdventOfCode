@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.Pathfinding
 {
-    public class BaseNodeConnection : IEquatable<BaseNodeConnection>
+    public class BaseNodeConnection: IEquatable<BaseNodeConnection>
     {
         public virtual BaseNode NodeA { get; protected set; }
         public virtual BaseNode NodeB { get; protected set; }
@@ -24,7 +25,7 @@ namespace AdventOfCode.Tools.Pathfinding
             RefreshDistance();
         }
 
-        public void RefreshDistance()
+        public virtual void RefreshDistance()
         {
             distance = Math.Sqrt(Math.Pow(NodeB.X - NodeA.X, 2) + Math.Pow(NodeB.Y - NodeA.Y, 2));
         }
@@ -46,7 +47,10 @@ namespace AdventOfCode.Tools.Pathfinding
 
         public override string ToString()
         {
-            return NodeA.ToString().PadRight(10) + "<-> " + NodeB.ToString().PadRight(10) + "@".PadLeft(5) + distance.ToString("0.00");
+            return NodeA.ToString().PadRight(10) +
+                (Direction.HasFlag(ConnectionDirection.BToA) ? "<" : string.Empty) + "-" +
+                (Direction.HasFlag(ConnectionDirection.AToB) ? ">" : string.Empty) + " " +
+                NodeB.ToString().PadRight(10) + "@".PadLeft(5) + Distance.ToString("0.00");
         }
 
         public virtual bool IsSameConnection(BaseNodeConnection other)
@@ -54,7 +58,7 @@ namespace AdventOfCode.Tools.Pathfinding
             return other != null &&
                 (
                     other.NodeA == NodeA && other.NodeB == NodeB && Direction == other.Direction && Direction != ConnectionDirection.None ||
-                    other.NodeA == NodeB && other.NodeB == NodeA && 
+                    other.NodeA == NodeB && other.NodeB == NodeA &&
                     (
                         (Direction == other.Direction && Direction == ConnectionDirection.Both) ||
                         (Direction == ConnectionDirection.AToB && other.Direction == ConnectionDirection.BToA) ||
