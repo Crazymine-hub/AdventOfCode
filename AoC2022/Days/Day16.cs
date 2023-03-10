@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Days.Tools.Day16;
+using AdventOfCode.Tools;
 using AdventOfCode.Tools.Graphics;
 using AdventOfCode.Tools.Pathfinding;
 using AdventOfCode.Tools.Pathfinding.AStar;
@@ -15,8 +16,10 @@ namespace AdventOfCode.Days
     {
         public override string Title => "Proboscidea Volcanium";
 
-        private List<ValveInfo> caveValves;
+        private List<ValveInfo> allValves;
+        private List<ValveInfo> flowValves;
         private List<ValveNodeConnection> connections;
+        private const string startValveName = "AA";
 
         public override string Solve(string input, bool part2)
         {
@@ -27,10 +30,10 @@ namespace AdventOfCode.Days
 
             var mostRlease = FindOptimalReleaseRoute();
 
-            return $"You can release at most {GetReleasedPressure(mostRlease)} pressure.";
+            return $"You can release at most {GetReleasedPressure(mostRlease, true)} pressure.";
         }
 
-        private int GetReleasedPressure(List<ValvePathStep> mostRlease)
+        private int GetReleasedPressure(List<ValvePathStep> mostRlease, bool writeToConsole)
         {
             int minute = 0;
             int totalReleased = 0;
@@ -38,14 +41,20 @@ namespace AdventOfCode.Days
             foreach (var step in mostRlease.Skip(1))
             {
                 ProcessMinute();
-                Console.WriteLine($"You move to valve {step.Valve.Name}.");
-                Console.WriteLine();
+                if (writeToConsole)
+                {
+                    Console.WriteLine($"You move to valve {step.Valve.Name}.");
+                    Console.WriteLine();
+                }
 
                 if (step.Opened)
                 {
                     ProcessMinute();
-                    Console.WriteLine($"You open valve {step.Valve.Name}.");
-                    Console.WriteLine();
+                    if (writeToConsole)
+                    {
+                        Console.WriteLine($"You open valve {step.Valve.Name}.");
+                        Console.WriteLine();
+                    }
                     openedValves.Add(step.Valve);
                     openedValves = openedValves.OrderBy(x => x.Name).ToList();
                 }
@@ -54,15 +63,19 @@ namespace AdventOfCode.Days
             while (minute < 30)
             {
                 ProcessMinute();
-                Console.WriteLine();
+                if (writeToConsole)
+                    Console.WriteLine();
             }
 
             void ProcessMinute()
             {
                 minute++;
-                Console.WriteLine($"== Minute {minute} ==");
+                if (writeToConsole)
+                    Console.WriteLine($"== Minute {minute} ==");
                 var minutePressure = openedValves.Sum(x => x.PressureRelease);
                 totalReleased += minutePressure;
+
+                if (!writeToConsole) return;
 
                 if (openedValves.Count == 0)
                     Console.WriteLine("No valves are open.");
@@ -76,70 +89,93 @@ namespace AdventOfCode.Days
 
         private List<ValvePathStep> FindOptimalReleaseRoute()
         {
-            var finalPath = new List<ValvePathStep>();
-            var pathFind = new AStarPathfinder(connections.Cast<AStarNodeConnection>().ToList());
-            var currentNode = caveValves.Single(x => x.Name == "AA");
-            var possibleValves = caveValves.Where(x => x.PressureRelease > 0).ToHashSet();
-            ValveInfo nextValve = null;
-            var timeSpent = 0;
+            var startValve = allValves.Single(x => x.Name == startValveName);
+            var initial = new ValvePath();
+            initial.Add(startValve, 0);
+            var path = FindAllPaths(startValve, 30, initial)
+                .OrderByDescending(x => x.PressureReleased)
+                .First();
+            return GetSteps(path);
+        }
 
-            finalPath.Add(new ValvePathStep(currentNode, false));
-            while (timeSpent < 30)
+        //DFS shamelessly copied from u/nervario https://github.com/amafoas/advent-of-code-2022/blob/8f98c41b8783455a4b47390a6fe88066e8191630/Day-16/main.go#L95
+        private List<ValvePath> FindAllPaths(ValveInfo current, int timeLeft, ValvePath path)
+        {
+            var newPaths = new List<ValvePath>() { path };
+            foreach (ValveInfo targetValve in flowValves)
             {
-                var bestPath = new List<ValveInfo>();
-                var timeAdded = int.MaxValue;
-                var mostReleased = 0;
-                foreach (var targetValve in possibleValves
-                    .Where(x => !x.IsOpened && x != currentNode)
-                    .OrderByDescending(x => x.PressureRelease))
-                {
-                    var path = pathFind.GetPath(currentNode, targetValve)
-                        .Skip(1)
-                        .Cast<ValveInfo>()
-                        .ToList();
-                    var lifeTime = 30 - (timeSpent + path.Count + 1);
-                    var valveRelease = lifeTime * targetValve.PressureRelease;
-                    if (valveRelease > mostReleased)
-                    {
-                        bestPath = path;
-                        timeAdded = path.Count;
-                        mostReleased = valveRelease;
-                    }
-                }
-                if (bestPath == null) throw new Exception("Something went wrong.");
-                if (timeSpent + timeAdded + 1 > 30) break;
-                currentNode = bestPath.Last();
-                currentNode.IsOpened = true;
-                timeSpent += timeAdded + 1;
-                finalPath.AddRange(bestPath.Select((x, i) => new ValvePathStep(x, i == bestPath.Count - 1)));
-                if (possibleValves.All(x => x.IsOpened))
-                    break;
+                if (targetValve == current) continue;
+                var connection = connections.Single(x => x.HasConnectionTo(current, targetValve));
+                var newTimeLeft = timeLeft - (int)connection.Distance - 1; //go to and open valve
+                if (newTimeLeft <= 0 || path.Path.Contains(targetValve)) continue;
+
+                var basePath = new ValvePath();
+                basePath.Path.AddRange(path.Path);
+                basePath.PressureReleased = path.PressureReleased;
+                basePath.Add(targetValve, newTimeLeft * targetValve.PressureRelease);
+                newPaths.AddRange(FindAllPaths(targetValve, newTimeLeft, basePath));
             }
 
-            return finalPath;
+            return newPaths;
+        }
+
+        private List<ValvePathStep> GetSteps(ValvePath valvePath)
+        {
+            var path = valvePath.Path;
+            var steps = new List<ValvePathStep>
+            {
+                new ValvePathStep(path.First(), false)
+            };
+
+            for (int i = 0; i < path.Count - 1; ++i)
+            {
+                var fromNode = path[i];
+                var toNode = path[i + 1];
+                var connection = connections.Single(x => x.HasConnectionTo(fromNode, toNode));
+                var needsReverse = connection.NodeA == toNode;
+                foreach (var betweenNode in connection.PassedNodes.Reverse<ValveInfo>())
+                    steps.Add(new ValvePathStep(betweenNode, false));
+                var pathStep = new ValvePathStep((ValveInfo)connection.GetOtherNode(fromNode), true);
+                steps.Add(pathStep);
+            }
+            return steps;
         }
 
         private void LoadValveMap(string input)
         {
-            caveValves = new List<ValveInfo>();
-            connections = new List<ValveNodeConnection>();
+            allValves = new List<ValveInfo>();
+            var allConnections = new List<ValveNodeConnection>();
             var matches = Regex.Matches(input, @"Valve (?<Valve>\w+) has flow rate=(?<FlowRate>\d+); tunnels? leads? to valves? (?:(?<Tunnels>\w+)(?:, )?)+", RegexOptions.Multiline);
             foreach (Match match in matches)
             {
                 var valve = new ValveInfo(match.Groups["Valve"].Value, int.Parse(match.Groups["FlowRate"].Value));
                 foreach (Capture tunnel in match.Groups["Tunnels"].Captures)
                     valve.ConnectedValves.Add(tunnel.Value);
-                caveValves.Add(valve);
+                allValves.Add(valve);
             }
 
-            foreach (ValveInfo valve in caveValves)
+
+            foreach (ValveInfo valve in allValves)
             {
                 foreach (string connectedValveName in valve.ConnectedValves)
                 {
-                    ValveInfo connectedValve = caveValves.Single(x => x.Name == connectedValveName);
-                    var connection = new ValveNodeConnection(valve, connectedValve);
-                    if (!connections.Any(x => x.IsSameConnection(connection)))
-                        connections.Add(connection);
+                    ValveInfo connectedValve = allValves.Single(x => x.Name == connectedValveName);
+                    var connection = new ValveNodeConnection(valve, connectedValve, 1, null);
+                    if (!allConnections.Any(x => x.IsSameConnection(connection)))
+                        allConnections.Add(connection);
+                }
+            }
+
+            flowValves = allValves.Where(x => x.PressureRelease > 0).ToList();
+            connections = new List<ValveNodeConnection>();
+            var pathfind = new AStarPathfinder(allConnections.Cast<AStarNodeConnection>().ToList());
+            foreach (var valveA in allValves.Where(x => x.Name == startValveName).Concat(flowValves))
+            {
+                foreach (var valveB in flowValves)
+                {
+                    if (valveA == valveB || connections.Any(x => x.HasConnectionTo(valveA, valveB))) continue;
+                    var path = pathfind.GetPath(valveA, valveB).Cast<ValveInfo>().Skip(1).TakeWhile(x => x != valveB).ToList();
+                    connections.Add(new ValveNodeConnection(valveA, valveB, path.Count + 1, path));
                 }
             }
         }

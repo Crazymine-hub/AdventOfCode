@@ -30,10 +30,8 @@ namespace AdventOfCode.Tools.Pathfinding
             distance = Math.Sqrt(Math.Pow(NodeB.X - NodeA.X, 2) + Math.Pow(NodeB.Y - NodeA.Y, 2));
         }
 
-        public virtual bool HasConnectionTo(BaseNode target)
-        {
-            return (NodeA == target || NodeB == target);
-        }
+        public virtual bool HasConnectionTo(BaseNode nodeA, BaseNode nodeB) => HasConnectionTo(nodeA) && HasConnectionTo(nodeB);
+        public virtual bool HasConnectionTo(BaseNode target) => (NodeA == target || NodeB == target);
 
         public virtual BaseNode GetOtherNode(BaseNode target)
         {

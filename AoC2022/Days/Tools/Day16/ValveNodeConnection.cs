@@ -10,10 +10,13 @@ namespace AdventOfCode.Days.Tools.Day16
 {
     internal class ValveNodeConnection: AStarNodeConnection
     {
-        public override double Distance => 1;
+        public override double Distance { get; }
+        public List<ValveInfo> PassedNodes { get; }
 
-        public ValveNodeConnection(AStarNode a, AStarNode b, ConnectionDirection direction = ConnectionDirection.Both) : base(a, b, direction)
+        public ValveNodeConnection(AStarNode a, AStarNode b, int distance, List<ValveInfo> passedNodes) : base(a, b, ConnectionDirection.Both)
         {
+            Distance = distance;
+            PassedNodes = passedNodes;
         }
 
         public override void RefreshDistance() { }

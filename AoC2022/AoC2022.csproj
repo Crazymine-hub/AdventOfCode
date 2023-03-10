@@ -65,6 +65,7 @@
     <Compile Include="Days\Tools\Day15\SensorState.cs" />
     <Compile Include="Days\Tools\Day16\ValveInfo.cs" />
     <Compile Include="Days\Tools\Day16\ValveNodeConnection.cs" />
+    <Compile Include="Days\Tools\Day16\ValvePath.cs" />
     <Compile Include="Days\Tools\Day7\File.cs" />
     <Compile Include="Days\Tools\Day7\Directory.cs" />
     <Compile Include="Days\Tools\Day7\IFileSystemEntry.cs" />
