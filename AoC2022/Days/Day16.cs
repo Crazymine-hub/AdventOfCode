@@ -6,6 +6,7 @@ using AdventOfCode.Tools.Pathfinding.AStar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -23,59 +24,73 @@ namespace AdventOfCode.Days
 
         public override string Solve(string input, bool part2)
         {
-            if (part2) return Part2UnavailableMessage;
             LoadValveMap(input);
 
             //var mostRelease = ProcessStep(caveValves.Single(x => x.Name == "AA"), 0, 0);
 
-            var mostRlease = FindOptimalReleaseRoute();
+            (var pathA, var pathB) = FindOptimalReleaseRoute(part2);
 
-            return $"You can release at most {GetReleasedPressure(mostRlease, true)} pressure.";
+            return $"You can release at most {GetReleasedPressure(pathA, pathB, part2)} pressure.";
         }
 
-        private int GetReleasedPressure(List<ValvePathStep> mostRlease, bool writeToConsole)
+        private int GetReleasedPressure(List<ValvePathStep> pathA, List<ValvePathStep> pathB, bool hasPathB)
         {
-            int minute = 0;
             int totalReleased = 0;
             List<ValveInfo> openedValves = new List<ValveInfo>();
-            foreach (var step in mostRlease.Skip(1))
+            int indexA = 1;
+            int indexB = 1;
+            bool openingA = false;
+            bool openingB = false;
+            for (int minute = 1; minute <= (hasPathB ? 26 : 30); ++minute)
             {
-                ProcessMinute();
-                if (writeToConsole)
-                {
-                    Console.WriteLine($"You move to valve {step.Valve.Name}.");
-                    Console.WriteLine();
-                }
+                ValvePathStep valveA = indexA < pathA.Count ? pathA[indexA] : null;
+                ValvePathStep valveB = indexB < (pathB?.Count ?? -1) ? pathB[indexB] : null;
+                ProcessMinute(minute);
+                ProcessValve(true, valveA, ref indexA, ref openingA);
+                ProcessValve(false, valveB, ref indexB, ref openingB);
+                Console.WriteLine();
+            }
 
-                if (step.Opened)
+            void ProcessValve(bool isPlayer, ValvePathStep valve, ref int index, ref bool opening)
+            {
+                if (valve != null)
                 {
-                    ProcessMinute();
-                    if (writeToConsole)
+                    if (!opening)
                     {
-                        Console.WriteLine($"You open valve {step.Valve.Name}.");
-                        Console.WriteLine();
+                        if (isPlayer)
+                            Console.WriteLine($"You move to valve {valve.Valve.Name}.");
+                        else
+                            Console.WriteLine($"The elefant moves to valve {valve.Valve.Name}.");
                     }
-                    openedValves.Add(step.Valve);
-                    openedValves = openedValves.OrderBy(x => x.Name).ToList();
+                    else
+                    {
+                        if (isPlayer)
+                            Console.WriteLine($"You open valve {valve.Valve.Name}.");
+                        else
+                            Console.WriteLine($"The elefant opens valve {valve.Valve.Name}.");
+                        openedValves.Add(valve.Valve);
+                        openedValves = openedValves.OrderBy(x => x.Name).ToList();
+                    }
+                    if (valve.Opened)
+                    {
+                        if (opening)
+                        {
+                            opening = false;
+                            index++;
+                        }
+                        else
+                            opening = true;
+                    }
+                    else
+                        index++;
                 }
             }
 
-            while (minute < 30)
+            void ProcessMinute(int minute)
             {
-                ProcessMinute();
-                if (writeToConsole)
-                    Console.WriteLine();
-            }
-
-            void ProcessMinute()
-            {
-                minute++;
-                if (writeToConsole)
-                    Console.WriteLine($"== Minute {minute} ==");
+                Console.WriteLine($"== Minute {minute} ==");
                 var minutePressure = openedValves.Sum(x => x.PressureRelease);
                 totalReleased += minutePressure;
-
-                if (!writeToConsole) return;
 
                 if (openedValves.Count == 0)
                     Console.WriteLine("No valves are open.");
@@ -87,15 +102,37 @@ namespace AdventOfCode.Days
             return totalReleased;
         }
 
-        private List<ValvePathStep> FindOptimalReleaseRoute()
+        private (List<ValvePathStep> pathA, List<ValvePathStep> pathB) FindOptimalReleaseRoute(bool part2)
         {
             var startValve = allValves.Single(x => x.Name == startValveName);
             var initial = new ValvePath();
             initial.Add(startValve, 0);
-            var path = FindAllPaths(startValve, 30, initial)
+            var paths = FindAllPaths(startValve, part2 ? 26 : 30, initial)
                 .OrderByDescending(x => x.PressureReleased)
-                .First();
-            return GetSteps(path);
+                .ToList();
+            if (!part2)
+                return (GetSteps(paths.First()), null);
+
+            int maxRelease = 0;
+            ValvePath bestPathA = null;
+            ValvePath bestPathB = null;
+
+            foreach (var pathA in paths)
+            {
+                if (pathA.Path.Count == 0) continue;
+                foreach (var pathB in paths)
+                {
+                    var totalRelease = pathA.PressureReleased + pathB.PressureReleased;
+                    if (pathA != pathB && totalRelease > maxRelease && !pathA.Path.Where(x => x != startValve).Any(x => pathB.Path.Where(y => y != startValve).Contains(x)))
+                    {
+                        maxRelease = totalRelease;
+                        bestPathA = pathA;
+                        bestPathB = pathB;
+                    }
+                }
+            }
+
+            return (GetSteps(bestPathA), GetSteps(bestPathB));
         }
 
         //DFS shamelessly copied from u/nervario https://github.com/amafoas/advent-of-code-2022/blob/8f98c41b8783455a4b47390a6fe88066e8191630/Day-16/main.go#L95
