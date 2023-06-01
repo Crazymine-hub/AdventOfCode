@@ -91,7 +91,6 @@ namespace AdventOfCode.Days
             SpawnRock(ref shapeIndex, out rockPosition, out currentShape);
             long rockCount = 1;
             var maxRocks = part2 ? 1_000_000_000_000 : 2022;
-            Regex expression = new Regex(@"(?<main>(?<v>;\d+)+?)(\k<main>)+", RegexOptions.Compiled);
             while (rockCount <= maxRocks)
             {
                 var nextPosition = new Point(rockPosition.X, rockPosition.Y);
@@ -133,8 +132,7 @@ namespace AdventOfCode.Days
             int offset = 0;
 
             var startPoints = placementList.Where(x => x.PlacementCode == endPlacement.PlacementCode && x.ListIndex != endPlacement.ListIndex)
-                .Select(x => placementList.IndexOf(x))
-                .ToHashSet();
+                .Select(x => x.ListIndex);
             if (!startPoints.Any()) return 0;
 
             while (scanIndex > 0)
@@ -144,12 +142,11 @@ namespace AdventOfCode.Days
                 var scanItem = placementList[scanIndex];
                 pattern.Add(scanItem);
                 var points = placementList.Where(x => x.PlacementCode == scanItem.PlacementCode && x.JetIndex == scanItem.JetIndex && x.ListIndex != scanItem.ListIndex)
-                    .Select(x => x.ListIndex)
-                    .ToHashSet();
-                var newPoints = startPoints.Where(x => points.Contains(x - offset)).ToHashSet();
+                    .Select(x => x.ListIndex);
+                var newPoints = startPoints.Where(x => points.Contains(x - offset)).ToList();
                 if (!newPoints.Any())
                 {
-                    if (startPoints.Count != 1 || offset <= 1 || startPoints.Single() != scanIndex) return 0;
+                    if (startPoints.Count() != 1 || offset <= 1 || startPoints.Single() != scanIndex) return 0;
                     offset--;
                     scanIndex++;
                     pattern.RemoveAt(pattern.Count - 1);
@@ -220,7 +217,6 @@ namespace AdventOfCode.Days
             {
                 var targetX = shapePosition.X + point.X;
                 var targetY = shapePosition.Y + point.Y;
-                if (targetY < 0) ;
                 if (targetX < 0 || targetX >= CaveWidth || targetY < 0 || occupiedPoints.Contains(new Point(targetX, targetY))) return false;
             }
             return true;
