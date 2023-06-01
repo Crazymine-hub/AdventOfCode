@@ -222,7 +222,7 @@ namespace AdventOfCode.Tools.DynamicGrid
                 {
                     for (int column = x - 1; column <= x + 1; ++column)
                     {
-                        if (!diagonal && !(layer == z || row == y || column == x)) continue;
+                        if (!diagonal && !((layer == z && row == y) || (layer == z &&  column == x) || (row == y && column == x))) continue;
                         if (!InRange(column, row, layer))
                         {
                             yield return new DynamicGridValue<T>(column, row, layer, GetDefaultValue());
@@ -277,7 +277,7 @@ namespace AdventOfCode.Tools.DynamicGrid
                 {
                     StringBuilder line = new StringBuilder();
                     for (int x = 0; x < XDim; ++x)
-                        line.Append(stringConverter(this[x, y], x, y));
+                        line.Append(stringConverter(this[x, y, z], x, y));
                     if (lineEndHandler != null)
                         line.Append(lineEndHandler(line.ToString(), y));
                     result.AppendLine(line.ToString());
