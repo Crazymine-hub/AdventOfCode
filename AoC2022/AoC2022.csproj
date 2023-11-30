@@ -72,6 +72,7 @@
     <Compile Include="Days\Day15.cs" />
     <Compile Include="Days\Day16.cs" />
     <Compile Include="Days\Day17.cs" />
+    <Compile Include="Days\Day19.cs" />
     <Compile Include="Days\Day2.cs" />
     <Compile Include="Days\Day3.cs" />
     <Compile Include="Days\Day4.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Days\Tools\Day16\ValveNodeConnection.cs" />
     <Compile Include="Days\Tools\Day16\ValvePath.cs" />
     <Compile Include="Days\Tools\Day17\ShapePlacement.cs" />
+    <Compile Include="Days\Tools\Day19\BlueprintProcessor.cs" />
     <Compile Include="Days\Tools\Day7\File.cs" />
     <Compile Include="Days\Tools\Day7\Directory.cs" />
     <Compile Include="Days\Tools\Day7\IFileSystemEntry.cs" />
@@ -187,6 +189,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Inputs\Day18.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inputs\Day19.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
