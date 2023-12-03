@@ -1,9 +1,8 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventOfCode", "AdventOfCode\AdventOfCode.csproj", "{4C193E19-B84E-4FD0-91A8-1FFA09D34824}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCode", "AdventOfCode\AdventOfCode.csproj", "{4C193E19-B84E-4FD0-91A8-1FFA09D34824}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3087092B-DFDA-4B74-AED1-3540AB4AE6DC} = {3087092B-DFDA-4B74-AED1-3540AB4AE6DC}
 		{52B9CDF9-8311-4A41-9171-FF923A0AED23} = {52B9CDF9-8311-4A41-9171-FF923A0AED23}
@@ -11,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventOfCode", "AdventOfCod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2019", "AoC2019\AoC2019.csproj", "{B441CA03-78AA-4FEE-9ED0-4A3A9B20CF2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventOfCommon", "AdventOfCommon\AdventOfCommon.csproj", "{4F6E4037-B01C-4C1C-B13F-BF7452FD1C37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCommon", "AdventOfCommon\AdventOfCommon.csproj", "{4F6E4037-B01C-4C1C-B13F-BF7452FD1C37}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2020", "AoC2020\AoC2020.csproj", "{AF512998-15F2-4844-A6BE-E0DE7D279274}"
 EndProject
@@ -26,7 +25,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2021", "AoC2021\AoC2021.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2022", "AoC2022\AoC2022.csproj", "{3087092B-DFDA-4B74-AED1-3540AB4AE6DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2023", "AoC2023\AoC2023.csproj", "{52B9CDF9-8311-4A41-9171-FF923A0AED23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoC2023", "AoC2023\AoC2023.csproj", "{52B9CDF9-8311-4A41-9171-FF923A0AED23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventOfForms", "AdventOfForms\AdventOfForms.csproj", "{E1D3224F-FAAA-46ED-A128-EB59513E8724}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +92,14 @@ Global
 		{52B9CDF9-8311-4A41-9171-FF923A0AED23}.Release|Any CPU.Build.0 = Release|Any CPU
 		{52B9CDF9-8311-4A41-9171-FF923A0AED23}.Release|x64.ActiveCfg = Release|Any CPU
 		{52B9CDF9-8311-4A41-9171-FF923A0AED23}.Release|x64.Build.0 = Release|Any CPU
+		{E1D3224F-FAAA-46ED-A128-EB59513E8724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1D3224F-FAAA-46ED-A128-EB59513E8724}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1D3224F-FAAA-46ED-A128-EB59513E8724}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E1D3224F-FAAA-46ED-A128-EB59513E8724}.Debug|x64.Build.0 = Debug|Any CPU
+		{E1D3224F-FAAA-46ED-A128-EB59513E8724}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1D3224F-FAAA-46ED-A128-EB59513E8724}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1D3224F-FAAA-46ED-A128-EB59513E8724}.Release|x64.ActiveCfg = Release|Any CPU
+		{E1D3224F-FAAA-46ED-A128-EB59513E8724}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

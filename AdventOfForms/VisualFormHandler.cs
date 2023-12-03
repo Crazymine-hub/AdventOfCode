@@ -5,8 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AdventOfCode.Tools.Visualization;
 
-namespace AdventOfCode.Tools.Visualization
+namespace AdventOfCode.Visualization
 {
     public class VisualFormHandler : IDisposable
     {
@@ -123,7 +124,7 @@ namespace AdventOfCode.Tools.Visualization
         {
             if (VisualForm.InvokeRequired)
             {
-                return (bool)VisualForm.Invoke(new Func<bool>(GetVisibility));
+                return VisualForm.Invoke(new Func<bool>(GetVisibility));
             }
             return VisualForm.Visible;
         }
@@ -131,7 +132,7 @@ namespace AdventOfCode.Tools.Visualization
         private void HandleDisposedWindow(object sender, EventArgs e)
         {
             if (sender != VisualForm) return;
-            this.Dispose();
+            Dispose();
         }
 
         protected virtual void Dispose(bool disposing)

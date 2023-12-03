@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+		<RootNamespace>AdventOfCode.Visualization</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Update="DebugForms\AStarDebugForm.cs">
+			<SubType>Form</SubType>
+		</Compile>
+		<Compile Update="VisForm.cs">
+			<SubType>Form</SubType>
+		</Compile>
+	</ItemGroup>
+
+</Project>

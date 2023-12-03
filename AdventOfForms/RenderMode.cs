@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdventOfCode.Tools.Visualization
+namespace AdventOfCode.Visualization
 {
     [Flags]
     public enum RenderMode
