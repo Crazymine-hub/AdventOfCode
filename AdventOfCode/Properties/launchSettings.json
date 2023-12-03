@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "AdventOfCode": {
+      "commandName": "Project",
+      "commandLineArgs": "..\\..\\..\\..\\AoC2023\\bin\\Debug\\net8.0\\"
+    }
+  }
+}

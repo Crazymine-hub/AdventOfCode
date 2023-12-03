@@ -1,6 +1,8 @@
-﻿using System;
+﻿using AdventOfCode.Tools.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,24 +15,51 @@ namespace AdventOfCode.Tools
 
         public static int GetUserInput(string prompt, bool noInitialClear = true)
         {
-            string message = "";
+            if (noInitialClear) Console.Clear();
             while (true)
             {
-                if (noInitialClear) Console.Clear();
-                noInitialClear = true;
-                if (message != "") Console.WriteLine(message);
-                message = "";
                 Console.WriteLine(prompt);
-                string input = Console.ReadLine();
+                string input = Console.ReadLine()!;
 
                 if (!int.TryParse(input, out int inputNr))
                 {
-                    message = "==========================\r\n" +
+                    Console.Clear();
+                    Console.WriteLine("==========================\r\n" +
                     "YOU DIDN'T ENTER A NUMBER!\r\n" +
-                    "==========================\r\n";
+                    "==========================\r\n");
                 }
                 else
                     return inputNr;
+            }
+        }
+
+        public static bool GetUserYesNo(string prompt, bool defaultValue)
+        {
+            return GetUserChoice<bool>(prompt,
+                new UserChoiceOption<bool>("Yes", 'y', defaultValue, true, defaultValue ? [ConsoleKey.Y, ConsoleKey.Enter] : [ConsoleKey.Y]),
+                new UserChoiceOption<bool>("No", 'n', !defaultValue, false, !defaultValue ? [ConsoleKey.N, ConsoleKey.Enter] : [ConsoleKey.N]));
+        }
+
+        public static TChoiceType GetUserChoice<TChoiceType>(string prompt, params UserChoiceOption<TChoiceType>[] options)
+        {
+            if (options.Count(x => x.IsDefault) > 1)
+                throw new ArgumentException("Only one option can be default.", nameof(options));
+            if (options.SelectMany(x => x.ConsoleKeys).ContainsDuplicates())
+                throw new ArgumentException("Key was applied to multiple options", nameof(options));
+            Console.WriteLine(prompt);
+            foreach (var opt in options)
+                Console.WriteLine(string.Join(' ',
+                    "(" + (opt.IsDefault ? char.ToUpper(opt.DisplayChar) : char.ToLower(opt.DisplayChar)) + ")",
+                    opt.DisplayText,
+                    opt.IsDefault ? "(default)" : string.Empty));
+
+            UserChoiceOption<TChoiceType>? defaultOption = options.SingleOrDefault(x => x.IsDefault);
+            while (true)
+            {
+                var input = Console.ReadKey(true).Key;
+                var option = Array.Find(options, x => x.ConsoleKeys.Contains(input)) ?? defaultOption;
+                if (option != null)
+                    return option.ReturnValue;
             }
         }
 
