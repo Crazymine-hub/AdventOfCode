@@ -11,6 +11,7 @@ namespace AdventOfCode
     {
         public string AdditionalContent { get; set; }
         public virtual bool UsesAdditionalContent { get; protected set; } = false;
+        public bool TestMode { get; set; } = false;
         public CancellationToken CancellationToken { get; set; } = default;
         public abstract string Title { get; }
         public abstract string Solve(string input, bool part2);

@@ -131,6 +131,7 @@ namespace AdventOfCode
                 if (day.UsesAdditionalContent && File.Exists(additionalContentFile.FullName))
                     day.AdditionalContent = File.ReadAllText(additionalContentFile.FullName);
 
+                day.TestMode = testMode;
                 day.CancellationToken = tokenSource.Token;
                 string input = LoadInput(inputFile, testMode, dayNr);
                 Console.Clear();
