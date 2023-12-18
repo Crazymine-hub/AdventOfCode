@@ -22,7 +22,7 @@ public static class DynamicGrid
         for(int y = 0; y < lines.Count; ++y)
         {
             var line = lines[y];
-            for(int x = 0; x < lines.Count; ++x)
+            for(int x = 0; x < line.Length; ++x)
                 grid[x, y] = valueParseDelegate.Invoke(line[x], x, y);
         }
 
