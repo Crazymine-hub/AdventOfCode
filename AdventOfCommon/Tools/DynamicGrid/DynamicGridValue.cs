@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,5 +28,7 @@ namespace AdventOfCode.Tools.DynamicGrid
         {
             return gridValue.Value;
         }
+
+        public Point AsPoint() => new Point(X, Y);
     }
 }
