@@ -20,7 +20,7 @@ namespace AdventOfCode.Tools.Pathfinding
 
         public override string ToString() => $"@{X}/{Y}";
 
-        public virtual bool Equals(BaseNode other)
+        public virtual bool Equals(BaseNode? other)
         {
             return other != null && other.X == X && other.Y == Y;
         }

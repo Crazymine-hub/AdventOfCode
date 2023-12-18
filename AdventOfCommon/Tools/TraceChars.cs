@@ -16,6 +16,33 @@ namespace AdventOfCode.Tools
         //RIGHT                                          8  0    0    0    0    0    0    0    0    1    1    1    1    1    1    1    1    0    0    0    0    0    0    0    0    1    1    1    1    1    1    1    1 
         //BOLD                                          16  0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1 
 
+        [Flags]
+        public enum Direction
+        {
+            None = 0,
+            Up = 1,
+            Down = 2,
+            Left = 4,
+            Right = 8,
+            Bold = 16,
+            
+            UpDown = Up | Down,
+            LeftRight = Left | Right,
+            
+            UpLeft = Left | Up,
+            DownLeft = Left | Down,
+            
+            UpRight = Up | Right,
+            DownRight = Down | Right,
+
+            LeftRightUP = LeftRight | Up,
+            LeftRightDown = LeftRight | Down,
+
+            UpDownLeft = UpDown | Left,
+            UpDownRight = UpDown | Right,
+
+            AllDriections = LeftRight | UpDown,
+        }
 
         public static int GetPathNumber(bool up, bool down, bool left, bool right, bool bold)
         {
