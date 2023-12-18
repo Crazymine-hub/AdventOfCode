@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCode.Tools.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace AdventOfCode
 {
     public abstract class DayBase
     {
-        public string AdditionalContent { get; set; }
+        public string? AdditionalContent { get; set; }
         public virtual bool UsesAdditionalContent { get; protected set; } = false;
         public bool TestMode { get; set; } = false;
         public CancellationToken CancellationToken { get; set; } = default;
@@ -18,14 +19,16 @@ namespace AdventOfCode
 
         protected const string Part2UnavailableMessage = "Part 2 is unavailable";
 
-        protected List<string> GetLines(string input)
+        [Obsolete("The GetLines Method is available as string extension. (AdventOfCode.Tools.Extensions.StringExtensions)")]
+        protected static List<string> GetLines(string input)
         {
-            return input.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            return input.GetLines();
         }
 
-        protected List<string> GetGroupedLines(string input)
+        [Obsolete("The GetGroupedLines Method is available as string extension. (AdventOfCode.Tools.Extensions.StringExtensions)")]
+        protected static List<string> GetGroupedLines(string input)
         {
-            return input.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            return input.GetGroupedLines();
         }
     }
 }
