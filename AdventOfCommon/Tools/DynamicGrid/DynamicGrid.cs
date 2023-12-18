@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,7 +24,7 @@ namespace AdventOfCode.Tools.DynamicGrid
 
         public event Func<T> GetDefault;
 
-        public DynamicGrid(int dimX = 1, int dimY = 1, int dimZ = 1, int xOffset = 0, int yOffset = 0, int zOffset = 0, Func<T> getDefaultEvent = null)
+        public DynamicGrid(int dimX = 1, int dimY = 1, int dimZ = 1, int xOffset = 0, int yOffset = 0, int zOffset = 0, Func<T>? getDefaultEvent = null)
         {
             if(getDefaultEvent != null)
                 GetDefault += getDefaultEvent;
@@ -56,47 +57,52 @@ namespace AdventOfCode.Tools.DynamicGrid
             return GetDefault();
         }
 
-        public void IncreaseX(bool front)
+        public void IncreaseX(bool front) => InsertColumn(front ? 0 : XDim, front);
+        public void InsertColumn(int index, bool moveOrigin = false)
         {
+            if(index < 0 || index > XDim)
+                throw new ArgumentOutOfRangeException(nameof(index), "The Index must be within the Grid");
             for(int z = 0; z < ZDim; z++)
                 for(int y = 0; y < YDim; y++)
-                    grid[z][y].Insert(front ? 0 : XDim, GetDefaultValue());
+                    grid[z][y].Insert(index, GetDefaultValue());
             ++XDim;
-            if(front)
+            if(index == 0 && moveOrigin)
                 ++XOrigin;
         }
 
-        public void IncreaseY(bool front)
+        public void IncreaseY(bool front) => InsertRow(front ? 0 : YDim, front);
+        public void InsertRow(int index, bool moveOrigin = false)
         {
+            if(index < 0 || index > YDim)
+                throw new ArgumentOutOfRangeException(nameof(index), "The Index must be within the Grid");
             for(int z = 0; z < ZDim; z++)
             {
                 List<T> row = new List<T>();
                 for(int x = 0; x < XDim; x++)
-                {
                     row.Add(GetDefaultValue());
-                }
-                grid[z].Insert(front ? 0 : YDim, row);
+                grid[z].Insert(index, row);
             }
             ++YDim;
-            if(front)
+            if(index == 0 && moveOrigin)
                 ++YOrigin;
         }
 
-        public void IncreaseZ(bool front)
+        public void IncreaseZ(bool front) => InsertLayer(front ? 0 : ZDim, front);
+        public void InsertLayer(int index, bool moveOrigin = false)
         {
+            if(index < 0 || index > ZDim)
+                throw new ArgumentOutOfRangeException(nameof(index), "The Index must be within the Grid");
             List<List<T>> newGrid = new List<List<T>>();
             for(int y = 0; y < YDim; y++)
             {
                 List<T> row = new List<T>();
                 for(int x = 0; x < XDim; x++)
-                {
                     row.Add(GetDefaultValue());
-                }
                 newGrid.Add(row);
             }
-            grid.Insert(front ? 0 : ZDim, newGrid);
+            grid.Insert(index, newGrid);
             ++ZDim;
-            if(front)
+            if(index == 0 && moveOrigin)
                 ++ZOrigin;
         }
 
