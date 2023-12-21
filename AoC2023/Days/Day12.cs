@@ -1,6 +1,9 @@
-﻿using System;
+﻿using AdventOfCode.Exceptions;
+using AdventOfCode.Tools.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,19 +14,14 @@ public class Day12: DayBase
 {
     public override string Title => "Hot Springs";
 
+
     public override string Solve(string input, bool part2)
     {
-        var tasks = new List<Task<int>>();
-        foreach(var line in GetLines(input))
-        {
-            var task = Task<int>.Run(() => AnalyzeLine(line, part2));
-            tasks.Add(task);
-            if(TestMode)
-                task.Wait();
-        }
-        Task.WaitAll(tasks.ToArray(), CancellationToken);
+        var sum = 0;
+        foreach(var line in input.GetLines())
+            sum += AnalyzeLine(line, part2);
 
-        return $"There are {tasks.Sum(x => x.Result)} valid Configurations";
+        return $"There are {sum} valid Configurations";
     }
 
     private int AnalyzeLine(string line, bool part2)
@@ -49,99 +47,69 @@ public class Day12: DayBase
         var validConfigCount = 0;
         ulong defectiveFlags = 1U << machines.Count(x => x == null);
 
-        if(TestMode)
-        {
-            Console.Write(documentation[0]);
-            Console.Write(" ");
-            Console.WriteLine(documentation[1]);
-        }
 
-        for(ulong i = 0; i < defectiveFlags; ++i)
-            if(IsConfigurationValid(machines, defectives, i, TestMode && !part2))
-                validConfigCount++;
+        var validVersions = GetValidVersions(machines, defectives[0]);
+
+        foreach(var groupLength in defectives.Skip(1))
+            validVersions = FilterGroup(validVersions, groupLength);
+
+        validVersions = validVersions.Where(x => !x.Exists(y => y == false)).ToList();
+
+        //if(validVersions.SelectMany(x => x).Any(x => x.HasValue))
+        //    throw new ResultValidationException("Not all versions completeley resolved:\r\n" + string.Join(Environment.NewLine, validVersions.Select(LineToString)));
         if(TestMode)
-        {
-            Console.WriteLine(validConfigCount);
-            Console.WriteLine();
-        }
-        return validConfigCount;
+            Console.WriteLine(string.Join(' ', [.. documentation, validVersions.Count]));
+        return validVersions.Count;
     }
 
-    private bool IsConfigurationValid(List<bool?> machines, List<int> defectives, ulong states, bool printDebug)
+    private string LineToString(List<bool?> src) =>
+            string.Concat(src.Select(x => x switch
+            {
+                true => '.',
+                false => '#',
+                null => '?'
+            }));
+
+    private List<List<bool?>> FilterGroup(List<List<bool?>> validVersions, int groupLength)
     {
-        List<bool?> fullMachines = [.. machines];
-        int byteIndex = 0;
-        var defectiveCount = 0;
-        var groupIndex = 0;
+        List<List<bool?>> newVersions = new();
+        foreach(var version in validVersions)
+            newVersions.AddRange(GetValidVersions(version, groupLength));
+        return newVersions;
+    }
 
-        for(int i = 0; i < fullMachines.Count; ++i)
+    private List<List<bool?>> GetValidVersions(List<bool?> origin, int defectiveLength)
+    {
+        List<List<bool?>> validVersions = new();
+        int i;
+        for(i = 0; i <= origin.Count - defectiveLength; i++)
         {
-            if(!fullMachines[i].HasValue)
-            {
-                fullMachines[i] = (states & (1U << byteIndex)) != 0;
-                byteIndex++;
-            }
+            //out of range or group is split
+            if(origin.Take(i).Any(x => x == false)) break;
+            if(origin.Skip(i).Take(defectiveLength).Any(x => x == true)) continue;
+
+            List<bool?> group = origin.Skip(i).ToList();
+            for(int j = 0; j < defectiveLength; ++j)
+                group[j] = false;
+            if(defectiveLength < group.Count && !group[defectiveLength].HasValue)
+                group[defectiveLength] = true;
+            if(IsConfigurationValid(group, defectiveLength))
+                validVersions.Add(group.Skip(defectiveLength).SkipWhile(x => x == true).ToList());
         }
 
-        if(printDebug)
-            Console.Write(string.Concat(fullMachines.Select(x => x.Value ? '.' : '#')));
-
-        //Seperate loop for beauty
-        for(int i = 0; i < fullMachines.Count; ++i)
+        if(i == 0 && IsConfigurationValid(origin, defectiveLength))
         {
-            if(fullMachines[i] == true)
-            {
-                if(defectiveCount == 0) continue;
-                if(groupIndex >= defectives.Count)
-                {
-                    if(printDebug)
-                        Console.WriteLine($" C More defective groups than given");
-                    return false;
-                }
-                if(defectiveCount != defectives[groupIndex])
-                {
-                    if(printDebug)
-                        Console.WriteLine($" C Group [{groupIndex}]: {defectiveCount,4} Expected: {defectives[groupIndex]}");
-                    return false;
-                }
-
-                defectiveCount = 0;
-                groupIndex++;
-            }
-            else
-                defectiveCount++;
+            var remainder = origin.SkipWhile(x => x.HasValue).ToList();
+            if(!remainder.Any())
+                validVersions.Add(remainder);
         }
 
-        if(defectiveCount > 0)
-        {
-            if(groupIndex >= defectives.Count)
-            {
-                if(printDebug)
-                    Console.WriteLine($" E More defective groups than expected");
-                return false;
-            }
-            if(defectiveCount != defectives[groupIndex])
-            {
-                if(printDebug)
-                    Console.WriteLine($" E Group [{groupIndex}]: {defectiveCount,4} Expected: {defectives[groupIndex]}");
-                return false;
-            }
-            groupIndex++;
-        }
+        return validVersions;
+    }
 
-        if(groupIndex != defectives.Count)
-        {
-            if(printDebug)
-                Console.WriteLine($" E Found {groupIndex,4} Groups. Expected: {defectives.Count}");
-            return false;
-        }
-
-        if(TestMode)
-        {
-            if(!printDebug)
-                Console.Write(string.Concat(fullMachines.Select(x => x.Value ? '.' : '#')));
-            Console.WriteLine("   OK");
-        }
-        return true;
+    private bool IsConfigurationValid(List<bool?> machines, int groupLength)
+    {
+        var defectiveCount = machines.SkipWhile(x => x == true).TakeWhile(x => x == false).Count();
+        return defectiveCount == groupLength;
     }
 }
