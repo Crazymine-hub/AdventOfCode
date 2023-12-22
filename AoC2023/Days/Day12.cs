@@ -30,7 +30,7 @@ public class Day12: DayBase
         return $"There are {sum} valid Configurations";
     }
 
-    private int AnalyzeLine(string line, bool part2)
+    private long AnalyzeLine(string line, bool part2)
     {
         var documentation = line.Split(' ');
         if(part2)
@@ -50,23 +50,34 @@ public class Day12: DayBase
         var defectives = documentation[1].Split(',').Select(int.Parse).ToList();
 
 
-        var validVersions = GetValidVersions(machines, defectives[0], 0);
+        var validVersions = GetValidVersions(machines, defectives[0], 0)
+            .GroupBy(x => x)
+            .ToDictionary(x => x.Key, x => x.LongCount());
 
         foreach(var groupLength in defectives.Skip(1))
             validVersions = FilterGroup(machines, validVersions, groupLength);
 
-        //validVersions = validVersions.Where(x => !machines.Skip(x).Any(y => y == false)).ToList();
+        var finalVersions = validVersions.Where(x => !machines.Skip(x.Key).Any(y => y == false)).ToList();
 
-        if(TestMode)
-            Console.WriteLine(string.Join(' ', [.. documentation, validVersions.Count]));
-        return validVersions.Count;
+        var patternCount = finalVersions.Sum(x => x.Value);
+        //if(TestMode)
+        Console.WriteLine(string.Join(' ', [.. documentation, patternCount]));
+        return patternCount;
     }
 
-    private List<int> FilterGroup(List<bool?> origin, List<int> validIndices, int groupLength)
+    private Dictionary<int, long> FilterGroup(List<bool?> origin, Dictionary<int, long> validIndices, int groupLength)
     {
-        List<int> newVersions = new();
+        Dictionary<int, long> newVersions = new();
         foreach(var index in validIndices)
-            newVersions.AddRange(GetValidVersions(origin, groupLength, index));
+        {
+            var results = GetValidVersions(origin, groupLength, index.Key);
+            foreach(var result in results)
+            {
+                if(!newVersions.ContainsKey(result))
+                    newVersions.Add(result, 0);
+                newVersions[result] += index.Value;
+            }
+        }
         return newVersions;
     }
 
