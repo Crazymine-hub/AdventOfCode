@@ -310,6 +310,37 @@ namespace AdventOfCode.Tools.DynamicGrid
                         yield return cellValue;
                     }
         }
+
+        public IEnumerable<DynamicGridValue<T>> GetRow(int y, int z = DefaultLayer)
+        {
+            if(!InRange(0, y, z))
+                throw new ArgumentOutOfRangeException($"{nameof(y)} or {nameof(z)} ",$"The row on (y: {y} (Range: 0 - {YDim - 1}), z: {z} (Range: 0 - {ZDim - 1})) doesn't exist.");
+            return EnumerateRow(y, z);
+        }
+        public IEnumerable<DynamicGridValue<T>> EnumerateRow(int y, int z = DefaultLayer)
+        {
+            for(int x = 0; x < XDim; ++x)
+            {
+                var cellValue = new DynamicGridValue<T>(x, y, z, this[x, y, z]);
+                yield return cellValue;
+            }
+        }
+
+        public IEnumerable<DynamicGridValue<T>> GetColumn(int x, int z = DefaultLayer)
+        {
+            if(!InRange(x, 0, z))
+                throw new ArgumentOutOfRangeException($"The Column on (x: {x} (Range: 0 - {XDim - 1}), z: {z} (Range: 0 - {ZDim - 1})) doesn't exist.");
+            return EnumerateColumn(x, z);
+        }
+
+        private IEnumerable<DynamicGridValue<T>> EnumerateColumn(int x, int z = DefaultLayer)
+        {
+            for(int y = 0; y < YDim; ++y)
+            {
+                var cellValue = new DynamicGridValue<T>(x, y, z, this[x, y, z]);
+                yield return cellValue;
+            }
+        }
         #endregion
     }
 }
