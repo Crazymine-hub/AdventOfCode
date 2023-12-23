@@ -14,140 +14,105 @@ public class Day13: DayBase
 
     public override string Solve(string input, bool part2)
     {
-        if(part2) return Part2UnavailableMessage;
-
         int patternSum = 0;
+        var difference = part2 ? 1 : 0;
         foreach(var pattern in input.GetGroupedLines())
         {
-            patternSum += GetPatternValue(pattern);
+            patternSum += GetPatternValue(pattern, difference);
             Console.WriteLine();
         }
         return $"The Sum of the mirror coordinates is {patternSum}";
     }
 
-    private int GetPatternValue(string pattern)
+    private int GetPatternValue(string pattern, int comparisonDifference)
     {
         var grid = DynamicGrid.GenerateFromInput(pattern, x => x switch
         {
             '#' => true,
-            '.' => false
-        });
+            '.' => false,
+            _ => throw new NotSupportedException($"Char '{x}' not supported")
+        }) ;
 
         Console.WriteLine(pattern);
 
-        //forward column
-        int? beforeMirrorIndex = null;
-        int mirrorIndex = grid.XDim - 1;
-        var mirrorColumn = grid.GetColumn(mirrorIndex).Select(x => x.Value).ToList();
-        for(int x = 0; x < grid.XDim - 1; ++x)
+        var beforeMirror = EvaluateGridIndex(grid, false, comparisonDifference);
+        if(beforeMirror.HasValue)
         {
-            var column = grid.GetColumn(x).Select(x => x.Value).ToList();
-            if(column.SequenceEqual(mirrorColumn))
+            Console.WriteLine($"There are {beforeMirror} columns in front of the mirror");
+            return beforeMirror.Value;
+        }
+        beforeMirror = EvaluateGridIndex(grid, true, comparisonDifference);
+        if(beforeMirror.HasValue)
+        {
+            Console.WriteLine($"There are {beforeMirror} rows in front of the mirror");
+            return beforeMirror.Value * 100;
+        }
+
+        throw new ResultValidationException("No mirror found");
+    }
+
+
+    private int? EvaluateGridIndex(DynamicGrid<bool> grid, bool isRow, int expectedDifference)
+    {
+        List<bool> GetGridValues(int index)
+        {
+            var values = isRow ? grid.GetRow(index) : grid.GetColumn(index);
+            return values.Select(x => x.Value).ToList();
+        }
+
+        var gridDimension = isRow ? grid.YDim : grid.XDim;
+        List<int> similar = new List<int>();
+        var previousColumn = GetGridValues(0);
+        for(int x = 1; x < gridDimension; ++x)
+        {
+            var column = GetGridValues(x);
+            if(ListEqual(column, previousColumn, expectedDifference, out int offest))
+                similar.Add(x - 1);
+            previousColumn = column;
+        }
+
+        foreach(var column in similar)
+        {
+            var offset = 0;
+            var differences = 0;
+            while(true)
             {
-                if(mirrorIndex == x + 1)
-                {
-                    beforeMirrorIndex = x;
+                if(column - offset < 0 || column + 1 + offset >= gridDimension)
                     break;
-                }
-                else
-                {
-                    mirrorIndex--;
-                    mirrorColumn = grid.GetColumn(mirrorIndex).Select(x => x.Value).ToList();
-                }
+                var columnA = GetGridValues(column - offset);
+                var columnB = GetGridValues(column + 1 + offset);
+
+                if(!ListEqual(columnA, columnB, expectedDifference, out int comparedDifferences))
+                    break;
+
+                differences += comparedDifferences;
+
+                if(differences > expectedDifference)
+                    break;
+
+                if((column - offset == 0 || column + 1 + offset == gridDimension - 1) && differences == expectedDifference)
+                    return column + 1;
+                offset++;
             }
         }
 
-        if(beforeMirrorIndex.HasValue)
-        {
-            Console.WriteLine($"F Mirror has {beforeMirrorIndex.Value + 1} columns before it");
-            return beforeMirrorIndex.Value + 1;
-        }
+        return null;
+    }
 
-        //forward row
-        beforeMirrorIndex = null;
-        mirrorIndex = grid.YDim - 1;
-        mirrorColumn = grid.GetRow(mirrorIndex).Select(x => x.Value).ToList();
-        for(int y = 0; y < grid.YDim - 1; ++y)
-        {
-            var column = grid.GetRow(y).Select(x => x.Value).ToList();
-            if(column.SequenceEqual(mirrorColumn))
+    private bool ListEqual(List<bool> columnA, List<bool> columnB, int expectedDifference, out int difference)
+    {
+        difference = 0;
+        if(columnA.Count != columnB.Count) return false;
+
+        for(int i = 0; i < columnA.Count; ++i) {
+            if(columnA[i] != columnB[i])
             {
-                if(mirrorIndex == y + 1)
-                {
-                    beforeMirrorIndex = y;
-                    break;
-                }
-                else
-                {
-                    mirrorIndex--;
-                    mirrorColumn = grid.GetRow(mirrorIndex).Select(x => x.Value).ToList();
-                }
+                difference++;
+                if(difference > expectedDifference)
+                    return false;
             }
         }
 
-        if(beforeMirrorIndex.HasValue)
-        {
-            Console.WriteLine($"F Mirror has {beforeMirrorIndex.Value + 1} rows before it");
-            return (beforeMirrorIndex.Value + 1) * 100;
-        }
-
-        //backward column
-        beforeMirrorIndex = null;
-        mirrorIndex = 0;
-        mirrorColumn = grid.GetColumn(mirrorIndex).Select(x => x.Value).ToList();
-        for(int x = grid.XDim - 1; x > 0; --x)
-        {
-            var column = grid.GetColumn(x).Select(x => x.Value).ToList();
-            if(column.SequenceEqual(mirrorColumn))
-            {
-                if(mirrorIndex == x - 1)
-                {
-                    beforeMirrorIndex = mirrorIndex;
-                    break;
-                }
-                else
-                {
-                    mirrorIndex++;
-                    mirrorColumn = grid.GetColumn(mirrorIndex).Select(x => x.Value).ToList();
-                }
-            }
-        }
-
-        if(beforeMirrorIndex.HasValue)
-        {
-            Console.WriteLine($"B Mirror has {beforeMirrorIndex.Value + 1} columns before it");
-            return beforeMirrorIndex.Value + 1;
-        }
-
-        //backward row
-        beforeMirrorIndex = null;
-        mirrorIndex = 0;
-        mirrorColumn = grid.GetRow(mirrorIndex).Select(x => x.Value).ToList();
-        for(int y = grid.YDim - 1; y > 0; --y)
-        {
-            var column = grid.GetRow(y).Select(x => x.Value).ToList();
-            if(column.SequenceEqual(mirrorColumn))
-            {
-                if(mirrorIndex == y - 1)
-                {
-                    beforeMirrorIndex = mirrorIndex;
-                    break;
-                }
-                else
-                {
-                    mirrorIndex++;
-                    mirrorColumn = grid.GetRow(mirrorIndex).Select(x => x.Value).ToList();
-                }
-            }
-        }
-
-        if(beforeMirrorIndex.HasValue)
-        {
-            Console.WriteLine($"B Mirror has {beforeMirrorIndex.Value + 1} rows before it");
-            return (beforeMirrorIndex.Value + 1) * 100;
-        }
-
-        Console.WriteLine("No mirror found");
-        return 0;
+        return true;
     }
 }
