@@ -8,7 +8,7 @@ namespace AdventOfCode.Tools.Pathfinding.AStar
 {
     public class AStarNode : BaseNode
     {
-        public AStarNode PreviousNode { get; internal set; }
+        public AStarNode? PreviousNode { get; internal set; }
         public double ExpansionPriority => PathLength + NodeHeuristic;
         public double PathLength { get; internal set; } = double.PositiveInfinity;
         public double NodeHeuristic { get; set; }

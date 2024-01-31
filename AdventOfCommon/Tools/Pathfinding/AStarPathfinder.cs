@@ -9,18 +9,15 @@ using System.Threading.Tasks;
 namespace AdventOfCode.Tools.Pathfinding
 {
     public delegate void ExpansionDelegate(IReadOnlyCollection<AStarNode> expanded, IReadOnlyCollection<AStarNode> considered, AStarNode active);
-    public delegate bool PathCheckerDelegate(AStarNodeConnection nodeConnection);
+    public delegate bool PathCheckerDelegate(AStarNodeConnection nodeConnection, AStarNode currentNode);
 
     public class AStarPathfinder
     {
         readonly List<AStarNodeConnection> connections;
         readonly List<AStarNode> nodes;
 
-        public event ExpansionDelegate OnExpanded;
-        public PathCheckerDelegate CheckPathCallback { get; set; }
-
-        public double DistanceHeatWeigh { get; set; } = 0.5;
-
+        public event ExpansionDelegate? OnExpanded;
+        public PathCheckerDelegate? CanUsePathCallback { get; set; }
 
         public AStarPathfinder(List<AStarNodeConnection> connectionList)
         {
@@ -29,6 +26,23 @@ namespace AdventOfCode.Tools.Pathfinding
                 .SelectMany(x => new AStarNode[] { x.NodeA, x.NodeB })
                 .Distinct()
                 .ToList();
+        }
+        public AStarNode[] GetPath(AStarNode start, AStarNode finish)
+        {
+            return GetPath(start, finish, out _, out _);
+        }
+
+        public AStarNode[] GetPath(AStarNode start, AStarNode finish, out double cost)
+        {
+            return GetPath(start, finish, out _, out cost);
+        }
+
+        public AStarNode[] GetPath(AStarNode startNode,
+                                  AStarNode endNode,
+                                  out List<AStarNodeConnection> connectionList,
+                                  out double totalDistance)
+        {
+            return GetPath(startNode, endNode, CancellationToken.None, out connectionList, out totalDistance);
         }
 
         public AStarNode[] GetPath(AStarNode startNode,
@@ -77,7 +91,7 @@ namespace AdventOfCode.Tools.Pathfinding
                     active);
 
                 var inUseNodes = GetPathToNode(active);
-                AStarNode nextActive = null;
+                AStarNode? nextActive = null;
                 foreach(var node in withoutExpanded.Except(inUseNodes))
                     if(nextActive == null || nextActive.ExpansionPriority > node.ExpansionPriority)
                         nextActive = node;
@@ -105,13 +119,13 @@ namespace AdventOfCode.Tools.Pathfinding
                                 Dictionary<AStarNode, HashSet<AStarNodeConnection>> neighbourDictionary,
                                 AStarNode active)
         {
-            if(!neighbourDictionary.TryGetValue(active, out HashSet<AStarNodeConnection> neighbours))
+            if(!neighbourDictionary.TryGetValue(active, out HashSet<AStarNodeConnection>? neighbours))
                 neighbours = new HashSet<AStarNodeConnection>();
             double totalDistance = active.PathLength;
 
             foreach (var connection in neighbours)
             {
-                if (connection.Distance < 0) continue;
+                if (connection.Distance < 0 || !(CanUsePathCallback?.Invoke(connection, active) ?? true)) continue;
                 AStarNode target = connection.GetOtherNode(active);
                 double newDistance = totalDistance + connection.Distance;
                 if (target == null || target.PathLength <= newDistance) continue;
@@ -121,26 +135,6 @@ namespace AdventOfCode.Tools.Pathfinding
                 consideredNodes.Add(target);
             }
             expandedNodes.Add(active);
-        }
-
-
-
-        public AStarNode[] GetPath(AStarNode start, AStarNode finish)
-        {
-            return GetPath(start, finish, out _, out _);
-        }
-
-        public AStarNode[] GetPath(AStarNode start, AStarNode finish, out double cost)
-        {
-            return GetPath(start, finish, out _, out cost);
-        }
-
-        public AStarNode[] GetPath(AStarNode startNode,
-                                  AStarNode endNode,
-                                  out List<AStarNodeConnection> connectionList,
-                                  out double totalDistance)
-        {
-            return GetPath(startNode, endNode, CancellationToken.None, out connectionList, out totalDistance);
         }
 
         public static List<AStarNode> GetPathToNode(AStarNode targetNode)
