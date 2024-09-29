@@ -24,12 +24,12 @@ internal class Day9: DayBase
         return $"The sum of all extrapolated values is {sum}";
     }
 
-    private long Extrapolate(string line, bool part2)
+    private static long Extrapolate(string line, bool part2)
     {
         List<long> currentList = line.Split(' ').Select(x => long.Parse(x)).ToList();
         List<long> oldList;
 
-        Stack<long> lastDigits = new Stack<long>();
+        Stack<long> lastDigits = new();
 
         while(!currentList.TrueForAll(x => x == 0))
         {

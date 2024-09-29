@@ -92,7 +92,7 @@ public class Day14: DayBase
         return $"The load on the plattform is {weight}";
     }
 
-    private int GetRockLoad(DynamicGrid<RockState> startPattern)
+    private static int GetRockLoad(DynamicGrid<RockState> startPattern)
     {
         var weight = 0;
         foreach(var rock in startPattern.Where(x => x.Value == RockState.Rolling))
@@ -100,7 +100,7 @@ public class Day14: DayBase
         return weight;
     }
 
-    private string GetRockPattern(DynamicGrid<RockState> pattern) =>
+    private static string GetRockPattern(DynamicGrid<RockState> pattern) =>
         pattern.GetStringRepresentation((RockState state, int x, int y) => state switch
     {
         RockState.None => ".",
@@ -109,10 +109,9 @@ public class Day14: DayBase
         _ => throw new NotSupportedException($"Unsupported State {state}")
     });
 
-    private bool ShiftRocks(DynamicGrid<RockState> grid, Direction direction)
+    private static bool ShiftRocks(DynamicGrid<RockState> grid, Direction direction)
     {
         bool shiftAny = false;
-        IEnumerable<DynamicGridValue<RockState>> GetGridValues(int index, bool isRow) => isRow ? grid.GetRow(index) : grid.GetColumn(index);
 
 
         var rangeA = Enumerable.Range(0, grid.XDim).ToList();
@@ -125,11 +124,7 @@ public class Day14: DayBase
 
         var isRow = direction == Direction.West || direction == Direction.East;
         if(isRow)
-        {
-            var rangeBuf = rangeA;
-            rangeA = rangeB;
-            rangeB = rangeBuf;
-        }
+            (rangeB, rangeA) = (rangeA, rangeB);
 
         rangeB.RemoveAt(0);
         foreach(var coordA in rangeA)

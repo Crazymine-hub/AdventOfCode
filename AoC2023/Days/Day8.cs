@@ -71,16 +71,10 @@ public partial class Day8: DayBase
     private static partial Regex nodeRegEx();
 }
 
-internal class Node
+internal class Node(string node, long steps)
 {
-    public string Name { get; set; }
-    public long Steps { get; set; }
+    public string Name { get; set; } = node;
+    public long Steps { get; set; } = steps;
 
-    public Node(string node, long steps)
-    {
-        Name = node;
-        Steps = steps;
-    }
-
-    public static implicit operator Node((string node, long steps) value) => new Node(value.node, value.steps);
+    public static implicit operator Node((string node, long steps) value) => new(value.node, value.steps);
 }

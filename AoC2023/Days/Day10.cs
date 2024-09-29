@@ -125,9 +125,9 @@ public class Day10: DayBase
         });
     }
 
-    private void DetermineNode(DirectionalNode node, List<DirectionalNode> wall, bool aIsInside)
+    private static void DetermineNode(DirectionalNode node, List<DirectionalNode> wall, bool aIsInside)
     {
-        var closestNode = wall.Where(x => x.X == node.X || x.Y == node.Y).MinBy(x => x.GetDistanceTo(node));
+        var closestNode = wall.Where(x => x.X == node.X || x.Y == node.Y).MinBy(x => x.GetManhattanDistanceTo(node));
         var direction = Rotate(GetDirection(node, closestNode), 2);
 
         if(aIsInside)
@@ -157,7 +157,6 @@ public class Day10: DayBase
             if(updateSides)
             {
                 var toDirection = node.Direction & ~(fromDirection | TraceChars.Direction.Bold);
-                var rotateCount = 0;
                 var upBit = TraceChars.Direction.Up;
                 int rotationCount = 0;
                 while(upBit != fromDirection)
