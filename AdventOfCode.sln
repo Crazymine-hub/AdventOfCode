@@ -1,27 +1,27 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventOfCode", "AdventOfCode\AdventOfCode.csproj", "{4C193E19-B84E-4FD0-91A8-1FFA09D34824}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCode", "AdventOfCode\AdventOfCode.csproj", "{4C193E19-B84E-4FD0-91A8-1FFA09D34824}"
 	ProjectSection(ProjectDependencies) = postProject
 		{CAC734C9-1234-448A-AD75-3C5B411CE86E} = {CAC734C9-1234-448A-AD75-3C5B411CE86E}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2019", "AoC2019\AoC2019.csproj", "{B441CA03-78AA-4FEE-9ED0-4A3A9B20CF2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoC2019", "AoC2019\AoC2019.csproj", "{B441CA03-78AA-4FEE-9ED0-4A3A9B20CF2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventOfCommon", "AdventOfCommon\AdventOfCommon.csproj", "{4F6E4037-B01C-4C1C-B13F-BF7452FD1C37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCommon", "AdventOfCommon\AdventOfCommon.csproj", "{4F6E4037-B01C-4C1C-B13F-BF7452FD1C37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2020", "AoC2020\AoC2020.csproj", "{AF512998-15F2-4844-A6BE-E0DE7D279274}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoC2020", "AoC2020\AoC2020.csproj", "{AF512998-15F2-4844-A6BE-E0DE7D279274}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0755F445-721B-4258-9300-0FB002F29D64}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoTest", "AoTest\AoTest.csproj", "{490CBFFD-9EB3-44CE-AAB2-448A0F6223C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoTest", "AoTest\AoTest.csproj", "{490CBFFD-9EB3-44CE-AAB2-448A0F6223C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC2021", "AoC2021\AoC2021.csproj", "{CAC734C9-1234-448A-AD75-3C5B411CE86E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoC2021", "AoC2021\AoC2021.csproj", "{CAC734C9-1234-448A-AD75-3C5B411CE86E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
