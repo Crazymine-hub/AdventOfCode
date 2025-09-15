@@ -9,7 +9,7 @@ namespace AdventOfCode.Days.Tools.Day7
 {
     class Bag: TopoItem
     {
-        public override string Name { get; }
+        public override string Name { get; init; }
         public Dictionary<string, int> ContainedBags { get; set; } = new Dictionary<string, int>();
         public override bool IsDependantOn(string dependencyName) =>
             ContainedBags.ContainsKey(dependencyName);
