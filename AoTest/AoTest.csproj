@@ -7,9 +7,9 @@
     <Content Include="Data\AoCommon\Mazes\non-perfect\maze2.bmp" />
     <Content Include="Data\AoCommon\Mazes\non-perfect\maze3.bmp" />
     <Content Include="Data\AoCommon\Mazes\non-perfect\maze4.bmp" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.10.4" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.10.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AdventOfCommon\AdventOfCommon.csproj" />
