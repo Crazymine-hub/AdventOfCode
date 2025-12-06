@@ -1,22 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using Eto.Forms;
+using Eto.Drawing;
+
+//using GLib;
 
 namespace AdventOfCode.Tools.Visualization
 {
     internal partial class VisForm : Form
     {
-        VisualState state = VisualState.zoomed;
+        private string titleText = string.Empty;
 
-        private string titleText;
-
-        internal string Title
+        internal new string Title
         {
             get => titleText;
             set
@@ -26,7 +21,7 @@ namespace AdventOfCode.Tools.Visualization
             }
         }
 
-        internal Image DisplayImage
+        internal Image? DisplayImage
         {
             get => visualRender.Image;
             set => visualRender.Image = value;
@@ -37,74 +32,50 @@ namespace AdventOfCode.Tools.Visualization
             InitializeComponent();
             Reset();
             Visible = false;
-            Left = SystemInformation.VirtualScreen.Width - Width;
+            // TODO Maybe center on active screen
+            // this.Location = new Eto.Drawing.Point();
             Invalidate();
-            WindowState = FormWindowState.Maximized;
-            UpdateVisualState();
         }
 
         internal static VisForm CreateInstance()
         {
             VisForm instance = null;
-            Task.Run(() =>
+            System.Threading.Tasks.Task.Run(() =>
             {
                 instance = new VisForm();
-                using (ApplicationContext context = new ApplicationContext(instance))
-                    Application.Run(context);
+                new Eto.Forms.Application().Run(instance);
             });
-            while (instance == null || !instance.InvokeRequired) { };
+            while (instance == null) { }
             return instance;
         }
 
         private void RefreshDisplayedText()
         {
-            Text = $"{titleText} - {state}";
+            this.Title = $"{titleText}";
         }
 
         internal void Reset()
         {
-            BackColor = Color.Black;
+            BackgroundColor = Eto.Drawing.Colors.Black;
             visualRender.Image?.Dispose();
             visualRender.Image = null;
         }
 
-        private void VisForm_Click(object sender, EventArgs e)
+        private void VisualRender_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            state += 1;
-            if ((int)state >= Enum.GetValues(typeof(VisualState)).Length)
-                state = 0;
-
-            RefreshDisplayedText();
-            UpdateVisualState();
+            visualRender.ResetView();
         }
 
-        private void UpdateVisualState()
+        private void VisualRender_Paint(object? sender, PaintEventArgs e)
         {
-            switch (state)
-            {
-                case VisualState.normal:
-                    visualRender.Dock = DockStyle.None;
-                    visualRender.SizeMode = PictureBoxSizeMode.AutoSize;
-                    visualRender.BackColor = Color.Black;
-                    break;
-                case VisualState.zoomed:
-                    visualRender.Dock = DockStyle.Fill;
-                    visualRender.SizeMode = PictureBoxSizeMode.Zoom;
-                    visualRender.BackColor = Color.DimGray;
-                    break;
-            }
+            e.Graphics.AntiAlias = false;
+            e.Graphics.ImageInterpolation = ImageInterpolation.None;
+            e.Graphics.DrawImage(visualRender.Image, Point.Empty);
         }
 
-        internal void FocusOnImage(double x, double y)
+        internal void FocusOnImage(float x, float y)
         {
-            HorizontalScroll.Value = MathHelper.Clamp(
-                (int)((x - Width / 2) / visualRender.Width * HorizontalScroll.Maximum),
-                HorizontalScroll.Minimum,
-                HorizontalScroll.Maximum);
-            VerticalScroll.Value = MathHelper.Clamp(
-                (int)((y - Height / 2) / visualRender.Height * VerticalScroll.Maximum),
-                VerticalScroll.Minimum,
-                VerticalScroll.Maximum);
+            visualRender.MovePixel(new PointF(x, y), (Point)visualRender.Size / 2);
         }
     }
 }
