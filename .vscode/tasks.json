@@ -2,7 +2,11 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build_AoC",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -13,6 +17,48 @@
             ],
             "problemMatcher": "$msCompile"
         },
+        {
+            "label": "build_2020",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/AoC2020/AoC2020.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build_2021",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/AoC2021/AoC2021.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run_2020",
+            "dependsOn": [
+                "build_AoC",
+                "build_2020"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "run_2021",
+            "dependsOn": [
+                "build_AoC",
+                "build_2021"
+            ],
+            "dependsOrder": "sequence"
+        },
+
+
         {
             "label": "publish",
             "command": "dotnet",

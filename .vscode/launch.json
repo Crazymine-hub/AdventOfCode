@@ -5,22 +5,42 @@
             // Use IntelliSense to find out which attributes exist for C# debugging
             // Use hover for the description of the existing attributes
             // For further information visit https://github.com/dotnet/vscode-csharp/blob/main/debugger-launchjson.md
-            "name": ".NET Core Launch (console)",
+            "name": "AoC2020 debug",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "run_2020",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/AdventOfCode/bin/Debug/net8.0/AdventOfCode.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/AdventOfCode",
+            "args": [
+                "./"
+            ],
+            "cwd": "${workspaceFolder}/AoC2020/bin/Debug/net8.0",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "internalConsole",
+            "console": "integratedTerminal",
             "stopAtEntry": false
         },
         {
-            "name": ".NET Core Attach",
+            // Use IntelliSense to find out which attributes exist for C# debugging
+            // Use hover for the description of the existing attributes
+            // For further information visit https://github.com/dotnet/vscode-csharp/blob/main/debugger-launchjson.md
+            "name": "AoC2021 debug",
             "type": "coreclr",
-            "request": "attach"
+            "request": "launch",
+            "preLaunchTask": "run_2021",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/AdventOfCode/bin/Debug/net8.0/AdventOfCode.dll",
+            "args": [
+                "./"
+            ],
+            "cwd": "${workspaceFolder}/AoC2020/bin/Debug/net8.0",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "AoC attach",
+            "type": "coreclr",
+            "request": "attach",
         }
     ]
 }
