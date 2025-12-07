@@ -49,7 +49,6 @@
                 "build_AoC",
                 "build_2020"
             ],
-            "dependsOrder": "sequence"
         },
         {
             "label": "run_2021",
@@ -57,7 +56,6 @@
                 "build_AoC",
                 "build_2021"
             ],
-            "dependsOrder": "sequence"
         },
 
 
