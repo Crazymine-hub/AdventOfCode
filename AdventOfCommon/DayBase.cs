@@ -19,12 +19,12 @@ namespace AdventOfCode
 
         protected List<string> GetLines(string input)
         {
-            return input.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            return input.ReplaceLineEndings().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
 
         protected List<string> GetGroupedLines(string input)
         {
-            return input.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            return input.ReplaceLineEndings().Split(new string[] { Environment.NewLine + Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
     }
 }
