@@ -5,6 +5,22 @@
             // Use IntelliSense to find out which attributes exist for C# debugging
             // Use hover for the description of the existing attributes
             // For further information visit https://github.com/dotnet/vscode-csharp/blob/main/debugger-launchjson.md
+            "name": "AoCode debug",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build_AoC",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/AdventOfCode/bin/Debug/net8.0/AdventOfCode.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/AdventOfCode/bin/Debug/net8.0",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            // Use IntelliSense to find out which attributes exist for C# debugging
+            // Use hover for the description of the existing attributes
+            // For further information visit https://github.com/dotnet/vscode-csharp/blob/main/debugger-launchjson.md
             "name": "AoC2020 debug",
             "type": "coreclr",
             "request": "launch",
@@ -32,7 +48,7 @@
             "args": [
                 "./"
             ],
-            "cwd": "${workspaceFolder}/AoC2020/bin/Debug/net8.0",
+            "cwd": "${workspaceFolder}/AoC2021/bin/Debug/net8.0",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",
             "stopAtEntry": false

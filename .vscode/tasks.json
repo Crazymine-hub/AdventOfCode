@@ -25,7 +25,8 @@
                 "build",
                 "${workspaceFolder}/AoC2020/AoC2020.csproj",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+                "/consoleloggerparameters:NoSummary;ForceNoAlign",
+                "--no-dependencies"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -37,7 +38,8 @@
                 "build",
                 "${workspaceFolder}/AoC2021/AoC2021.csproj",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+                "/consoleloggerparameters:NoSummary;ForceNoAlign",
+                "--no-dependencies"
             ],
             "problemMatcher": "$msCompile"
         },
