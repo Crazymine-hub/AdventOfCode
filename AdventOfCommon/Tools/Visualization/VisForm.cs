@@ -39,7 +39,7 @@ namespace AdventOfCode.Tools.Visualization
 
         internal static VisForm CreateInstance()
         {
-            VisForm instance = null;
+            VisForm? instance = null;
             System.Threading.Tasks.Task.Run(() =>
             {
                 instance = new VisForm();
@@ -61,7 +61,7 @@ namespace AdventOfCode.Tools.Visualization
             visualRender.Image = null;
         }
 
-        private void VisualRender_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void VisualRender_MouseDoubleClick(object? sender, MouseEventArgs e)
         {
             visualRender.ResetView();
         }

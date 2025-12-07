@@ -21,9 +21,9 @@ namespace AdventOfCode.Tools
                 if (message != "") Console.WriteLine(message);
                 message = "";
                 Console.WriteLine(prompt);
-                string input = Console.ReadLine();
+                string? input = Console.ReadLine();
 
-                if (!int.TryParse(input, out int inputNr))
+                if (input is null || !int.TryParse(input, out int inputNr))
                 {
                     message = "==========================\r\n" +
                     "YOU DIDN'T ENTER A NUMBER!\r\n" +

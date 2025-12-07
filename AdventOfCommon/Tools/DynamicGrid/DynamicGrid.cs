@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Tools.DynamicGrid
 {
-    public sealed class DynamicGrid<T> : IEnumerable<DynamicGridValue<T>>
+    public sealed class DynamicGrid<T> : IEnumerable<DynamicGridValue<T>> where T:notnull
     {
         private readonly List<List<List<T>>> grid;
 
@@ -19,7 +20,7 @@ namespace AdventOfCode.Tools.DynamicGrid
         public int YOrigin { get; private set; }
         public int ZOrigin { get; private set; }
 
-        public event Func<T> GetDefault;
+        public event Func<T>? GetDefault;
 
         public DynamicGrid(int dimX = 1, int dimY = 1, int dimZ = 1)
         {
@@ -32,7 +33,7 @@ namespace AdventOfCode.Tools.DynamicGrid
         private T GetDefaultValue()
         {
             if (GetDefault == null)
-                return default(T);
+                return default(T) ?? throw new NoNullAllowedException($"Default value for {typeof(T)} was null.");
             return GetDefault();
         }
 
@@ -128,9 +129,9 @@ namespace AdventOfCode.Tools.DynamicGrid
             this[XOrigin + x, YOrigin + y, ZOrigin + z] = value;
         }
 
-        public void CutDown(Predicate<T> isEmpty = null)
+        public void CutDown(Predicate<T>? isEmpty = null)
         {
-            if (isEmpty == null) isEmpty = new Predicate<T>(x => x.Equals(GetDefaultValue()));
+            isEmpty ??= new Predicate<T>(x => x.Equals(GetDefaultValue()));
 
             while (grid.First().All(y => y.All(x => isEmpty(x)))) DecreaseZ(true);
             while (grid.Last().All(y => y.All(x => isEmpty(x)))) DecreaseZ(false);
@@ -215,9 +216,9 @@ namespace AdventOfCode.Tools.DynamicGrid
             }
         }
 
-        public string GetStringRepresentation(Func<T, int, int, string> stringConverter, Func<string, int, string> lineEndHandler = null)
+        public string GetStringRepresentation(Func<T, int, int, string> stringConverter, Func<string, int, string>? lineEndHandler = null)
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
             for (int z = 0; z < ZDim; ++z)
             {
                 for (int y = 0; y < YDim; ++y)

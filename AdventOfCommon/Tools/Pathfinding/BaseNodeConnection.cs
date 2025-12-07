@@ -45,12 +45,12 @@ namespace AdventOfCode.Tools.Pathfinding
             return NodeA.ToString().PadRight(10) + "<-> " + NodeB.ToString().PadRight(10) + "@".PadLeft(5) + distance.ToString("0.00");
         }
 
-        public virtual bool IsSameConnection(BaseNodeConnection other)
+        public virtual bool IsSameConnection(BaseNodeConnection? other)
         {
             return other != null && (other.NodeA == NodeA && other.NodeB == NodeB || other.NodeA == NodeB && other.NodeB == NodeA);
         }
 
-        public virtual bool Equals(BaseNodeConnection other)
+        public virtual bool Equals(BaseNodeConnection? other)
         {
             return IsSameConnection(other);
         }

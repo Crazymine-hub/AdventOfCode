@@ -83,7 +83,7 @@ namespace AdventOfCode.Tools
         /// <param name="desiredIsProduct">Whether the desired result is a product or a sum.</param>
         /// <param name="otherValue">The Result of the other operation executed with the operands (Sum if <paramref name="desiredIsProduct"/> ist true. Product if false)</param>
         /// <returns>An Array with all required operands to get to the Result with the given operation. Or null, if no operands could be found.</returns>
-        public static long[] GetOperandsByResult(long[] factorList, int operandCount, long desiredResult, bool desiredIsProduct, out long otherValue)
+        public static long[]? GetOperandsByResult(long[] factorList, int operandCount, long desiredResult, bool desiredIsProduct, out long otherValue)
         {
             bool numberMoved = true;
             int[] positions = new int[operandCount];

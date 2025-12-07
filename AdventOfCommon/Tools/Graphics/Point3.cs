@@ -152,7 +152,7 @@ namespace AdventOfCode.Tools.Graphics
             return X == other.X && Y == other.Y && Z == other.Z;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Point3 && Equals((Point3)obj);
         }

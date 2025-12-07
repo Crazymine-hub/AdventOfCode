@@ -9,7 +9,7 @@ namespace AdventOfCode
 {
     public abstract class DayBase
     {
-        public string AdditionalContent { get; set; }
+        public string? AdditionalContent { get; set; }
         public virtual bool UsesAdditionalContent { get; protected set; } = false;
         public CancellationToken CancellationToken { get; set; } = default;
         public abstract string Title { get; }

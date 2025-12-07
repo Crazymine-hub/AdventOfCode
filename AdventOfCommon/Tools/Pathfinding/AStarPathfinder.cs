@@ -1,4 +1,5 @@
-﻿using AdventOfCode.Tools.Pathfinding.AStar;
+﻿using AdventOfCode.Exceptions;
+using AdventOfCode.Tools.Pathfinding.AStar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,11 +28,11 @@ namespace AdventOfCode.Tools.Pathfinding
     {
         readonly List<AStarNodeConnection> connections;
         readonly List<AStarNode> nodes;
-        HashSet<AStarNode> expandedNodes;
-        HashSet<AStarNode> consideredNodes;
-        Dictionary<AStarNode, HashSet<AStarNodeConnection>> neighbourDictionary;
+        HashSet<AStarNode> expandedNodes = new();
+        HashSet<AStarNode> consideredNodes = new();
+        Dictionary<AStarNode, HashSet<AStarNodeConnection>> neighbourDictionary = new();
 
-        public event ExpansionDelegate OnExpanded;
+        public event ExpansionDelegate? OnExpanded;
 
         public double DistanceHeatWeigh { get; set; } = 0.5;
 
@@ -52,9 +53,9 @@ namespace AdventOfCode.Tools.Pathfinding
                                   out double totalDistance)
         {
             AStarNode active = startNode;
-            expandedNodes = new HashSet<AStarNode>();
-            consideredNodes = new HashSet<AStarNode>();
-            neighbourDictionary = new Dictionary<AStarNode, HashSet<AStarNodeConnection>>();
+            expandedNodes.Clear();
+            consideredNodes.Clear();
+            neighbourDictionary.Clear();
 
             foreach (var connection in connections)
             {
@@ -85,11 +86,12 @@ namespace AdventOfCode.Tools.Pathfinding
                     active);
 
                 var inUseNodes = GetPathToNode(active);
-                AStarNode nextActive = null;
+                AStarNode? nextActive = null;
                 foreach(var node in withoutExpanded.Except(inUseNodes))
                     if(nextActive == null || nextActive.ExpansionPriority > node.ExpansionPriority)
                         nextActive = node;
-                if (nextActive == active) return new AStarNode[0];
+                if (nextActive == active) return [];
+                if(nextActive is null) throw new PathfindException($"No Path from {startNode} to {endNode} found!");
                 active = nextActive;
 
             }
@@ -164,7 +166,7 @@ namespace AdventOfCode.Tools.Pathfinding
         private IEnumerable<AStarNodeConnection> GetNeighbours(AStarNode targetNode) =>
             connections.Where(conn => conn.HasConnectionTo(targetNode));
 
-        public static List<AStarNode> GetPathToNode(AStarNode targetNode)
+        public static List<AStarNode> GetPathToNode(AStarNode? targetNode)
         {
             var path = new Stack<AStarNode>();
             while (targetNode != null)

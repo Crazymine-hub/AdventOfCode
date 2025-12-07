@@ -123,12 +123,14 @@ namespace AdventOfCode
             else if (File.Exists(dayPath + dayNr + "_2.txt"))
                 fileExtension = "_2.txt";
 
-            if (!string.IsNullOrWhiteSpace(day.Title))
-                Console.Title += " ---" + day.Title + "---";
-            if (useSecond == 2)
-                Console.Title += " Part 2";
-            else
-                Console.Title += " Part 1";
+            if(OperatingSystem.IsWindows()){
+                if (!string.IsNullOrWhiteSpace(day.Title))
+                    Console.Title += " ---" + day.Title + "---";
+                if (useSecond == 2)
+                    Console.Title += " Part 2";
+                else
+                    Console.Title += " Part 1";
+            }
 
             Stopwatch stopwatch = new Stopwatch();
             using (tokenSource = new CancellationTokenSource())
@@ -234,7 +236,7 @@ namespace AdventOfCode
                     if (!dllType.FullName.StartsWith("AdventOfCode")) return false;
                 lib = asm;
                 year = dllMatch.Groups[1].Value;
-                dayPath = directory + "\\Inputs\\Day";
+                dayPath = Path.Combine(directory, "Inputs", "Day");
                 return true;
             }
             return false;
