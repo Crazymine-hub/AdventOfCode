@@ -2,13 +2,9 @@
 using AdventOfCode.Tools.Pathfinding.AStar;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using Eto.Forms;
 
 namespace AdventOfCode.Tools.Visualization.DebugForm
 {
@@ -29,74 +25,37 @@ namespace AdventOfCode.Tools.Visualization.DebugForm
             int width = maxX - minX + 1;
             int height = maxY - minY + 1;
 
-            nodeGrid.RowCount = width + 1;
-            nodeGrid.ColumnCount = width + 1;
-            var colTemplate = nodeGrid.ColumnStyles[0];
-            for (int x = 1; x < width + 1; ++x)
-            {
-                nodeGrid.ColumnStyles.Add(new ColumnStyle(colTemplate.SizeType, colTemplate.Width));
-                Label label = new Label();
-                label.Text = (x - 1).ToString();
-                label.ForeColor = Color.White;
-                nodeGrid.Controls.Add(label);
-                label.Dock = DockStyle.Fill;
-                nodeGrid.SetColumn(label, x);
-                nodeGrid.SetRow(label, 0);
-
-            }
-
-
-            var rowTemplate = nodeGrid.RowStyles[0];
-            for (int y = 1; y < height + 1; ++y)
-            {
-                nodeGrid.RowStyles.Add(new RowStyle(rowTemplate.SizeType, rowTemplate.Height));
-                Label label = new Label();
-                label.Text = (y - 1).ToString();
-                label.ForeColor = Color.White;
-                nodeGrid.Controls.Add(label);
-                label.Dock = DockStyle.Fill;
-                nodeGrid.SetRow(label, y);
-                nodeGrid.SetColumn(label, 0);
-            }
-
             foreach (var node in nodes)
             {
-                Panel panel = new Panel();
-                panel.BackColor = Color.White;
+                Panel panel = new Panel(){ Style = FormStyle.PanelStyle };
                 panel.Width = 5;
                 panel.Height = 5;
-                CellToolTip.SetToolTip(panel, node.ToString());
+                panel.ToolTip=node.ToString();
                 panel.Tag = node;
-                panel.Click += Panel_Click;
-                nodeGrid.SetColumn(panel, node.X + 1);
-                nodeGrid.SetRow(panel, node.Y + 1);
-                nodeGrid.Controls.Add(panel);
-                panel.Dock = DockStyle.Fill;
+                panel.MouseDown += Panel_Click;
+                nodeGrid.Add(panel, node.X, node.Y);
+                //nodeGrid.Controls.Append(panel);
                 nodePanels.Add(panel);
             }
         }
 
-        private void Panel_Click(object sender, EventArgs e)
+        private void Panel_Click(object? sender, EventArgs e)
         {
 
             ResetView();
-            AStarNode node = (sender as Panel)?.Tag as AStarNode;
-            if (node == null) throw new InvalidOperationException("The clicked target doesn't have a node associated.");
+            AStarNode node = (sender as Panel)?.Tag as AStarNode ?? 
+                throw new InvalidOperationException("The clicked target doesn't have a node associated.");
             List<AStarNode> path = AStarPathfinder.GetPathToNode(node);
-            foreach (AStarNode pathNode in path)
+            foreach (Panel panel in nodePanels.Where(p => path.Contains(p.Tag)))
             {
-                var panel = nodePanels.Single(x => x.Tag == pathNode);
-                panel.BackColor = Color.Green;
+                panel.Style = FormStyle.PathStyle;
             }
         }
 
         private void ResetView()
         {
             foreach (var panel in nodePanels)
-            {
-                panel.BackColor = Color.White;
-                CellToolTip.SetToolTip(panel, panel.Tag.ToString());
-            }
+                panel.Style = FormStyle.PanelStyle;
         }
     }
 }

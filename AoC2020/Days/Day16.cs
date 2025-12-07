@@ -13,7 +13,7 @@ namespace AdventOfCode.Days
     {
         public override string Title => "Ticket Translation";
 
-        Dictionary<string, List<Range>> criterias;
+        Dictionary<string, List<TicketRange>> criterias;
         List<List<string>> possibleNames = new List<List<string>>();
         public override string Solve(string input, bool part2)
         {
@@ -72,18 +72,18 @@ namespace AdventOfCode.Days
                 return "Invalid Tickets: " + invalidSum;
         }
 
-        private Dictionary<string, List<Range>> GetCriteria(string criteriaInput)
+        private Dictionary<string, List<TicketRange>> GetCriteria(string criteriaInput)
         {
-            var result = new Dictionary<string, List<Range>>();
+            var result = new Dictionary<string, List<TicketRange>>();
             foreach (Match detail in Regex.Matches(criteriaInput, @"(?<Criteria>[^:\r\n]+)(?<Ranges>[: or]+(?<Lower>\d+)-(?<Upper>\d+))+"))
             {
-                List<Range> ranges = new List<Range>();
+                List<TicketRange> ranges = new List<TicketRange>();
                 //add all allowed ranges for this criteria
                 for (int i = 0; i < detail.Groups["Ranges"].Captures.Count; i++)
                 {
                     int low = int.Parse(detail.Groups["Lower"].Captures[i].Value);
                     int up = int.Parse(detail.Groups["Upper"].Captures[i].Value);
-                    ranges.Add(new Range(low, up));
+                    ranges.Add(new TicketRange(low, up));
                 }
                 //put this criteria with all of it's ranges to the record.
                 result.Add(detail.Groups["Criteria"].Value, ranges);

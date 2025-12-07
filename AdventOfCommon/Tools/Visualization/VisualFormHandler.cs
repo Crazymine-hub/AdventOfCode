@@ -1,27 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using Eto.Drawing;
 
 namespace AdventOfCode.Tools.Visualization
 {
     public class VisualFormHandler : IDisposable
     {
 
-        private static List<VisualFormHandler> instances = new List<VisualFormHandler>();
-        public static int ValidInstanceCount => instances.Count();
-
-        private VisualFormHandler()
-        {
-
-        }
+        private static readonly List<VisualFormHandler> instances = [];
+        public static int ValidInstanceCount => instances.Count;
 
         public static VisualFormHandler GetInstance()
         {
-            VisualFormHandler handler = new VisualFormHandler();
+            VisualFormHandler handler = new();
             instances.Add(handler);
             return handler;
         }
@@ -35,116 +26,60 @@ namespace AdventOfCode.Tools.Visualization
 
 
         private VisForm visForm;
-        private VisForm VisualForm
-        {
-            get
-            {
-                if (visForm != null) return visForm;
-                visForm = VisForm.CreateInstance();
-                VisualForm.Disposed += HandleDisposedWindow;
-                return visForm;
-            }
-        }
 
         private bool isDisposed;
 
-        public string Title { get => VisualForm.Title; set => VisualForm.Title = value; }
-
-        public void Show(Image visualBmp = null, bool createCopy = true)
+        public string Title
         {
-            if (VisualForm.InvokeRequired)
-            {
-                VisualForm.Invoke(new Action<Image, bool>(Show), visualBmp, createCopy);
-                return;
-            }
-            Reset();
-            if (visualBmp != null)
-                Update(visualBmp, createCopy);
-            VisualForm.Show();
+            get => visForm.Title;
+            set => visForm.Title = value;
         }
 
-        public void Hide()
-        {
-            if (VisualForm.InvokeRequired)
-            {
-                VisualForm.Invoke(new MethodInvoker(Hide));
-                return;
-            }
-            VisualForm.Hide();
+        public bool Visible {
+            get => visForm.Visible;
+            set => visForm.Visible = value;
         }
+
+        private VisualFormHandler()
+        {
+            visForm = VisForm.CreateInstance();
+        }
+
+        // [Obsolete($"Call {nameof(Update)} and set {nameof(Visible)} to true instead.")]
+        // public void Show(Image? visualBmp = null, bool createCopy = true) =>
+        //     throw new NotSupportedException("Method is deprecated");
 
         public void Reset()
         {
-            if (VisualForm.InvokeRequired)
-            {
-                VisualForm.Invoke(new MethodInvoker(Reset));
-                return;
-            }
-            VisualForm.Reset();
+            visForm.Reset();
         }
 
         public void Invalidate()
         {
-            if (VisualForm.InvokeRequired)
-            {
-                VisualForm.Invoke(new MethodInvoker(Invalidate));
-                return;
-            }
             try
             {
-                VisualForm.Invalidate();
+                visForm.Invalidate();
             }
             catch { }
         }
 
         public void Update(Image visualImage, bool createCopy = true)
         {
-            if (VisualForm.InvokeRequired)
-            {
-                VisualForm.Invoke(new Action<Image, bool>(Update), visualImage, createCopy);
-                return;
-            }
-            VisualForm.DisplayImage?.Dispose();
-            VisualForm.DisplayImage = createCopy ? (Image)visualImage.Clone() : visualImage;
+            visForm.DisplayImage?.Dispose();
+            visForm.DisplayImage = createCopy ? new Bitmap(visualImage) : visualImage;
             Invalidate();
         }
 
-        public void SetFocusTo(double x, double y)
+        public void SetFocusTo(float x, float y)
         {
-            if (VisualForm.InvokeRequired)
-            {
-                VisualForm.Invoke(new Action<double, double>(SetFocusTo), x, y);
-                return;
-            }
-            VisualForm.FocusOnImage(x, y);
-        }
-
-        private bool GetVisibility()
-        {
-            if (VisualForm.InvokeRequired)
-            {
-                return (bool)VisualForm.Invoke(new Func<bool>(GetVisibility));
-            }
-            return VisualForm.Visible;
-        }
-
-        private void HandleDisposedWindow(object sender, EventArgs e)
-        {
-            if (sender != VisualForm) return;
-            this.Dispose();
+            visForm.FocusOnImage(x, y);
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (!isDisposed)
             {
-                if (disposing)
-                {
-                    if (VisualForm.InvokeRequired)
-                        VisualForm.Invoke(new Action(VisualForm.Dispose));
-                    else
-                        VisualForm.Dispose();
-                }
+                visForm.Dispose();
                 isDisposed = true;
                 instances.Remove(this);
             }

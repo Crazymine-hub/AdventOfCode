@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Days.Tools.Day16
 {
-    class Range
+    class TicketRange
     {
         public int Lower { get; set; }
         public int Upper { get; set; }
 
-        public Range(int low, int high)
+        public TicketRange(int low, int high)
         {
             Lower = low;
             Upper = high;

@@ -202,6 +202,7 @@ namespace AdventOfCode
         {
             Console.CancelKeyPress += Console_CancelKeyPress;
             Console.Title = "Advent of Code - Initializing";
+            AdventOfCode.Tools.Visualization.FormStyle.LoadStyles();
             if (args.Length <= 0 || !TryGetLibrary(args[0]))
             {
                 Console.Title = "Advent of Code - Set Year";
